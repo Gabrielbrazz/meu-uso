@@ -5,6 +5,9 @@ struct CodexAccountCard: Equatable, Sendable {
     let identity: CodexAccountIdentity
     let displayName: String
     let authHomes: [String]
+    /// Canonical paths of the account's own Codex homes — never one xswap manages — whose tokens
+    /// OpenUsage may refresh and write back.
+    let writableAuthHomes: [String]
     let piCredentialSources: [CodexPiCredentialSource]
     /// pi's usage logs name no account, so they count for the account in pi's `openai-codex` login.
     let claimsPiUsage: Bool
@@ -18,6 +21,8 @@ struct CodexAccountDiscovery: Equatable, Sendable {
     /// The homes the account cards divide between them; unused by the plain card.
     var historyHomes = CodexHistoryHomes(homes: [], defaultHome: "", registeredOwners: [:])
     var plainAuthHomes: [String] = []
+    /// The independent homes among `plainAuthHomes`; see `CodexAccountCard.writableAuthHomes`.
+    var plainWritableAuthHomes: [String] = []
     var plainPiCredentialSources: [CodexPiCredentialSource] = []
 }
 
@@ -34,6 +39,9 @@ extension ProviderAccountAssembly {
         let swaps = CodexSwapAccount.discover(
             environment: observer.environment, files: observer.files, home: homeDirectory
         )
+        let managedHomes = Set(CodexSwapAccount.managedHomes(
+            environment: observer.environment, files: observer.files, home: homeDirectory
+        ).map { CodexHomeScanner.canonicalHome($0, homeDirectory: homeDirectory) })
         let homeScan = CodexHomeScanner(
             environment: observer.environment,
             files: observer.files,
@@ -62,8 +70,11 @@ extension ProviderAccountAssembly {
                 + [keychainIdentity].compactMap { $0 }
         )
         guard !swaps.isEmpty || hasEstablishedAccounts || knownIdentities.count > 1 else {
+            let plainHomes = homeLogins.map(\.home).filter { !configuredHomes.contains($0) }
             return CodexAccountDiscovery(
-                plainAuthHomes: homeLogins.map(\.home).filter { !configuredHomes.contains($0) },
+                plainAuthHomes: plainHomes,
+                plainWritableAuthHomes: Set(plainHomes.map { CodexHomeScanner.canonicalHome($0, homeDirectory: homeDirectory) })
+                    .subtracting(managedHomes).sorted(),
                 plainPiCredentialSources: piScan.logins.map {
                     CodexPiCredentialSource(path: $0.authPath, providerID: $0.providerID)
                 }
@@ -150,9 +161,12 @@ extension ProviderAccountAssembly {
             let matchingPi = piScan.logins.filter { $0.identity == identity }.map {
                 CodexPiCredentialSource(path: $0.authPath, providerID: $0.providerID)
             }
+            let writableHomes = Set(matchingHomes.map { CodexHomeScanner.canonicalHome($0, homeDirectory: homeDirectory) })
+                .subtracting(managedHomes)
             return CodexAccountCard(id: record.id, identity: identity,
                 displayName: labels[identity.key] ?? "Codex",
                 authHomes: Set(matchingHomes + matchingSwapHomes).sorted(),
+                writableAuthHomes: writableHomes.sorted(),
                 piCredentialSources: matchingPi, claimsPiUsage: piUsageOwner == identity)
         }
         return CodexAccountDiscovery(cards: cards, historyHomes: historyHomes)
