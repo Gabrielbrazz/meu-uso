@@ -91,6 +91,10 @@ for bundle in "$BUILD_DIR"/*.bundle; do
 done
 shopt -u nullglob
 
+# The pt-BR strings (assets/Localization): the app's only localization, so the UI — including AppKit's
+# own menus and panels — is always Portuguese. See Support/L10n.swift.
+ditto "$ROOT_DIR/assets/Localization/pt-BR.lproj" "$APP_RESOURCES/pt-BR.lproj"
+
 # App icon. The classic AppIcon.icns (rendered by script/brand/mark.py --icns) always ships. When actool
 # can compile the Icon Composer source (assets/AppIcon.icon), the Liquid Glass Assets.car is added and
 # CFBundleIconName (which must match the .icon file stem, "AppIcon") is declared; otherwise macOS shows
@@ -134,6 +138,14 @@ cat >"$INFO_PLIST" <<PLIST
   <string>$APP_DISPLAY</string>
   <key>CFBundleDisplayName</key>
   <string>$APP_DISPLAY</string>
+  <key>LSHasLocalizedDisplayName</key>
+  <true/>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>pt-BR</string>
+  <key>CFBundleLocalizations</key>
+  <array>
+    <string>pt-BR</string>
+  </array>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>

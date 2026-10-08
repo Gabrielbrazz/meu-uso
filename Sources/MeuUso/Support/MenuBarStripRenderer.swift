@@ -41,7 +41,7 @@ enum MenuBarStripRenderer {
     /// extra-large gap next to neighboring items).
     static func textImage(for content: MenuBarContent) -> NSImage? {
         guard !content.isEmpty else { return nil }
-        let renderer = ImageRenderer(content: MenuBarTextStrip(content: content))
+        let renderer = ImageRenderer(content: MenuBarTextStrip(content: content).environment(\.locale, AppLocale.current))
         renderer.scale = 2
         guard let rendered = renderer.cgImage else { return nil }
         let cgImage = trimmedToVisibleContent(rendered) ?? rendered
@@ -106,7 +106,7 @@ enum MenuBarStripRenderer {
     /// counts or spend. Deterministic, so rendered once; `nil` only if `ImageRenderer` fails entirely
     /// (caller falls back to the app icon).
     static let privacyImage: NSImage? = {
-        let renderer = ImageRenderer(content: MenuBarPrivacyLabel())
+        let renderer = ImageRenderer(content: MenuBarPrivacyLabel().environment(\.locale, AppLocale.current))
         renderer.scale = 2
         guard let rendered = renderer.cgImage else { return nil }
         let cgImage = trimmedToVisibleContent(rendered) ?? rendered

@@ -71,6 +71,8 @@ final class StatusItemController: NSObject {
                     .environment(container.transparency)
                     .environment(updater)
                     .environment(\.codexResetClaims, container.codexResetClaims)
+                    // Dates, numbers and lists formatted by SwiftUI follow the app's pt-BR locale.
+                    .environment(\.locale, AppLocale.current)
             )
         )
         // The host view fills the panel. SwiftUI measures each screen and drives the panel height;

@@ -7,15 +7,31 @@ import Foundation
 struct WidgetData: Hashable {
     /// Hover note for locally-estimated spend tiles (Codex/Claude/Grok Today / Yesterday / Last 30
     /// Days), whose dollars are imputed from token counts rather than billed.
-    static let localEstimateNote = "Estimated locally, so it may be off"
+    static var localEstimateNote: String { L10n.tr("Estimated locally, so it may be off") }
     /// Hover note for Cursor spend tiles, whose spend comes from Cursor's usage-history export.
-    static let cursorUsageHistoryNote = "From your Cursor usage history."
+    static var cursorUsageHistoryNote: String { L10n.tr("From your Cursor usage history.") }
     /// Headline shown on a placed tile with no real backing metric (em dash, U+2014).
     static let noDataHeadline = "—"
     /// Subtitle shown on a placed tile with no real backing metric. Copy is intentionally exact.
-    static let noDataSubtitle = "No data"
+    static var noDataSubtitle: String { L10n.tr("No data") }
 
-    let title: String          // "Claude 5h", "Cursor credits"
+    /// "<value> <word>" for the English words the data model carries (`WidgetDisplayMode.word`,
+    /// `unboundedValueWord`, `limitNoun`), as whole translated phrases: the word order changes in
+    /// Portuguese ("US$ 100 limit" → "limite de US$ 100"). Unknown words fall back to "<value> <word>".
+    static func valuePhrase(_ value: String, _ word: String) -> String {
+        switch word {
+        case "used": return L10n.format("%@ used", value)
+        case "left": return L10n.format("%@ left", value)
+        case "spent": return L10n.format("%@ spent", value)
+        case "limit": return L10n.format("%@ limit", value)
+        case "purchased": return L10n.format("%@ purchased", value)
+        default: return "\(value) \(L10n.tr(word))"
+        }
+    }
+
+    /// English key from the descriptor ("Session", "Weekly"); `WidgetDataStore.data(for:)` swaps in the
+    /// translation once, at the choke point every surface reads from.
+    var title: String          // "Claude 5h", "Cursor credits"
     let icon: IconSource
     let kind: MetricKind
     let used: Double
@@ -193,18 +209,18 @@ struct WidgetData: Hashable {
         var tooltip: String? {
             switch self {
             case .noData, .level: return nil
-            case .spent: return "Limit reached"
+            case .spent: return L10n.tr("Limit reached")
             case .healthy(let projectedFraction):
                 let left = Int(((1 - projectedFraction) * 100).rounded())
-                return "~\(left)% left at reset"
+                return L10n.format("~%lld%% left at reset", left)
             case .closeToLimit(_, let projectedFraction):
                 let used = Int((projectedFraction * 100).rounded())
-                return "~\(used)% used at reset"
+                return L10n.format("~%lld%% used at reset", used)
             case .runningOut(_, let projectedFraction):
-                guard projectedFraction > 1 else { return "~100% used at reset" }
+                guard projectedFraction > 1 else { return L10n.format("~%lld%% used at reset", 100) }
                 // Floored to 1% so a bar projected even slightly over never reads "~0% over limit".
                 let over = max(1, Int(((projectedFraction - 1) * 100).rounded()))
-                return "~\(over)% over limit at reset"
+                return L10n.format("~%lld%% over limit at reset", over)
             }
         }
 
@@ -258,13 +274,13 @@ struct WidgetData: Hashable {
         }
         if let first = selectedValues.first {
             if let traySuffix, first.kind == .count {
-                return "\(MetricFormatter.number(first.number, kind: .count, style: .tray)) \(traySuffix)"
+                return "\(MetricFormatter.number(first.number, kind: .count, style: .tray)) \(MetricFormatter.unitWord(traySuffix, for: first.number))"
             }
             return MetricFormatter.string(for: first, style: .tray)
         }
         if let valueTextOverride { return valueTextOverride }
         let number = MetricFormatter.number(displayedValue, kind: kind, style: .tray)
-        if kind == .count, let countSuffix { return "\(number) \(countSuffix)" }
+        if kind == .count, let countSuffix { return "\(number) \(MetricFormatter.unitWord(countSuffix, for: displayedValue))" }
         return number
     }
 
@@ -274,8 +290,8 @@ struct WidgetData: Hashable {
             return valueTextOverride
         }
         // The unit (e.g. "credits") belongs in boundedSubtitle; the headline carries the mode word.
-        // `WidgetDisplayMode.label` is the single source for "Used"/"Left", so there's no second copy.
-        return "\(valueText) \(displayMode.label.lowercased())"
+        // `WidgetDisplayMode.word` is the single source for "used"/"left", so there's no second copy.
+        return Self.valuePhrase(valueText, displayMode.word)
     }
 
     /// Subtitle under the bounded headline (reset timing or limit context).
@@ -289,7 +305,7 @@ struct WidgetData: Hashable {
         // Any cycle-based metric (e.g. requests) shows its reset cadence when no exact reset date exists.
         if let periodDurationMs,
            let duration = Formatters.compactDuration(TimeInterval(periodDurationMs) / 1000) {
-            return "Resets in \(duration)"
+            return L10n.format("Resets in %@", duration)
         }
         switch kind {
         case .percent:
@@ -300,7 +316,7 @@ struct WidgetData: Hashable {
             guard let limit else { return nil }
             let digits = limit.rounded() == limit ? 0 : 2
             let amount = Formatters.currency(limit, fractionDigits: digits)
-            return "\(amount) \(limitNoun ?? "limit")"
+            return Self.valuePhrase(amount, limitNoun ?? "limit")
         case .count:
             // The unit (e.g. "credits") shows whether the count is bounded or a plain balance.
             return countSuffix
@@ -328,18 +344,18 @@ struct WidgetData: Hashable {
             if selected.count == 1 {
                 let value = selected[0]
                 if value.kind == .dollars, let word = unboundedValueWord {
-                    return "\(MetricFormatter.number(value.number, kind: .dollars, style: .row)) \(word)"
+                    return Self.valuePhrase(MetricFormatter.number(value.number, kind: .dollars, style: .row), word)
                 }
                 return MetricFormatter.string(for: value, style: .row)
             }
             return selected.map { MetricFormatter.string(for: $0, style: .row) }.joined(separator: " · ")
         }
         // Fallback for an unbounded row without typed values: "<value> <suffix> <word>".
-        let word = unboundedValueWord ?? displayMode.label.lowercased()
+        let word = unboundedValueWord ?? displayMode.word
         if kind == .count, let countSuffix {
-            return "\(valueText) \(countSuffix) \(word)"
+            return "\(valueText) \(MetricFormatter.unitWord(countSuffix, for: displayedValue)) \(L10n.tr(word))"
         }
-        return "\(valueText) \(word)"
+        return Self.valuePhrase(valueText, word)
     }
 
     /// Color bands for reset-credit expiries: blue normally, amber under a week, red under 48 hours.
@@ -389,7 +405,7 @@ struct WidgetData: Hashable {
         guard !entries.isEmpty else { return nil }
         // The header carries the verb; "in" only fits the relative durations beneath it (absolute
         // entries already read "Feb 15 at 3:45 PM").
-        let header = resetDisplayMode == .relative ? "Resets expire in:" : "Resets expire:"
+        let header = resetDisplayMode == .relative ? L10n.tr("Resets expire in:") : L10n.tr("Resets expire:")
         return ([header] + entries).joined(separator: "\n")
     }
 
@@ -404,7 +420,7 @@ struct WidgetData: Hashable {
     /// known pricing, so the triangle and its tooltip stay off.
     var unknownModelTooltip: String? {
         guard hasUnknownModels else { return nil }
-        let header = unknownModels.count == 1 ? "Unknown model found" : "Unknown models found"
+        let header = unknownModels.count == 1 ? L10n.tr("Unknown model found") : L10n.tr("Unknown models found")
         return ([header] + unknownModels.map { "- \($0)" }).joined(separator: "\n")
     }
 
@@ -432,7 +448,7 @@ struct WidgetData: Hashable {
         // hovering "2 available"); its tiny count never has a figures tooltip anyway.
         if let expiry = expiryTooltip { return expiry }
         if isZeroUsage && isUsagePeriod {
-            return (["No usage in this period"] + [unboundedTooltipNote].compactMap { $0 }).joined(separator: "\n")
+            return ([L10n.tr("No usage in this period")] + [unboundedTooltipNote].compactMap { $0 }).joined(separator: "\n")
         }
         if let figures = unboundedTooltip {
             return ([figures] + [unboundedTooltipNote].compactMap { $0 }).joined(separator: "\n")
@@ -516,7 +532,7 @@ extension WidgetData {
                 let projected = result.projectedUsage / ctx.limit
                 let spare = Int(((1 - projected) * 100).rounded())
                 guard spare >= 1 else { return .runningOut(eta: nil, projectedFraction: projected) }
-                return .closeToLimit(spare: "~\(spare)% spare", projectedFraction: projected)
+                return .closeToLimit(spare: L10n.format("~%lld%% spare", spare), projectedFraction: projected)
             case .behind:
                 // Coarse whole-percent meters can read 1% used very early in a window; linear
                 // extrapolation then projects a bogus blow-out while the headline still shows ~99%
@@ -569,7 +585,7 @@ extension WidgetData {
     func boundedTrailingText(now: Date = Date()) -> String? {
         guard hasData else { return Self.noDataSubtitle }
         if let subtitleOverride { return subtitleOverride }
-        if isFreshSessionWindow(now: now) { return "Not started" }
+        if isFreshSessionWindow(now: now) { return L10n.tr("Not started") }
         if let resetsAt {
             return resetDisplayMode == .absolute
                 ? Formatters.resetAbsoluteLabel(at: resetsAt, now: now)
@@ -606,7 +622,7 @@ extension WidgetData {
 
     /// Hover copy explaining the "Not started" trailing label: the rolling session window only begins
     /// once you send your first message, so there's no live countdown to show yet.
-    static let freshSessionTooltip = "Sessions start after you send your first message."
+    static var freshSessionTooltip: String { L10n.tr("Sessions start after you send your first message.") }
 
     /// Hover tooltip for the reset label: the *opposite* format from what's shown, mirroring the
     /// original's `formatResetTooltipText`. A fresh ("Not started") session explains itself instead of
@@ -630,8 +646,8 @@ extension WidgetData {
     var meterStyleTooltip: String? {
         guard hasMeterStyleToggle, let limit else { return nil }
         let opposite = displayMode == .remaining ? used : max(0, limit - used)
-        let word = (displayMode == .remaining ? WidgetDisplayMode.used : .remaining).label.lowercased()
-        return "\((valuePrefix ?? "") + format(opposite)) \(word)"
+        let word = (displayMode == .remaining ? WidgetDisplayMode.used : .remaining).word
+        return Self.valuePhrase((valuePrefix ?? "") + format(opposite), word)
     }
 }
 

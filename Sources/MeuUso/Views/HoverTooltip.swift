@@ -350,7 +350,10 @@ private final class TooltipPresenter {
     /// Leaves `host.rootView` holding whichever bubble it settled on, which is the one shown.
     private func measuredSize(for target: Target) -> CGSize {
         func fit(maxTextWidth: CGFloat?) -> CGSize {
-            host.rootView = AnyView(TooltipBubble(text: target.text, maxTextWidth: maxTextWidth))
+            host.rootView = AnyView(
+                TooltipBubble(text: target.text, maxTextWidth: maxTextWidth)
+                    .environment(\.locale, AppLocale.current)
+            )
             host.layoutSubtreeIfNeeded()
             return host.fittingSize
         }

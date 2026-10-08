@@ -13,7 +13,7 @@ enum ShareCardRenderer {
     /// The card rendered to an `NSImage`, or `nil` if `ImageRenderer` produces no CGImage. The image's
     /// point size is the card's natural (flexible) size; its pixel size is that times `scale`.
     static func image<Card: View>(for view: Card) -> NSImage? {
-        let renderer = ImageRenderer(content: view)
+        let renderer = ImageRenderer(content: view.environment(\.locale, AppLocale.current))
         renderer.scale = scale
         guard let cgImage = renderer.cgImage else { return nil }
         return NSImage(
