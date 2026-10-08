@@ -51,8 +51,8 @@ APP_RESOURCES="$APP_CONTENTS/Resources"
 APP_BINARY="$APP_MACOS/$APP_NAME"
 CLI_BINARY="$APP_HELPERS/openusage"
 DMG_PATH="$DIST_DIR/$DMG_NAME"
-# dSYMs for crash symbolication (uploaded to PostHog by release.yml). A folder, since posthog-cli's
-# `dsym upload --directory` and Sparkle both want a directory of bundles, not a single path.
+# dSYMs for crash symbolication, kept next to the DMG. A folder, since symbolication tools and Sparkle
+# both want a directory of bundles, not a single path.
 DSYM_DIR="$DIST_DIR/dSYMs"
 APP_DSYM="$DSYM_DIR/$APP_NAME.app.dSYM"
 ENTITLEMENTS_TEMPLATE="$ROOT_DIR/script/OpenUsage.release.entitlements.plist"
@@ -244,5 +244,5 @@ fi
 
 echo "==> done"
 echo "    DMG:  $DMG_PATH"
-echo "    dSYM: $APP_DSYM (uploaded to PostHog for crash symbolication by release.yml)."
+echo "    dSYM: $APP_DSYM (keep it to symbolicate crash reports for this build)."
 echo "    The appcast is generated from this DMG by generate_appcast (see release.yml)."

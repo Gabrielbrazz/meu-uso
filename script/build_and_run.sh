@@ -42,7 +42,9 @@ RESOURCE_BUNDLE_NAME="${TARGET_NAME}_${TARGET_NAME}.bundle"
 ENTITLEMENTS="$ROOT_DIR/script/OpenUsage.dev.entitlements.plist"
 SIGN_ENTITLEMENTS="$ROOT_DIR/script/OpenUsage.local.entitlements.plist"
 
-pkill -x "$TARGET_NAME" >/dev/null 2>&1 || true
+# Match the staged binary path, not the bare process name, so an installed app with the same
+# executable name is never touched.
+pkill -f "$APP_BINARY" >/dev/null 2>&1 || true
 
 echo "==> swift build ($CONFIG)"
 swift build -c "$CONFIG"
@@ -229,7 +231,7 @@ case "$MODE" in
   verify)
     launch_app
     sleep 1
-    pgrep -x "$TARGET_NAME" >/dev/null && echo "==> running"
+    pgrep -f "$APP_BINARY" >/dev/null && echo "==> running"
     ;;
   *)
     echo "usage: $0 [run|build|logs|verify]" >&2
