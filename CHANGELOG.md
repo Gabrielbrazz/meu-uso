@@ -6,6 +6,10 @@ Todas as mudanças relevantes do Meu Uso ficam registradas aqui. O formato segue
 
 Ponto de partida: fork do [OpenUsage](https://github.com/robinebers/openusage) v0.7.14 (commit `cb21465`), de Robin Ebers, sob licença MIT. O histórico anterior a este ponto está no repositório original.
 
+### Alterado
+- Nome: OpenUsage passa a ser Meu Uso. Bundle ID `io.github.gabrielbrazz.meuuso`, pastas `~/Library/Application Support/MeuUso` e `~/Library/Logs/MeuUso`, configuração em `~/.meu-uso` e `~/.config/meu-uso`, CLI `meu-uso`, API local em `127.0.0.1:6737`. Nada disso colide com uma instalação do OpenUsage no mesmo Mac.
+- Versão reiniciada em 0.1.0.
+
 ### Removido
 - Telemetria: o app não envia dados de uso nem relatórios de falha para serviço nenhum.
 - Infraestrutura do projeto original: workflows de política de PR, Pullfrog e stale, publicação no GitHub Pages e a limpeza de agentes da antiga versão Tauri.

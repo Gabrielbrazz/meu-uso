@@ -28,7 +28,7 @@ jobs:
         run: |
           python3 - << 'PY'
           import json, re, sys
-          with open("Sources/OpenUsage/Resources/pricing_supplement.json") as f:
+          with open("Sources/MeuUso/Resources/pricing_supplement.json") as f:
               supplement = json.load(f)
           problems = []
           for model, entry in supplement["pricing"].items():

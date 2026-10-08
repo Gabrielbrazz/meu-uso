@@ -14,8 +14,8 @@ The project script owns the build/run loop. From the repo root:
 ```
 
 The script builds a signed app bundle under `dist/` and launches it in place — nothing is installed to
-`/Applications`. The dev build uses its own bundle id (`com.robinebers.openusage.dev`), so it keeps its
-own settings and keychain and never disturbs a released OpenUsage. It ships no update feed, so it never
+`/Applications`. The dev build uses its own bundle id (`io.github.gabrielbrazz.meuuso.dev`), so it keeps its
+own settings and keychain and never disturbs a released Meu Uso. It ships no update feed, so it never
 checks for updates — test updates with a real signed, notarized release build.
 
 ## Stream logs
@@ -30,19 +30,19 @@ This launches the dev app and then streams its unified logs. Under the hood it f
 the app's process, equivalent to:
 
 ```sh
-log stream --info --style compact --predicate 'process == "OpenUsage"'
+log stream --info --style compact --predicate 'process == "MeuUso"'
 ```
 
 To read logs *after the fact* instead of live, use `log show` with a time window:
 
 ```sh
-log show --last 10m --info --predicate 'process == "OpenUsage"'
+log show --last 10m --info --predicate 'process == "MeuUso"'
 ```
 
 ## Log file
 
 In addition to the unified log above, the app writes a file log to
-`~/Library/Logs/OpenUsage/OpenUsage.log` — this is what to send with a support report. It is capped at
+`~/Library/Logs/MeuUso/MeuUso.log` — this is what to send with a support report. It is capped at
 ~10 MB with one `.1` archive. Raise the detail in **Settings -> Advanced -> Log Level** (use **Debug**
 for full detail), then grab the file with **Copy Log Path** or **Reveal in Finder** in that same
 section. See [Logging](logging.md) for the levels, subsystem tags, and the never-log-secrets guarantee.
@@ -75,5 +75,5 @@ short trail in the log file:
 - **Permissions / keychain prompts on every rebuild.** The script signs with a stable Apple Development
   identity so the permission ACLs stick. If you see repeated prompts, make sure such an identity exists in
   your keychain (the script warns when it falls back to ad-hoc signing).
-- **Inspect the local API.** With the app running, `curl 127.0.0.1:6736/v1/usage` shows the same usage
+- **Inspect the local API.** With the app running, `curl 127.0.0.1:6737/v1/usage` shows the same usage
   snapshots the UI uses — handy to confirm whether a problem is in fetching/mapping or in the UI.

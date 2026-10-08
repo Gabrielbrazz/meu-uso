@@ -1,11 +1,11 @@
 ---
 name: release-swift
-description: Cut a release of OpenUsage (Swift menu-bar app): pick a version, generate a categorized changelog, tag from `main`, and publish the GitHub Release with notes. Use to ship an Early Access beta or a stable release.
+description: Cut a release of Meu Uso (Swift menu-bar app): pick a version, generate a categorized changelog, tag from `main`, and publish the GitHub Release with notes. Use to ship an Early Access beta or a stable release.
 ---
 
 # Release Swift
 
-Pushing a `v*` tag on `main` runs `.github/workflows/release.yml`, which builds, signs, notarizes, attaches `OpenUsage-<version>.dmg` to the GitHub Release, and updates the Sparkle `appcast.xml` on `gh-pages`. CI creates the release with an EMPTY body, so this skill generates the changelog, records it in `CHANGELOG.md`, and publishes the notes onto the release.
+Pushing a `v*` tag on `main` runs `.github/workflows/release.yml`, which builds, signs, notarizes, attaches `MeuUso-<version>.dmg` to the GitHub Release, and updates the Sparkle `appcast.xml` on `gh-pages`. CI creates the release with an EMPTY body, so this skill generates the changelog, records it in `CHANGELOG.md`, and publishes the notes onto the release.
 
 ## Channels
 
@@ -38,7 +38,7 @@ Collect commits since the **previous release in the same channel** and categoriz
 Author attribution (required on every entry):
 
 - With a PR number `(#123)`: `gh pr view 123 --json author -q '.author.login'`.
-- Without a PR number: `gh api /repos/robinebers/openusage/commits/{full_hash} -q '.author.login'`.
+- Without a PR number: `gh api /repos/Gabrielbrazz/meu-uso/commits/{full_hash} -q '.author.login'`.
 - If the API returns null, fall back to the git author name.
 
 Output the changelog in a code block (template below) for review.
@@ -81,13 +81,13 @@ Never leave a release blank.
 ```sh
 gh release view v{version} --json isDraft,isPrerelease,assets,body \
   --jq '{isDraft, isPrerelease, assets:[.assets[].name], bodyLen:(.body|length)}'
-git fetch origin gh-pages && git show origin/gh-pages:appcast.xml | grep -F "OpenUsage-{version}.dmg"
-curl -s "https://robinebers.github.io/openusage/appcast.xml" | grep -F "OpenUsage-{version}.dmg"
+git fetch origin gh-pages && git show origin/gh-pages:appcast.xml | grep -F "MeuUso-{version}.dmg"
+curl -s "https://gabrielbrazz.github.io/meu-uso/appcast.xml" | grep -F "MeuUso-{version}.dmg"
 ```
 
 The second check matters: the Release workflow pushes `appcast.xml` to the **`gh-pages` branch**, and GitHub Pages serves that branch (Pages source: "Deploy from a branch", `gh-pages` / root). If the branch has the version but the live URL does not after ~10 minutes, check the repo's Pages build under Settings → Pages. Sparkle clients only see the live URL.
 
-Require `isDraft=false`, `isPrerelease=true` for beta or `false` for stable, an `OpenUsage-<version>.dmg` asset, `bodyLen>0`, and the version present in the appcast. If a draft was left behind, migrate its notes/assets onto the published release, then delete it — but only once a separate PUBLISHED release for the tag already exists:
+Require `isDraft=false`, `isPrerelease=true` for beta or `false` for stable, an `MeuUso-<version>.dmg` asset, `bodyLen>0`, and the version present in the appcast. If a draft was left behind, migrate its notes/assets onto the published release, then delete it — but only once a separate PUBLISHED release for the tag already exists:
 
 ```sh
 tag="v{version}"
@@ -108,10 +108,10 @@ Only include category sections that have entries.
 ## v{version}
 
 ### New Features
-- {message} ([#{pr}](https://github.com/robinebers/openusage/pull/{pr})) by @{author}
+- {message} ([#{pr}](https://github.com/Gabrielbrazz/meu-uso/pull/{pr})) by @{author}
 
 ### Bug Fixes
-- {message} ([#{pr}](https://github.com/robinebers/openusage/pull/{pr})) by @{author}
+- {message} ([#{pr}](https://github.com/Gabrielbrazz/meu-uso/pull/{pr})) by @{author}
 
 ### Refactor
 - {message} by @{author}
@@ -122,9 +122,9 @@ Only include category sections that have entries.
 ---
 
 ### Changelog
-**Full Changelog**: [{prev_tag}...v{version}](https://github.com/robinebers/openusage/compare/{prev_tag}...v{version})
+**Full Changelog**: [{prev_tag}...v{version}](https://github.com/Gabrielbrazz/meu-uso/compare/{prev_tag}...v{version})
 
-- [{short_hash}](https://github.com/robinebers/openusage/commit/{full_hash}) {commit message} by @{author}
+- [{short_hash}](https://github.com/Gabrielbrazz/meu-uso/commit/{full_hash}) {commit message} by @{author}
 ~~~
 
 `{prev_tag}` is the previous release **in the same channel**: last stable for a stable cut, last beta (or last stable for the first beta in a lane) for a beta cut.

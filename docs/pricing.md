@@ -1,16 +1,16 @@
 # Model Pricing
 
-How OpenUsage turns token counts into the estimated dollars on the Claude, Codex, Cursor, and Grok spend tiles. Grok uses the cost recorded in its session logs when available and only estimates older turns without one. OpenRouter and OpenCode do not use these estimates because their sources already report the cost directly.
+How Meu Uso turns token counts into the estimated dollars on the Claude, Codex, Cursor, and Grok spend tiles. Grok uses the cost recorded in its session logs when available and only estimates older turns without one. OpenRouter and OpenCode do not use these estimates because their sources already report the cost directly.
 
 ## Where prices come from
 
 Prices are layered from three sources; when the same model appears in more than one, the higher layer wins:
 
-1. **OpenUsage pricing supplement** — a small JSON file maintained in this repo and published to GitHub Pages. It covers models no public catalog carries (Cursor-native models like `auto` and `composer-*`), fast-variant multipliers, and alias rules that map provider log/CSV slugs to catalog keys.
+1. **Meu Uso pricing supplement** — a small JSON file maintained in this repo and published to GitHub Pages. It covers models no public catalog carries (Cursor-native models like `auto` and `composer-*`), fast-variant multipliers, and alias rules that map provider log/CSV slugs to catalog keys.
 2. **LiteLLM** — the community-maintained `model_prices_and_context_window.json`, covering the vast majority of API-priced models.
 3. **models.dev** — a gap-filler for models LiteLLM misses (e.g. some brand-new or niche models).
 
-The app ships with bundled snapshots of all three, so pricing works offline and on first launch. At runtime each source is refetched about once an hour (with ETag revalidation) and cached in `~/Library/Application Support/OpenUsage/pricing/`. A refresh never blocks a usage scan — scans always price against the freshest data already on hand.
+The app ships with bundled snapshots of all three, so pricing works offline and on first launch. At runtime each source is refetched about once an hour (with ETag revalidation) and cached in `~/Library/Application Support/MeuUso/pricing/`. A refresh never blocks a usage scan — scans always price against the freshest data already on hand.
 
 Because the supplement is published to GitHub Pages on merge, a pricing correction reaches installed apps within about an hour — no app update needed.
 
@@ -32,7 +32,7 @@ Codex offers an optional **Fallback Model** under **Customize → Codex → Cost
 
 The picker lists public text/code models from the supplement's `fallback_models.codex` list, and only offers entries with usable exact pricing. It never reads account-specific model lists. The bundled list works offline; list updates arrive through the existing supplement refresh. Opening these settings recalculates a saved choice, and a change in its availability after a list refresh recalculates the local totals again. If a saved choice becomes unavailable, the settings show a warning and remove its fallback estimates; if its pricing returns, the estimates return. Unknown-model warnings remain in both cases.
 
-Cursor's Grok Bot modes use separate aliases: `grok-bot-default` uses Grok 4.6 Fast rates, while `grok-bot-automation` uses Grok 4.6 base rates. This follows the per-event list-price comparison in [#1229](https://github.com/robinebers/openusage/issues/1229); the rates themselves come from [Cursor's pricing table](https://cursor.com/docs/models-and-pricing.md). `grok-bot-cua` uses Grok 4.7 base rates at the maintainer's direction.
+Cursor's Grok Bot modes use separate aliases: `grok-bot-default` uses Grok 4.6 Fast rates, while `grok-bot-automation` uses Grok 4.6 base rates. This follows the per-event list-price comparison in [robinebers/openusage#1229](https://github.com/robinebers/openusage/issues/1229); the rates themselves come from [Cursor's pricing table](https://cursor.com/docs/models-and-pricing.md). `grok-bot-cua` uses Grok 4.7 base rates at the maintainer's direction.
 
 Cursor Grok 4.7 is priced in the supplement from that same table: $2 input, $0.50 cache read, and $6 output per million tokens (Fast is 2x). Cursor lists a 500k long-context tier separately at 2x standard and 3x for Fast; CSV and log slugs follow the same `cursor-` prefix, effort, Fast, and dashed-version patterns as Grok 4.5 and 4.6, plus `-500k` / `[500k]` variants. The `-slow` slug uses the standard Grok 4.7 rate; a trailing effort or `-fast` suffix selects the same variant as other 4.7 slugs.
 
@@ -42,7 +42,7 @@ GPT-6 Sol, GPT-6.1 Sol, and GPT-6 Luna use the rates on [OpenAI's pricing page](
 
 ## What the estimate includes
 
-Costs are computed per usage event from four token buckets — plain input, cache writes, cache reads, and output — at the model's per-million-token rates, including 1-hour cache-write pricing, long-context tiers, and fast-variant multipliers. Most catalog tiers start above 200k prompt tokens; supported GPT-5.4, GPT-5.5, GPT-5.6, and GPT-6 Codex models switch above 272k input tokens. In either case, the higher rate applies to the whole request. A published cache discount is used when available; Codex cached input falls back to the full input rate when the source publishes no discount. Cursor's export combines many requests into each row, so OpenUsage uses the normal rate there rather than guessing that one request crossed the limit. When a Claude or Grok session records its own cost, that amount is used as-is. Nested Claude advisor usage has no carried cost, so it is priced separately from its tokens using the advisor model. Estimates represent API-rate value rather than a subscription bill.
+Costs are computed per usage event from four token buckets — plain input, cache writes, cache reads, and output — at the model's per-million-token rates, including 1-hour cache-write pricing, long-context tiers, and fast-variant multipliers. Most catalog tiers start above 200k prompt tokens; supported GPT-5.4, GPT-5.5, GPT-5.6, and GPT-6 Codex models switch above 272k input tokens. In either case, the higher rate applies to the whole request. A published cache discount is used when available; Codex cached input falls back to the full input rate when the source publishes no discount. Cursor's export combines many requests into each row, so Meu Uso uses the normal rate there rather than guessing that one request crossed the limit. When a Claude or Grok session records its own cost, that amount is used as-is. Nested Claude advisor usage has no carried cost, so it is priced separately from its tokens using the advisor model. Estimates represent API-rate value rather than a subscription bill.
 
 ## Privacy
 
@@ -50,5 +50,5 @@ The pricing refresh fetches three public price lists (from `raw.githubuserconten
 
 ## Maintainer notes
 
-- **Supplement changes** (new Cursor-native model, price correction, new alias): edit `Sources/OpenUsage/Resources/pricing_supplement.json`, sync entries from [Cursor models & pricing](https://cursor.com/docs/models-and-pricing.md), and update `updated_at` to the current UTC timestamp. On merge to `main`, `.github/workflows/pricing-supplement.yml` publishes it to gh-pages; installed apps pick it up within about an hour. The bundled copy ships with the next release for first launches. The **pricing-update skill** (`.agents/skills/pricing-update/`) walks an agent through the whole sync: pull the Cursor page, diff, edit, validate, and open a PR.
+- **Supplement changes** (new Cursor-native model, price correction, new alias): edit `Sources/MeuUso/Resources/pricing_supplement.json`, sync entries from [Cursor models & pricing](https://cursor.com/docs/models-and-pricing.md), and update `updated_at` to the current UTC timestamp. On merge to `main`, `.github/workflows/pricing-supplement.yml` publishes it to gh-pages; installed apps pick it up within about an hour. The bundled copy ships with the next release for first launches. The **pricing-update skill** (`.agents/skills/pricing-update/`) walks an agent through the whole sync: pull the Cursor page, diff, edit, validate, and open a PR.
 - **Bundled snapshots** (`pricing_litellm_snapshot.json`, `pricing_models_dev_snapshot.json`): regenerate occasionally (e.g. before a release) with `script/update_pricing_snapshots.sh`. Staleness is harmless — runtime fetches override them.

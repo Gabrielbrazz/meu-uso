@@ -1,8 +1,8 @@
 name: Release
 
-# Tag a version to ship it: `git tag v0.7.0 && git push origin v0.7.0`.
-# A tag with a pre-release suffix (e.g. v0.7.0-beta.1) publishes to the Early Access channel; a plain
-# tag (v0.7.0) publishes to everyone. The one-time secret/Pages setup is documented in the
+# Tag a version to ship it: `git tag v0.1.0 && git push origin v0.1.0`.
+# A tag with a pre-release suffix (e.g. v0.1.0-beta.1) publishes to the Early Access channel; a plain
+# tag (v0.1.0) publishes to everyone. The one-time secret/Pages setup is documented in the
 # release-swift skill under .agents/skills/release-swift/.
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to build (e.g. v0.7.0)"
+        description: "Tag to build (e.g. v0.1.0)"
         required: true
         type: string
 
@@ -83,8 +83,8 @@ jobs:
         env:
           ICLOUD_PROFILE_BASE64: ${{ secrets.APPLE_DEVELOPER_ID_ICLOUD_PROFILE }}
         run: |
-          printf '%s' "$ICLOUD_PROFILE_BASE64" | base64 --decode > "$RUNNER_TEMP/openusage-icloud.provisionprofile"
-          echo "ICLOUD_PROVISIONING_PROFILE=$RUNNER_TEMP/openusage-icloud.provisionprofile" >> "$GITHUB_ENV"
+          printf '%s' "$ICLOUD_PROFILE_BASE64" | base64 --decode > "$RUNNER_TEMP/meuuso-icloud.provisionprofile"
+          echo "ICLOUD_PROVISIONING_PROFILE=$RUNNER_TEMP/meuuso-icloud.provisionprofile" >> "$GITHUB_ENV"
 
       - name: Carry forward the existing appcast
         run: |
@@ -119,20 +119,20 @@ jobs:
           NOTARY_APPLE_ID: ${{ secrets.APPLE_ID }}
           NOTARY_APP_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           NOTARY_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          OPENUSAGE_VERSION: ${{ steps.meta.outputs.version }}
+          MEUUSO_VERSION: ${{ steps.meta.outputs.version }}
         run: ./script/release.sh
 
       - name: Publish DMG to GitHub Releases
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.meta.outputs.tag }}
-          name: OpenUsage ${{ steps.meta.outputs.version }}
+          name: Meu Uso ${{ steps.meta.outputs.version }}
           prerelease: ${{ steps.meta.outputs.prerelease }}
-          files: dist/OpenUsage-${{ steps.meta.outputs.version }}.dmg
+          files: dist/MeuUso-${{ steps.meta.outputs.version }}.dmg
 
       - name: Generate appcast with Sparkle
         env:
-          DMG: OpenUsage-${{ steps.meta.outputs.version }}.dmg
+          DMG: MeuUso-${{ steps.meta.outputs.version }}.dmg
           CHANNEL: ${{ steps.meta.outputs.channel }}
           # Per-tag GitHub release asset base. generate_appcast applies this prefix only to the new DMG
           # in feed/; preserved items keep their own (older-tag) URLs.

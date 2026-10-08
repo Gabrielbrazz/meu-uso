@@ -19,7 +19,7 @@ included-dollar cap. Total Usage uses Cursor's structured total percentage when 
 unavailable when Cursor supplies only the two pools. Older team accounts without usable pool data
 keep their dollar meter, including accounts that return zero placeholders beside positive spend.
 
-When Cursor reports your plan name, OpenUsage shows it beside the provider name.
+When Cursor reports your plan name, Meu Uso shows it beside the provider name.
 
 Grok Bot has its own usage allowance, separate from Cursor's normal billing-cycle meter. Its widget
 is enabled by default in Cursor's On Demand section. It uses your existing Cursor login, so signing
@@ -27,17 +27,17 @@ into the Grok CLI is not required.
 
 ## Where credentials come from
 
-Just be signed into the Cursor app. OpenUsage reads Cursor's local state database (and its keychain entries) for the session tokens; refreshed tokens are persisted back. Nothing extra to install or configure.
+Just be signed into the Cursor app. Meu Uso reads Cursor's local state database (and its keychain entries) for the session tokens; refreshed tokens are persisted back. Nothing extra to install or configure.
 
 ## Spend history
 
-Today, Yesterday, Last 30 Days, and Usage Trend come from Cursor's usage export. OpenUsage uses the exported token counts and shared model pricing to estimate the cost locally. Cursor's export may occasionally arrive late, so the newest figures can lag behind current activity. OpenUsage leaves isolated malformed rows out instead of silently counting broken values as zero. A failed download, an export that takes longer than 20 seconds, invalid export schema, or broken CSV structure leaves spend history unavailable for that refresh; live plan usage still updates. Each failure is recorded in the diagnostic log without including the exported usage data.
+Today, Yesterday, Last 30 Days, and Usage Trend come from Cursor's usage export. Meu Uso uses the exported token counts and shared model pricing to estimate the cost locally. Cursor's export may occasionally arrive late, so the newest figures can lag behind current activity. Meu Uso leaves isolated malformed rows out instead of silently counting broken values as zero. A failed download, an export that takes longer than 20 seconds, invalid export schema, or broken CSV structure leaves spend history unavailable for that refresh; live plan usage still updates. Each failure is recorded in the diagnostic log without including the exported usage data.
 
 ## Troubleshooting
 
 - **"Not logged in" / token errors** — open Cursor and make sure you're signed in, then refresh.
 - **Some metrics missing** — Cursor omits fields depending on plan type; missing metrics simply show "No data".
-- **Optional lookup failed** — Grok Bot, plan, credit-grant, prepaid-balance, and request-fallback failures stay nonfatal when primary usage is available. OpenUsage records fixed, credential-free reasons in the diagnostic log.
+- **Optional lookup failed** — Grok Bot, plan, credit-grant, prepaid-balance, and request-fallback failures stay nonfatal when primary usage is available. Meu Uso records fixed, credential-free reasons in the diagnostic log.
 
 ## Under the hood
 

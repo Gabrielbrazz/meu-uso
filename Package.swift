@@ -2,13 +2,13 @@
 import PackageDescription
 
 let package = Package(
-    name: "OpenUsage",
+    name: "MeuUso",
     platforms: [
         .macOS(.v15)
     ],
     products: [
-        .executable(name: "OpenUsage", targets: ["OpenUsageApp"]),
-        .executable(name: "openusage-cli", targets: ["OpenUsageCLI"])
+        .executable(name: "MeuUso", targets: ["MeuUsoApp"]),
+        .executable(name: "meu-uso-cli", targets: ["MeuUsoCLI"])
     ],
     dependencies: [
         // The de-facto standard recorder + global hotkey for Mac apps (System Settings-style field).
@@ -19,12 +19,12 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "OpenUsage",
+            name: "MeuUso",
             dependencies: [
                 .product(name: "KeyboardShortcuts", package: "KeyboardShortcuts"),
                 .product(name: "Sparkle", package: "Sparkle")
             ],
-            path: "Sources/OpenUsage",
+            path: "Sources/MeuUso",
             resources: [
                 .copy("Resources/ProviderIcons"),
                 .copy("Resources/pricing_supplement.json"),
@@ -36,33 +36,33 @@ let package = Package(
             ]
         ),
         .executableTarget(
-            name: "OpenUsageApp",
-            dependencies: ["OpenUsage"],
-            path: "Sources/OpenUsageApp",
+            name: "MeuUsoApp",
+            dependencies: ["MeuUso"],
+            path: "Sources/MeuUsoApp",
             swiftSettings: [
                 .swiftLanguageMode(.v6)
             ]
         ),
         .executableTarget(
-            name: "OpenUsageCLI",
-            dependencies: ["OpenUsage"],
-            path: "Sources/OpenUsageCLI",
+            name: "MeuUsoCLI",
+            dependencies: ["MeuUso"],
+            path: "Sources/MeuUsoCLI",
             swiftSettings: [
                 .swiftLanguageMode(.v6)
             ]
         ),
         .testTarget(
-            name: "OpenUsageTests",
-            dependencies: ["OpenUsage"],
-            path: "Tests/OpenUsageTests",
+            name: "MeuUsoTests",
+            dependencies: ["MeuUso"],
+            path: "Tests/MeuUsoTests",
             swiftSettings: [
                 .swiftLanguageMode(.v6)
             ]
         ),
         .testTarget(
-            name: "OpenUsageCLITests",
-            dependencies: ["OpenUsageCLI"],
-            path: "Tests/OpenUsageCLITests",
+            name: "MeuUsoCLITests",
+            dependencies: ["MeuUsoCLI"],
+            path: "Tests/MeuUsoCLITests",
             swiftSettings: [
                 .swiftLanguageMode(.v6)
             ]
