@@ -71,10 +71,8 @@ enum GrokUsageMapper {
         return trimmed.isEmpty ? nil : trimmed
     }
 
+    /// The cap with every digit, in the app's number style ("2.500").
     private static func formatUnits(_ value: Double) -> String {
-        if value.rounded() == value {
-            return String(Int(value))
-        }
-        return String(value)
+        MetricFormatter.number(value, kind: .count, style: .full)
     }
 }

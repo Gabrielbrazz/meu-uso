@@ -107,7 +107,7 @@
 "Debug" = "Depuração";
 "macOS wouldn't update Launch at Login. Check System Settings → Login Items." = "O macOS não atualizou a opção Abrir ao iniciar sessão. Confira em Ajustes do Sistema → Itens de Início.";
 "Up to %lld stars per provider" = "Até %lld estrelas por provedor";
-"iCloud Drive isn’t available. Check that this Mac is signed into iCloud and iCloud Drive is on." = "O iCloud Drive não está disponível. Confira se este Mac tem sessão iniciada no iCloud e se o iCloud Drive está ativado.";
+"iCloud Drive isn’t available. Check that this Mac is signed into iCloud and iCloud Drive is on. Development builds of Meu Uso can’t use iCloud." = "O iCloud Drive não está disponível. Confira se este Mac tem sessão iniciada no iCloud e se o iCloud Drive está ativado. As versões de desenvolvimento do Meu Uso não acessam o iCloud.";
 "Some synced usage data couldn’t be read. Check the log for details." = "Parte dos dados de uso sincronizados não pôde ser lida. Veja os detalhes no log.";
 "Meu Uso couldn’t save this Mac’s sync identity in Keychain. Sync may create a duplicate device if app preferences are reset." = "O Meu Uso não conseguiu salvar a identidade de sincronização deste Mac nas chaves do macOS. A sincronização pode criar um dispositivo duplicado se os ajustes do app forem redefinidos.";
 "notificationSubtitle:%@ %@" = "%1$@ · %2$@";

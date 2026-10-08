@@ -98,7 +98,7 @@ final class GrokCreditsConfigMapperTests: XCTestCase {
                 mapped.lines.first(where: { $0.label == "Pay as you go" }) else {
             return XCTFail("expected a Pay as you go badge")
         }
-        XCTAssertEqual(text, "2500 cap")
+        XCTAssertEqual(text, "2.500 cap")
         XCTAssertEqual(colorHex, "#22c55e")
     }
 

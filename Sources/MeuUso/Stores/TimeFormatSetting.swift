@@ -20,13 +20,14 @@ enum TimeFormatSetting: String, Hashable, Sendable, CaseIterable, UserDefaultsBa
         }
     }
 
-    /// Short time string ("17:30" / "5:30 PM") honoring the override, via the locale's hour cycle.
-    /// Auto follows the app's Brazilian locale (24-hour).
+    /// Short time string ("17:30" / "5:30 PM") in the app's Brazilian style, via the locale's hour
+    /// cycle. Auto takes the Mac's own 12/24-hour choice (`Locale.current` carries the System Settings
+    /// override); the other two force one.
     func shortTime(_ date: Date, base: Locale = AppLocale.current) -> String {
         var components = Locale.Components(locale: base)
         switch self {
         case .auto:
-            break
+            components.hourCycle = Locale.current.hourCycle
         case .twelveHour:
             components.hourCycle = .oneToTwelve
         case .twentyFourHour:
