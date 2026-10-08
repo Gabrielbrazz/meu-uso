@@ -10,7 +10,7 @@ final class WidgetMeterStyleTests: XCTestCase {
         let cases: [(name: String, format: ProgressFormat, used: Double, limit: Double,
                      remaining: String, consumed: String, subtitle: String?)] = [
             ("percent", .percent, 80, 100, "20%", "80%", nil),
-            ("dollars", .dollars, 80, 100, "$20.00", "$80.00", "$100 limit"),
+            ("dollars", .dollars, 80, 100, "US$\u{00A0}20,00", "US$\u{00A0}80,00", "US$\u{00A0}100 limit"),
             ("count", .count(suffix: "credits"), 320, 1_000, "680", "320", "credits")
         ]
 
@@ -113,7 +113,7 @@ final class WidgetMeterStyleTests: XCTestCase {
         store.meterStyle = .used
         let used = store.data(for: descriptor)
 
-        XCTAssertEqual(remaining.valueText, "$42.50")
+        XCTAssertEqual(remaining.valueText, "US$\u{00A0}42,50")
         XCTAssertEqual(remaining.unboundedSubtitle, "on-device estimate")
         XCTAssertEqual(used.valueText, remaining.valueText)
         XCTAssertEqual(used.unboundedSubtitle, remaining.unboundedSubtitle)

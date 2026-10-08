@@ -316,6 +316,6 @@ final class ResetDisplayTests: XCTestCase {
         data.resetDisplayMode = .absolute
         XCTAssertFalse(data.hasResetLabel())        // no resetsAt → not a clickable reset
         XCTAssertNil(data.resetTooltip())
-        XCTAssertEqual(data.boundedTrailingText(), "$20 limit") // falls back to limit context, unflipped
+        XCTAssertEqual(data.boundedTrailingText(), "US$\u{00A0}20 limit") // falls back to limit context, unflipped
     }
 }

@@ -39,7 +39,7 @@ final class UsageTrendTests: XCTestCase {
         XCTAssertEqual(points[30].value, 222_000_000)  // 6/21
         XCTAssertEqual(points[0].value, 0, "an idle day is a zero bar")
         // Pre-formatted readouts: compact counts with a "tokens" unit.
-        XCTAssertEqual(points[28...30].map(\.valueLabel), ["500 tokens", "1.5M tokens", "222M tokens"])
+        XCTAssertEqual(points[28...30].map(\.valueLabel), ["500 tokens", "1,5\u{00A0}mi tokens", "222\u{00A0}mi tokens"])
         XCTAssertEqual(points[0].valueLabel, "0 tokens")
     }
 

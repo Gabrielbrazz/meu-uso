@@ -458,8 +458,8 @@ final class CursorSpendProviderTests: XCTestCase {
         // unbacked → "No data"), but a provider that reports a real $0.00 (e.g. OpenRouter) still renders
         // it rather than hiding the figure.
         let cases: [(Double, Int, String, String)] = [
-            (12.34, 891_000, "$12.34", "$12.34 · 891K tokens"),
-            (0.0, 0, "$0.00", "$0.00 · 0 tokens")
+            (12.34, 891_000, "US$\u{00A0}12,34", "US$\u{00A0}12,34 · 891\u{00A0}mil tokens"),
+            (0.0, 0, "US$\u{00A0}0,00", "US$\u{00A0}0,00 · 0 tokens")
         ]
         for (dollars, tokens, expectedValue, expectedDetail) in cases {
             let runtime = TestProviderRuntime(

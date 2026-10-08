@@ -67,7 +67,7 @@ final class LocalUsageAPITests: XCTestCase {
         XCTAssertTrue(progress.keys.contains("color"))        // explicit null, like the original
 
         let text = try XCTUnwrap(lines.first { $0["type"] as? String == "text" })
-        XCTAssertEqual(text["value"] as? String, "$5.17 · 9.2M tokens")
+        XCTAssertEqual(text["value"] as? String, "US$\u{00A0}5,17 · 9,2\u{00A0}mi tokens")
         XCTAssertTrue(text.keys.contains("subtitle"))
     }
 
