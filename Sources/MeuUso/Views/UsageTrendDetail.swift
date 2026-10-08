@@ -4,6 +4,7 @@ import SwiftUI
 /// the hovered day) called out, the window's date range, and the source note. Hovering a bar highlights
 /// it and swaps the readout to that exact day — the same detail-on-demand the original app shows.
 struct UsageTrendDetail: View {
+    /// The row title, translated at display (`L10n.tr`); a title that is already translated passes through.
     let title: String
     let points: [MetricChartPoint]
     let note: String?
@@ -40,7 +41,7 @@ struct UsageTrendDetail: View {
 
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(title)
+            Text(L10n.tr(title))
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(.primary)
             Spacer(minLength: 8)
@@ -98,7 +99,7 @@ struct UsageTrendDetail: View {
         if let activeIndex, points.indices.contains(activeIndex) {
             return "\(points[activeIndex].label) · \(points[activeIndex].readout)"
         }
-        if let peakIndex { return "peak \(points[peakIndex].readout)" }
+        if let peakIndex { return L10n.format("peak %@", points[peakIndex].readout) }
         return ""
     }
 

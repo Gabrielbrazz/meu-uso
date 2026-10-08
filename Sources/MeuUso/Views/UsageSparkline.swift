@@ -104,6 +104,10 @@ struct UsageSparkline: View {
     private var accessibilityLabel: String {
         guard let peak = points.max(by: { $0.value < $1.value }),
               let first = points.first, let last = points.last else { return data.title }
-        return "\(data.title): \(points.count) days, \(first.label) to \(last.label), peak \(peak.readout)."
+        // The window is always a month of calendar days (zero-filled), so the count is never one.
+        return L10n.format(
+            "%@: %lld days, %@ to %@, peak %@.",
+            data.title, points.count, first.label, last.label, peak.readout
+        )
     }
 }

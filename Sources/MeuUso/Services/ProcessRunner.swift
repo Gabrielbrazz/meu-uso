@@ -140,7 +140,7 @@ enum ProcessRunnerError: Error, LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .timedOut(let executable, let timeout):
-            return "\(executable) timed out after \(Int(timeout))s."
+            return L10n.format("%@ timed out after %llds.", executable, Int(timeout))
         }
     }
 }

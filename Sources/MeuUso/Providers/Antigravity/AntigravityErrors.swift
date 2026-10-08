@@ -19,15 +19,15 @@ enum AntigravityError: Error, LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .notSignedIn:
-            return "Start Antigravity or run `agy` and try again."
+            return L10n.tr("Start Antigravity or run `agy` and try again.")
         case .credentialStoreUnreadable:
-            return "Couldn't read Antigravity credentials from Keychain. Unlock Keychain or sign in to Antigravity again."
+            return L10n.tr("Couldn't read Antigravity credentials from Keychain. Unlock Keychain or sign in to Antigravity again.")
         case .invalidCredentialData:
-            return "Antigravity credentials are invalid. Open Antigravity or run `agy` to sign in again."
+            return L10n.tr("Antigravity credentials are invalid. Open Antigravity or run `agy` to sign in again.")
         case .authExpired:
-            return "Antigravity sign-in expired. Open Antigravity or run `agy` to refresh."
+            return L10n.tr("Antigravity sign-in expired. Open Antigravity or run `agy` to refresh.")
         case .unavailable:
-            return "Antigravity usage is temporarily unavailable. Try again shortly."
+            return L10n.tr("Antigravity usage is temporarily unavailable. Try again shortly.")
         }
     }
 }

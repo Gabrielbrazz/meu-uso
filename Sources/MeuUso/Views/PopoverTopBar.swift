@@ -37,7 +37,7 @@ struct PopoverTopBar: View {
                 }
             }
         case .settings:
-            navigationBar(title: "Settings") {
+            navigationBar(title: L10n.tr("Settings")) {
                 withAnimation(Motion.modeSwitch) { layout.screen = .dashboard }
             } trailing: {
                 EmptyView()
@@ -45,8 +45,9 @@ struct PopoverTopBar: View {
         }
     }
 
+    /// The provider's name on its detail page (shown as is), else the translated screen title.
     private var customizeTitle: String {
-        layout.customizeProviderID.flatMap { layout.provider(id: $0)?.displayName } ?? "Customize"
+        layout.customizeProviderID.flatMap { layout.provider(id: $0)?.displayName } ?? L10n.tr("Customize")
     }
 
     private func customizeBack() {
@@ -105,7 +106,7 @@ struct PopoverTopBar: View {
         .glassButtonStyle()
         .buttonBorderShape(.circle)
         .controlSize(.large)
-        .hoverTooltip("Reset \(layout.provider(id: providerID)?.displayName ?? providerID)")
+        .hoverTooltip(L10n.format("Reset %@", layout.provider(id: providerID)?.displayName ?? providerID))
         .accessibilityLabel("Reset")
     }
 

@@ -266,7 +266,7 @@ extension KeychainAccessing {
     /// An accessor without scoped-write support must fail rather than drop the account and risk
     /// overwriting a different login. The production accessor implements the explicit `-a` write.
     func writeGenericPassword(service: String, account: String, value: String) throws {
-        throw KeychainError.writeFailed("Account-scoped Keychain writes are unavailable.")
+        throw KeychainError.writeFailed(L10n.tr("Account-scoped Keychain writes are unavailable."))
     }
 
     /// Whether an item exists for `service`, without reading its secret. `nil` means the probe
@@ -383,9 +383,9 @@ enum KeychainError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .writeFailed(let message):
-            return message.isEmpty ? "Keychain write failed." : message
+            return message.isEmpty ? L10n.tr("Keychain write failed.") : message
         case .readFailed(let message):
-            return message.isEmpty ? "Keychain read failed." : message
+            return message.isEmpty ? L10n.tr("Keychain read failed.") : message
         }
     }
 }

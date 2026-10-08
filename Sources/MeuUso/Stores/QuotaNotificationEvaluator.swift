@@ -84,7 +84,10 @@ final class QuotaNotificationEvaluator {
 
     /// Build and post one milestone notification. The title is the trigger name (matches the Settings
     /// row), the subtitle is "Provider Metric" so the user knows which quota worsened, and the body is
-    /// the plain-language verdict. Title Case per AGENTS.md. Returns whether delivery succeeded.
+    /// the plain-language verdict. Title and body arrive translated from `PaceMilestone`, and
+    /// `data.title` from `WidgetDataStore.data(for:)`; the subtitle's own format is looked up in the
+    /// "notificationSubtitle" context ("Claude · Sessão"), since the bare "%@ %@" belongs to the
+    /// deadline phrases. Returns whether delivery succeeded.
     private func deliver(
         _ milestone: PaceMilestone,
         data: WidgetData,
@@ -92,7 +95,11 @@ final class QuotaNotificationEvaluator {
         providerName: @MainActor (String) -> String,
         post: @MainActor (String, String, String, String) async -> Bool
     ) async -> Bool {
-        let subtitle = "\(providerName(providerID)) \(data.title)"
+        let subtitle = String(
+            format: L10n.tr("%@ %@", context: "notificationSubtitle"),
+            locale: AppLocale.current,
+            providerName(providerID), data.title
+        )
         return await post("\(providerID).\(milestone.rawValue)", milestone.notificationTitle, subtitle, milestone.body)
     }
 

@@ -139,17 +139,18 @@ enum UsageHistoryDocumentError: Error, LocalizedError, Equatable {
     case duplicateModel(String)
     case invalidValue
 
+    /// Shown in Settings → iCloud Sync, so translated.
     var errorDescription: String? {
         switch self {
-        case .unsupportedSchema: "This Mac wrote a newer usage-history format. Update Meu Uso."
-        case .invalidDevice: "The synced Mac identity is invalid."
-        case .invalidProvider: "The synced provider identifier is invalid."
-        case .invalidIdentity: "The synced account identity is invalid."
-        case .duplicateIdentity: "The synced account appears more than once."
-        case .invalidDay: "The synced history contains an invalid date."
-        case .duplicateDay: "The synced history contains the same date more than once."
-        case .duplicateModel: "The synced history contains the same model more than once."
-        case .invalidValue: "The synced history contains an invalid usage value."
+        case .unsupportedSchema: return L10n.tr("This Mac wrote a newer usage-history format. Update Meu Uso.")
+        case .invalidDevice: return L10n.tr("The synced Mac identity is invalid.")
+        case .invalidProvider: return L10n.tr("The synced provider identifier is invalid.")
+        case .invalidIdentity: return L10n.tr("The synced account identity is invalid.")
+        case .duplicateIdentity: return L10n.tr("The synced account appears more than once.")
+        case .invalidDay: return L10n.tr("The synced history contains an invalid date.")
+        case .duplicateDay: return L10n.tr("The synced history contains the same date more than once.")
+        case .duplicateModel: return L10n.tr("The synced history contains the same model more than once.")
+        case .invalidValue: return L10n.tr("The synced history contains an invalid usage value.")
         }
     }
 }

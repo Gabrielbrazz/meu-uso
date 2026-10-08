@@ -13,10 +13,11 @@ enum DensitySetting: String, Hashable, Sendable, CaseIterable {
 
     static let key = "density"
 
+    /// Translated, for the Settings picker.
     var label: String {
         switch self {
-        case .regular: return "Default"
-        case .compact: return "Compact"
+        case .regular: return L10n.tr("Default")
+        case .compact: return L10n.tr("Compact")
         }
     }
 

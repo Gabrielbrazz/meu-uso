@@ -29,10 +29,13 @@ enum GrokUsageMapper {
             ))
         }
         // A missing `onDemandCap` means no pay-as-you-go (proto-JSON also drops a 0 cap) → the
-        // Disabled badge, same as a present cap of 0.
+        // Disabled badge, same as a present cap of 0. The label is a lookup key and stays English; the
+        // badge text is display copy, translated here.
         lines.append(.badge(
             label: "Pay as you go",
-            text: config.onDemandCap > 0 ? "\(formatUnits(config.onDemandCap)) cap" : "Disabled",
+            text: config.onDemandCap > 0
+                ? L10n.format("%@ cap", formatUnits(config.onDemandCap))
+                : L10n.tr("Disabled"),
             colorHex: config.onDemandCap > 0 ? "#22c55e" : "#a3a3a3"
         ))
         return GrokMappedUsage(lines: lines)
@@ -53,8 +56,9 @@ enum GrokUsageMapper {
     /// Provider header warning when the credits endpoint refuses a team principal. This is an
     /// account shape, not a transient failure — Weekly / Extra Usage stay "No data"; local
     /// spend tiles still load.
-    static let teamBillingUnavailableWarning =
-        "Team accounts have no personal quota. Spend below is still from your Grok logs."
+    static var teamBillingUnavailableWarning: String {
+        L10n.tr("Team accounts have no personal quota. Spend below is still from your Grok logs.")
+    }
 
     static func planName(from response: HTTPResponse) -> String? {
         guard (200..<300).contains(response.statusCode),

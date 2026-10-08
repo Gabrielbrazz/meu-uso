@@ -35,11 +35,11 @@ enum GrokAuthError: Error, LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .notLoggedIn:
-            return "Grok not logged in. Run `grok login`."
+            return L10n.tr("Grok not logged in. Run `grok login`.")
         case .invalidAuth:
-            return "Grok auth invalid. Run `grok login` again."
+            return L10n.tr("Grok auth invalid. Run `grok login` again.")
         case .expired:
-            return "Grok auth expired. Run `grok login` again."
+            return L10n.tr("Grok auth expired. Run `grok login` again.")
         }
     }
 }

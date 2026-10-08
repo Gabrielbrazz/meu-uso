@@ -23,6 +23,7 @@ final class AntigravityProvider: ProviderRuntime {
     let now: @Sendable () -> Date
     let pricing: @Sendable () async -> ModelPricing
 
+    /// English key: the history descriptor keeps it as is, and the snapshot lines carry its translation.
     private static let usageSourceNote = "From your Antigravity conversations (estimated)"
 
     init(
@@ -96,13 +97,13 @@ final class AntigravityProvider: ProviderRuntime {
                     now: refreshedAt,
                     unknownModelsByDay: scan.unknownModelsByDay,
                     modelUsage: scan.modelUsage,
-                    modelSourceNote: Self.usageSourceNote
+                    modelSourceNote: L10n.tr(Self.usageSourceNote)
                 )
                 SpendTileMapper.appendUsageTrend(
                     scan.series,
                     to: &result.lines,
                     now: refreshedAt,
-                    note: Self.usageSourceNote
+                    note: L10n.tr(Self.usageSourceNote)
                 )
             }
 

@@ -33,7 +33,7 @@ struct ProviderListRow<Handle: View>: View {
                         .font(.system(size: density.headerPointSize, weight: .semibold))
                         .foregroundStyle(.primary)
                         .lineLimit(1)
-                    Text("\(metricCount) metrics")
+                    Text(metricCountText)
                         .font(.system(size: density.planBadgePointSize))
                         .foregroundStyle(.secondary)
                 }
@@ -54,10 +54,20 @@ struct ProviderListRow<Handle: View>: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Open \(provider.displayName)")
+            .accessibilityLabel(L10n.format("Open %@", provider.displayName))
         }
         .padding(.horizontal, 12)
         .padding(.vertical, density.controlRowPadding)
         .opacity(isEnabled ? 1 : 0.55)
+    }
+
+    /// "5 metrics" under the name. Exactly one reads the "%lld metrics#one" entry when the table has it
+    /// ("1 métrica", the `#one` convention of `MetricFormatter.unitWord`); without it — and under tests —
+    /// the plural key, so the English text reads as it always did.
+    private var metricCountText: String {
+        if metricCount == 1, L10n.tr("%lld metrics#one") != "%lld metrics#one" {
+            return L10n.format("%lld metrics#one", metricCount)
+        }
+        return L10n.format("%lld metrics", metricCount)
     }
 }

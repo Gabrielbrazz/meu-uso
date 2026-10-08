@@ -30,7 +30,8 @@ struct TotalSpendShareCardView: View {
             Text(metric.title)
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(.primary)
-            Text(total.period.rawValue)
+            // The raw value is the English period name ("Last 30 Days"), a lookup key; show its translation.
+            Text(L10n.tr(total.period.rawValue))
                 .font(.system(size: 12))
                 .foregroundStyle(.secondary)
             Spacer(minLength: 0)

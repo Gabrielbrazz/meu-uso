@@ -24,8 +24,10 @@ extension View {
     /// Shows `text` in a hover tooltip after a short delay, anchored above the hovered item. `nil` or empty
     /// shows nothing, so the many `someTooltip ?? ""` call sites keep their "no tooltip when blank"
     /// behavior. The text is also exposed as an accessibility hint — the part `.help()` gave VoiceOver.
+    /// `text` is an English key translated here (`L10n.tr`), so call sites pass the literal; text that is
+    /// already translated (model tooltips, `L10n.format` results) has no entry and passes through.
     func hoverTooltip(_ text: String?) -> some View {
-        modifier(HoverTooltipModifier(text: text))
+        modifier(HoverTooltipModifier(text: text.map { $0.isEmpty ? $0 : L10n.tr($0) }))
     }
 }
 

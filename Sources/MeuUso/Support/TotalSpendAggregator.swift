@@ -14,12 +14,13 @@ enum TotalSpendPeriod: String, CaseIterable, Identifiable, Sendable {
     var lineLabel: String { rawValue }
 
     /// Compact segment title for the period switcher — "Last 30 Days" doesn't fit three-across
-    /// in the 320pt popover without shrinking every segment.
+    /// in the 320pt popover without shrinking every segment. Translated; the raw values stay English
+    /// because they are the spend-line labels and the persisted selection.
     var shortLabel: String {
         switch self {
-        case .today: "Today"
-        case .yesterday: "Yesterday"
-        case .last30: "30 Days"
+        case .today: L10n.tr("Today")
+        case .yesterday: L10n.tr("Yesterday")
+        case .last30: L10n.tr("30 Days")
         }
     }
 }
@@ -35,20 +36,21 @@ enum TotalSpendMetric: String, CaseIterable, Identifiable, Sendable {
 
     var id: String { rawValue }
 
+    /// Translated menu and card title; the raw value is the persisted selection.
     var title: String {
         switch self {
-        case .cost: "Cost"
-        case .costPerMtok: "Cost/MTok"
-        case .tokens: "Tokens"
+        case .cost: L10n.tr("Cost")
+        case .costPerMtok: L10n.tr("Cost/MTok")
+        case .tokens: L10n.tr("Tokens")
         }
     }
 
     /// Empty-state copy when no provider qualifies for this metric in the selected period.
     var emptyMessage: String {
         switch self {
-        case .cost: "No cost data for this period"
-        case .costPerMtok: "No cost-per-token data for this period"
-        case .tokens: "No token data for this period"
+        case .cost: L10n.tr("No cost data for this period")
+        case .costPerMtok: L10n.tr("No cost-per-token data for this period")
+        case .tokens: L10n.tr("No token data for this period")
         }
     }
 

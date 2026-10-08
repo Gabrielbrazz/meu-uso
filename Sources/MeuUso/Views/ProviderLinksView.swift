@@ -33,14 +33,17 @@ struct ProviderLinksView: View {
         .padding(.bottom, density.textRowPadding)
     }
 
+    /// The provider declares each label as an English key ("Status", "Dashboard", "API Keys"); it's
+    /// translated here, at display.
     private func linkButton(_ link: ProviderLink) -> some View {
-        Button {
+        let label = L10n.tr(link.label)
+        return Button {
             if let url = URL(string: link.url) {
                 NSWorkspace.shared.open(url)
             }
         } label: {
             HStack(spacing: 4) {
-                Text(link.label)
+                Text(label)
                     .font(.system(size: density.supportingPointSize, weight: .medium))
                     .lineLimit(1)
                 Image(systemName: "arrow.up.right")
@@ -51,6 +54,6 @@ struct ProviderLinksView: View {
         }
         .buttonStyle(.bordered)
         .controlSize(.small)
-        .accessibilityLabel("\(link.label), opens in browser")
+        .accessibilityLabel(L10n.format("%@, opens in browser", label))
     }
 }

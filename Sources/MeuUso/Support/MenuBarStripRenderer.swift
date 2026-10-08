@@ -115,7 +115,7 @@ enum MenuBarStripRenderer {
             size: NSSize(width: CGFloat(cgImage.width) / renderer.scale, height: CGFloat(cgImage.height) / renderer.scale)
         )
         image.isTemplate = true
-        image.accessibilityDescription = "Meu Uso, usage hidden while the screen is shared"
+        image.accessibilityDescription = L10n.tr("Meu Uso, usage hidden while the screen is shared")
         return image
     }()
 

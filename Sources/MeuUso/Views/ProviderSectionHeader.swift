@@ -85,16 +85,18 @@ struct ProviderSectionHeader: View {
                 MotionAwareProgressView(controlSize: .mini)
                     .accessibilityLabel("Refreshing")
             } else if let warning {
+                // Providers compose their warnings already translated; `L10n.tr` (also applied by
+                // `hoverTooltip`) only matters for a bare English key, and keeps VoiceOver on the tooltip's text.
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(Theme.notice)
                     .hoverTooltip(warning)
-                    .accessibilityLabel(warning)
+                    .accessibilityLabel(L10n.tr(warning))
             }
             Spacer(minLength: 8)
             if let onCopyScreenshot {
                 CopyFeedbackButton(
-                    accessibilityLabel: "Copy \(provider.displayName) Screenshot",
+                    accessibilityLabel: L10n.format("Copy %@ Screenshot", provider.displayName),
                     isRevealed: isHovered,
                     action: onCopyScreenshot
                 )

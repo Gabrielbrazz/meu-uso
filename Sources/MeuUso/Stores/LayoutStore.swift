@@ -284,7 +284,7 @@ final class LayoutStore {
         guard !canPin(descriptorID) else { return nil }
         if let providerID = registry.descriptor(id: descriptorID)?.providerID,
            pinnedCount(forProvider: providerID) >= Self.maxPinsPerProvider {
-            return "Up to \(Self.maxPinsPerProvider) stars per provider"
+            return L10n.format("Up to %lld stars per provider", Self.maxPinsPerProvider)
         }
         return nil
     }

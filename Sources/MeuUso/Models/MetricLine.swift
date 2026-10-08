@@ -72,7 +72,8 @@ struct MetricChartPoint: Hashable, Sendable, Codable {
     /// The hover readout for this day: the producer's pre-formatted label, or a compact token count as a
     /// fallback. One definition so the inline sparkline and the detail popover never format it differently.
     var readout: String {
-        valueLabel ?? (MetricFormatter.number(value, kind: .count, style: .row) + " tokens")
+        valueLabel ?? (MetricFormatter.number(value, kind: .count, style: .row) + " "
+            + MetricFormatter.unitWord("tokens", for: value))
     }
 }
 
@@ -137,8 +138,11 @@ enum MetricLine: Hashable, Sendable, Codable {
         return false
     }
 
-    /// The shared "no usage data" placeholder badge, shown when a provider returns no metric lines.
-    static let noUsageData = MetricLine.badge(label: "Status", text: "No usage data", colorHex: "#A3A3A3")
+    /// The shared "no usage data" placeholder badge, shown when a provider returns no metric lines. The
+    /// "Status" label is a lookup key and stays English; only the badge text is translated.
+    static var noUsageData: MetricLine {
+        .badge(label: "Status", text: L10n.tr("No usage data"), colorHex: "#A3A3A3")
+    }
 
     /// Append `noUsageData` when nothing was produced, so an empty result reads as a clear status
     /// instead of a blank tile.

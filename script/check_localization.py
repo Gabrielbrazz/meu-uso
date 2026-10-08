@@ -33,9 +33,17 @@ SWIFTUI_CALLS = [
 # Helpers that call L10n.tr on their String argument (first literal argument).
 TRANSLATING_HELPERS = [
     r"\.hoverTooltip", r"\brow", r"\bsection", r"\blogButton", r"\binlineNotice",
-    r"\bClosureMenuItem\(\s*title:", r"\bDismissableHintCard\(\s*title:", r"\bTransientPill\(\s*text:",
-    r"\bScreenCrossLink\(\s*title:", r"\bCustomizeRow\(\s*title:",
+    r"\bprimaryButton", r"\bghostButton",
 ]
+# Helpers that call L10n.tr on some labeled arguments, wherever they sit in the argument list.
+LABELED_HELPERS = {
+    "ClosureMenuItem": ["title"],
+    "DismissableHintCard": ["title", "message", "buttonTitle"],
+    "TransientPill": ["text"],
+    "ScreenCrossLinkRow": ["title", "subtitle"],
+    "CustomizeMetricRow": ["title"],
+    "fieldIcon": ["label"],
+}
 # Model fields translated at display time: the literal itself is the key.
 MODEL_FIELDS = ["title", "traySuffix", "sourceNote", "infoNote", "valueTooltipNote", "unitLabel"]
 # Model fields that become part of a phrase key.
@@ -126,6 +134,19 @@ def code_view(text):
         out.append(text[i])
         i += 1
     return "".join(out), literals
+
+
+def closing_paren(code, start):
+    """Index of the parenthesis closing the one at `start` (literals are already placeholders)."""
+    depth = 0
+    for i in range(start, len(code)):
+        if code[i] == "(":
+            depth += 1
+        elif code[i] == ")":
+            depth -= 1
+            if depth == 0:
+                return i
+    return len(code)
 
 
 def literal_value(raw):
@@ -224,6 +245,11 @@ def collect(paths):
                 problems.append(f"{where}: interpolated key passed to L10n; use a format string")
             elif value is not None:
                 add(value, where)
+        # A literal context adds its own entry ("resetClaim:Reset"); the plain key is the fallback.
+        for m in re.finditer(r"\bL10n\.tr\(\s*__S(\d+)__\s*,\s*context:\s*__S(\d+)__", code):
+            key, context = literal_value(literals[int(m.group(1))]), literal_value(literals[int(m.group(2))])
+            if isinstance(key, str) and isinstance(context, str):
+                add(f"{context}:{key}", f"{path}:{line_of(m.start())}")
         for m in re.finditer(r"\bL10n\.plural\([^,]+,\s*__S(\d+)__\s*,\s*__S(\d+)__", code):
             for idx in (m.group(1), m.group(2)):
                 value = literal_value(literals[int(idx)])
@@ -242,6 +268,14 @@ def collect(paths):
                         problems.append(f"{where}: SwiftUI literal mixes text and interpolation; use L10n.format")
                 elif value is not None:
                     add(value, where)
+        for name, labels in LABELED_HELPERS.items():
+            for m in re.finditer(rf"\b{name}\(", code):
+                arguments = code[m.end():closing_paren(code, m.end() - 1)]
+                for label in labels:
+                    for a in re.finditer(rf"\b{label}:\s*__S(\d+)__", arguments):
+                        value = literal_value(literals[int(a.group(1))])
+                        if isinstance(value, str):
+                            add(value, f"{path}:{line_of(m.start())}")
 
         # 3. Model fields translated at display time.
         if "/Providers/" in path or "/Models/" in path or "/Pricing/" in path:

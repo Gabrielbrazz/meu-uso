@@ -41,7 +41,7 @@ enum Formatters {
         calendar: Calendar = .current
     ) -> String? {
         guard let when = whenLabel(at: date, mode: mode, now: now, calendar: calendar) else { return nil }
-        let verb = L10n.tr(prefix)
+        let verb = L10n.tr(prefix, context: "deadline")
         if when == imminent { return L10n.format("%@ soon", verb) }
         switch mode {
         case .relative: return L10n.format("%@ in %@", verb, when)

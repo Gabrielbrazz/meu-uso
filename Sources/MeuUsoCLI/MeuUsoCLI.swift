@@ -14,7 +14,7 @@ struct MeuUsoCLI {
 
             let app = AppBundleLocator.locate()
             if arguments.showVersion {
-                print(app.version.map { "meu-uso \($0)" } ?? "meu-uso (development build)")
+                print(app.version.map { "meu-uso \($0)" } ?? "meu-uso (versão de desenvolvimento)")
                 return
             }
 
@@ -28,15 +28,15 @@ struct MeuUsoCLI {
             FileHandle.standardOutput.write(result.data)
             FileHandle.standardOutput.write(Data("\n".utf8))
             if !result.warnings.isEmpty {
-                result.warnings.forEach { writeError("warning: \($0)") }
+                result.warnings.forEach { writeError("aviso: \($0)") }
                 exit(4)
             }
         } catch CLIError.usage(let message) {
-            fail("\(message)\nRun 'meu-uso --help' for usage.", code: 2)
+            fail("\(message)\nRode 'meu-uso --help' para ver como usar.", code: 2)
         } catch CLIError.appDefaultsUnavailable {
-            fail("Could not open the Meu Uso settings domain.", code: 4)
+            fail("Não foi possível abrir o domínio de ajustes do Meu Uso.", code: 4)
         } catch UsageReaderError.unknownProvider(let providerID) {
-            fail("Unknown provider: \(providerID)", code: 2)
+            fail("Provedor desconhecido: \(providerID)", code: 2)
         } catch {
             fail(error.localizedDescription, code: 4)
         }
@@ -51,13 +51,15 @@ struct MeuUsoCLI {
         exit(code)
     }
 
+    /// Human-facing text is written directly in Portuguese: `L10n` lives inside the MeuUso module.
+    /// Flags, the command name, exit codes and the JSON output stay as they are.
     private static let help = """
-    Usage: meu-uso [provider] [--force]
+    Uso: meu-uso [provedor] [--force]
 
-    Read limits through Meu Uso's shared five-minute cache and exit. Output is always JSON.
+    Lê os limites pelo cache compartilhado de cinco minutos do Meu Uso e sai. A saída é sempre JSON.
 
-    Options:
-      --force      Refresh even when the shared cache is still fresh
+    Opções:
+      --force      Atualiza mesmo quando o cache compartilhado ainda está válido
       -v, --version
       -h, --help
     """

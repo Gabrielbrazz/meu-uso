@@ -110,8 +110,8 @@ struct CodexPricingSection: View {
     }
 
     private var activityLabel: String? {
-        if isLoading { return "Loading Models…" }
-        if isApplying { return "Recalculating Estimates…" }
+        if isLoading { return L10n.tr("Loading Models…") }
+        if isApplying { return L10n.tr("Recalculating Estimates…") }
         return nil
     }
 }

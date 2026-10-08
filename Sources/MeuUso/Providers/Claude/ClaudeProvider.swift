@@ -317,8 +317,8 @@ final class ClaudeProvider: ProviderRuntime {
         // partial result cannot replace the last-good combined history in WidgetDataStore.
         if !Task.isCancelled, let scan = DailyUsageAccumulator.merged([nativeScan, piScan]) {
             let note = piScan == nil
-                ? "From your Claude usage history (estimated)"
-                : "From your Claude usage history and pi (estimated)"
+                ? L10n.tr("From your Claude usage history (estimated)")
+                : L10n.tr("From your Claude usage history and pi (estimated)")
             usageHistory = ProviderUsageHistory(
                 series: scan.series,
                 modelUsage: scan.modelUsage,

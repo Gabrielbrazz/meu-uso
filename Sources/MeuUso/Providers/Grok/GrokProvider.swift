@@ -122,10 +122,10 @@ final class GrokProvider: ProviderRuntime {
                 now: now(),
                 unknownModelsByDay: scan.unknownModelsByDay,
                 modelUsage: scan.modelUsage,
-                modelSourceNote: "From your Grok logs (estimated)"
+                modelSourceNote: L10n.tr("From your Grok logs (estimated)")
             )
             SpendTileMapper.appendUsageTrend(scan.series, to: &mapped.lines, now: now(),
-                                             note: "From your Grok logs (estimated)")
+                                             note: L10n.tr("From your Grok logs (estimated)"))
         }
 
         return ProviderSnapshot.make(

@@ -83,7 +83,7 @@ struct ShortcutRecorderField: View {
                 .font(.callout)
                 .foregroundStyle(.secondary)
         } else if let currentShortcut {
-            Text(currentShortcut.description)
+            Text(Self.displayText(for: currentShortcut))
                 .font(.system(.callout, design: .monospaced))
         } else {
             Text("Record Shortcut")
@@ -150,6 +150,24 @@ struct ShortcutRecorderField: View {
     /// Global hotkeys need a real modifier; plain keys (or shift-only) would hijack normal typing.
     private func isValid(_ shortcut: KeyboardShortcuts.Shortcut) -> Bool {
         !shortcut.modifiers.intersection([.command, .option, .control]).isEmpty
+    }
+
+    /// The shortcut as the chip (and the launch log) shows it: "⌥⌘K", "⌃⌥Espaço". Space is spelled here
+    /// because the library's `description` names it through `NSLocalizedString(…, bundle: .module)` — a
+    /// SwiftPM `Bundle.module` that a packaged app can't resolve, so the accessor `fatalError`s (see
+    /// `ResourceBundle.swift`). Every other key still goes through the library's `description`, which
+    /// (KeyboardShortcuts 3.1.0) only reaches its bundle for Space.
+    @MainActor
+    static func displayText(for shortcut: KeyboardShortcuts.Shortcut) -> String {
+        guard shortcut.key == KeyboardShortcuts.Key.space else { return shortcut.description }
+        let modifiers = shortcut.modifiers
+        var symbols = ""
+        // The standard macOS order: ⌃ ⌥ ⇧ ⌘.
+        if modifiers.contains(.control) { symbols += "⌃" }
+        if modifiers.contains(.option) { symbols += "⌥" }
+        if modifiers.contains(.shift) { symbols += "⇧" }
+        if modifiers.contains(.command) { symbols += "⌘" }
+        return symbols + L10n.tr("Space")
     }
 
     private func stopRecording() {

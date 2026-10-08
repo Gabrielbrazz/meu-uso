@@ -16,6 +16,8 @@ Regras para quem escreve código:
    - `L10n.tr("Refresh failed")` para texto fixo.
    - `L10n.format("Resets in %@", duration)` para texto com valores. Use `%@` para texto, `%lld` para inteiro e `%%` para o sinal de porcentagem.
    - `L10n.plural(count, "%lld day", "%lld days")` quando a palavra muda com a quantidade.
+   - `L10n.tr("Reset", context: "resetClaim")` quando a mesma palavra em inglês pede traduções diferentes. A entrada fica `"resetClaim:Reset" = "Renovar";` e, sem ela, vale a tradução de `"Reset"`.
+   - Helpers que recebem texto já traduzem por dentro: `hoverTooltip`, `ClosureMenuItem`, `DismissableHintCard`, `TransientPill`, `ScreenCrossLinkRow` e os `section`, `row` e `inlineNotice` dos Ajustes. Passe o literal em inglês; texto já traduzido passa direto.
 3. **Frase inteira, nunca pedaço.** Não concatene palavras traduzidas (`"\(valor) " + L10n.tr("left")`). Monte a frase com placeholder (`"%@ left"`), porque a ordem das palavras muda em português ("limite de US$ 100").
 4. **Interpolação em literal de SwiftUI:** prefira `Text(L10n.format("Meu Uso %@", versão))`. `Text("Meu Uso \(versão)")` também funciona, mas a chave vira `"Meu Uso %@"`, e inteiros viram `%lld`.
 5. **Rótulos que também são chave interna ficam em inglês nos dados** e só são traduzidos na exibição. São eles:
@@ -86,6 +88,7 @@ Os valores dos provedores são cobrados em dólar, por isso aparecem como US$.
 | Estimated locally | Estimativa local |
 | Extra Usage | Uso extra |
 | Global Shortcut | Atalho global |
+| Hide / Show | Ocultar / Mostrar |
 | Hide From Screen Share | Ocultar ao compartilhar a tela |
 | iCloud Sync | Sincronização com o iCloud |
 | Increase Transparency | Aumentar transparência |
@@ -108,6 +111,7 @@ Os valores dos provedores são cobrados em dólar, por isso aparecem como US$.
 | On-demand | Sob demanda |
 | Outdated | Desatualizado |
 | Pace / pacing | Ritmo |
+| Party Mode / Drunk Mode | Modo festa / Modo zonzo |
 | "~35% left at reset" | ~35% restante na renovação |
 | "~92% used at reset" | ~92% usado na renovação |
 | "~12% over limit at reset" | ~12% acima do limite na renovação |
@@ -124,6 +128,8 @@ Os valores dos provedores são cobrados em dólar, por isso aparecem como US$.
 | Reset (verbo, "Resets in 2h") | Renova ("Renova em 2h") |
 | Reset expires | Expira |
 | Reset All Settings | Redefinir todos os ajustes |
+| Reset (botão de resgatar uma renovação do Codex) | Renovar |
+| Reset credit | Renovação |
 | searches | buscas |
 | Session | Sessão |
 | Settings | Ajustes |
@@ -132,6 +138,7 @@ Os valores dos provedores são cobrados em dólar, por isso aparecem como US$.
 | soon | em breve |
 | spent ("$12 spent") | gastos ("US$ 12 gastos") |
 | Spend / Total Spend | Gasto / Gasto total |
+| Star for menu bar / Unstar | Adicionar à barra de menus / Remover da barra de menus |
 | Time Format (12-hour / 24-hour) | Formato de hora (12 horas / 24 horas) |
 | Today / Yesterday | Hoje / Ontem |
 | Unknown model | Modelo desconhecido |

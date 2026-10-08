@@ -10,7 +10,8 @@ struct ClaudeSwapAccount: Equatable, Sendable {
     var organizationName: String? = nil
 
     func displayName(fallbackOrganization: String? = nil) -> String {
-        let organization = organizationName ?? fallbackOrganization ?? "Organization \(organizationID.prefix(8))"
+        let organization = organizationName ?? fallbackOrganization
+            ?? L10n.format("Organization %@", String(organizationID.prefix(8)))
         return "Claude: \(organization) (\(email))"
     }
 

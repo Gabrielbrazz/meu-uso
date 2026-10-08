@@ -268,8 +268,8 @@ struct SettingsScreen: View {
                         .font(.caption)
                         .foregroundStyle(.orange)
                         .hoverTooltip(notificationsAuth == .denied
-                            ? "Notifications are turned off for Meu Uso. Enable them in System Settings."
-                            : "Meu Uso needs permission to send alerts.")
+                            ? L10n.tr("Notifications are turned off for Meu Uso. Enable them in System Settings.")
+                            : L10n.tr("Meu Uso needs permission to send alerts."))
                 }
             }
             .padding(.horizontal, 8)
@@ -324,7 +324,7 @@ struct SettingsScreen: View {
                     Task { await refreshNotificationsAuth() }
                 }
             } label: {
-                Text(notificationsAuth == .denied ? "Open System Settings" : "Allow Notifications")
+                Text(notificationsAuth == .denied ? L10n.tr("Open System Settings") : L10n.tr("Allow Notifications"))
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
@@ -376,7 +376,7 @@ struct SettingsScreen: View {
                 .padding(.bottom, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
             if commandLineTool.status == .conflict {
-                inlineNotice("\(commandLineTool.destinationPath) already exists and wasn't installed by Meu Uso.")
+                inlineNotice(L10n.format("%@ already exists and wasn't installed by Meu Uso.", commandLineTool.destinationPath))
             } else if let errorMessage = commandLineTool.errorMessage {
                 inlineNotice(errorMessage)
             }
@@ -402,7 +402,7 @@ struct SettingsScreen: View {
                 let pasteboard = NSPasteboard.general
                 pasteboard.clearContents()
                 guard pasteboard.setString(LogFile.url.path, forType: .string) else {
-                    logActionError = "Couldn't copy the log path to the clipboard."
+                    logActionError = L10n.tr("Couldn't copy the log path to the clipboard.")
                     AppLog.warn(.config, "Copy log path failed")
                     return
                 }
@@ -445,10 +445,10 @@ struct SettingsScreen: View {
     }
 
     /// A full-width glass button row, matching the "Check for Updates…" idiom.
-    /// Glass on macOS 26+, bordered fallback on macOS 15.
+    /// Glass on macOS 26+, bordered fallback on macOS 15. `title` is an English key (see below).
     private func logButton(_ title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title).frame(maxWidth: .infinity)
+            Text(L10n.tr(title)).frame(maxWidth: .infinity)
         }
         .glassButtonStyle()
         .controlSize(.regular)
@@ -457,6 +457,10 @@ struct SettingsScreen: View {
     }
 
     // MARK: - Section / row scaffolding
+    //
+    // `section`, `row`, `inlineNotice` and `logButton` take English keys and translate them where they
+    // render (`L10n.tr`), so call sites pass the literal; text that is already translated (error
+    // messages, `L10n.format` results) has no entry and passes through unchanged.
 
     /// A caption header over a rounded card of rows — the Customize block shape. The header is
     /// inset 8pt so it aligns with the rows' content, matching how Customize lines its provider
@@ -466,7 +470,7 @@ struct SettingsScreen: View {
         @ViewBuilder rows: () -> some View
     ) -> some View {
         VStack(alignment: .leading, spacing: density.headerToCardSpacing) {
-            Text(title)
+            Text(L10n.tr(title))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 8)
@@ -481,7 +485,7 @@ struct SettingsScreen: View {
     /// as a Customize metric row so the cards share one rhythm.
     private func row(_ label: String, @ViewBuilder control: () -> some View) -> some View {
         HStack(spacing: 10) {
-            Text(label)
+            Text(L10n.tr(label))
             Spacer(minLength: 8)
             control()
         }
@@ -493,7 +497,7 @@ struct SettingsScreen: View {
     /// General/Advanced error lines and the "this setting is paused" captions (Increase Transparency
     /// paused by a system accessibility setting, or by Party mode taking over the look).
     private func inlineNotice(_ text: String) -> some View {
-        Text(text)
+        Text(L10n.tr(text))
             .font(.caption)
             .foregroundStyle(Theme.notice)
             .padding(.horizontal, 12)
@@ -502,7 +506,8 @@ struct SettingsScreen: View {
     }
 
     /// A trailing popup picker that hugs its selection — segmented controls don't fit the 320pt
-    /// popover once options have real words in them.
+    /// popover once options have real words in them. The setting enums' `label`s are already
+    /// translated; `L10n.tr` leaves those as is and covers any option that still hands over an English key.
     private func picker<Value: Hashable>(
         _ selection: Binding<Value>,
         options: [Value],
@@ -510,7 +515,7 @@ struct SettingsScreen: View {
     ) -> some View {
         Picker("", selection: selection) {
             ForEach(options, id: \.self) { option in
-                Text(label(option)).tag(option)
+                Text(L10n.tr(label(option))).tag(option)
             }
         }
         .pickerStyle(.menu)

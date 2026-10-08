@@ -49,8 +49,8 @@ struct CustomizeProviderDetailView: View {
 
     private func metricSections(_ group: ProviderMetrics) -> some View {
         VStack(alignment: .leading, spacing: density.sectionSpacing) {
-            metricSection("Always Visible", metrics: group.alwaysShownMetrics, providerID: group.provider.id)
-            metricSection("On Demand", metrics: group.expandedMetrics, providerID: group.provider.id)
+            metricSection(L10n.tr("Always Visible"), metrics: group.alwaysShownMetrics, providerID: group.provider.id)
+            metricSection(L10n.tr("On Demand"), metrics: group.expandedMetrics, providerID: group.provider.id)
         }
     }
 
@@ -97,6 +97,7 @@ struct CustomizeProviderDetailView: View {
     private func metricRow(_ metric: WidgetDescriptor, in providerID: String) -> some View {
         let isActive = activeMetricID == metric.id
         return CustomizeMetricRow(
+            // The descriptor title is an English key; `CustomizeMetricRow` translates it at display.
             title: metric.title,
             // The grip is visual-only and publishes its frame (id "grip:<metric>") so the container
             // gesture can tell which row a drag started on. The drag gesture itself is on the section
@@ -175,6 +176,7 @@ struct CustomizeProviderDetailView: View {
     }
 
     private func makeLift(metricID: String, value: DragGesture.Value) -> ReorderLift? {
+        // English descriptor title; the lifted `CustomizeMetricRow` translates it at display.
         let title = layout.customizeDetail(for: providerID)?.metrics.first { $0.id == metricID }?.title ?? ""
         return ReorderLift.make(
             id: metricID,
@@ -200,10 +202,16 @@ private struct StarButton: View {
             Button {
                 if layout.canPin(metric.id) {
                     layout.togglePin(metric.id)
-                    layout.presentCustomizationNotice(pinned ? "Removed from menu bar" : "Starred for menu bar")
+                    layout.presentCustomizationNotice(
+                        pinned ? L10n.tr("Removed from menu bar") : L10n.tr("Starred for menu bar")
+                    )
                 } else {
                     shakeTrigger += 1
-                    layout.presentCustomizationNotice(layout.pinDenialReason(metric.id) ?? "Up to 2 stars per provider", tone: .notice)
+                    layout.presentCustomizationNotice(
+                        layout.pinDenialReason(metric.id)
+                            ?? L10n.format("Up to %lld stars per provider", LayoutStore.maxPinsPerProvider),
+                        tone: .notice
+                    )
                 }
             } label: {
                 Image(systemName: pinned ? "star.fill" : "star")

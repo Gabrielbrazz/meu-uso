@@ -8,10 +8,11 @@ enum ResetDisplayMode: String, Hashable, Sendable, CaseIterable {
     case relative
     case absolute
 
+    /// Translated, for the Settings picker.
     var label: String {
         switch self {
-        case .relative: return "Countdown"
-        case .absolute: return "Exact Time"
+        case .relative: return L10n.tr("Countdown")
+        case .absolute: return L10n.tr("Exact Time")
         }
     }
 

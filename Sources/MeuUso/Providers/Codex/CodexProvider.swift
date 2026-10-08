@@ -196,7 +196,7 @@ final class CodexProvider: ProviderRuntime {
                 fallbackPricingModelsByDay: usage.fallbackPricingModelsByDay
             )
         }
-        let warning = history == nil ? "Local token history is still updating." : nil
+        let warning = history == nil ? L10n.tr("Local token history is still updating.") : nil
         if warning != nil {
             AppLog.warn(LogTag.plugin("codex"), "local history scan deferred; publishing live quota")
         }
@@ -270,14 +270,14 @@ final class CodexProvider: ProviderRuntime {
         return CodexLocalHistory(sourceNote: baseNote, usageHistory: usageHistory)
     }
 
+    /// One whole sentence per source combination, so the translation table can reorder each one.
     private static func localUsageSourceNote(hasPi: Bool, hasOpenCode: Bool) -> String {
-        var sources = ["Codex logs"]
-        if hasPi { sources.append("pi") }
-        if hasOpenCode { sources.append("OpenCode") }
-        let joined = sources.count > 2
-            ? sources.dropLast().joined(separator: ", ") + ", and " + sources[sources.count - 1]
-            : sources.joined(separator: " and ")
-        return "From your \(joined) (estimated)"
+        switch (hasPi, hasOpenCode) {
+        case (false, false): L10n.tr("From your Codex logs (estimated)")
+        case (true, false): L10n.tr("From your Codex logs and pi (estimated)")
+        case (false, true): L10n.tr("From your Codex logs and OpenCode (estimated)")
+        case (true, true): L10n.tr("From your Codex logs, pi, and OpenCode (estimated)")
+        }
     }
 
     /// Fetches the on-demand reset-credit balance (and per-credit expiry) without ever failing the

@@ -14,6 +14,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  localization:
+    name: Localization
+    # Every user-facing string needs a pt-BR translation in assets/Localization (see docs/glossario.md).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Check pt-BR translations
+        run: python3 script/check_localization.py
+
   pricing:
     name: Pricing supplement
     # Installed apps fetch Sources/MeuUso/Resources/pricing_supplement.json straight from `main`

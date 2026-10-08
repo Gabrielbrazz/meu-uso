@@ -7,10 +7,11 @@ enum MenuBarStyle: String, Hashable, Sendable, CaseIterable {
     case text
     case bars
 
+    /// Translated, for the Settings picker.
     var label: String {
         switch self {
-        case .text: return "Text"
-        case .bars: return "Bars"
+        case .text: return L10n.tr("Text")
+        case .bars: return L10n.tr("Bars")
         }
     }
 }

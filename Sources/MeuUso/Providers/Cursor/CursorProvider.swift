@@ -135,7 +135,7 @@ final class CursorProvider: ProviderRuntime {
                 var mapped = try await requestBasedResult(
                     accessToken: currentToken,
                     planName: planName,
-                    unavailableMessage: "Cursor request-based usage data unavailable. Try again later."
+                    unavailableMessage: L10n.tr("Cursor request-based usage data unavailable. Try again later.")
                 )
                 await appendGrokBotUsage(to: &mapped.lines, accessToken: currentToken)
                 return snapshot(mapped)
@@ -160,7 +160,7 @@ final class CursorProvider: ProviderRuntime {
     /// Grok Bot uses the same Cursor account but keeps a separate weekly allowance. Missing access is
     /// normal for ineligible accounts; malformed data and request failures remain visible in diagnostics.
     private func appendGrokBotUsage(to lines: inout [MetricLine], accessToken: String) async {
-        guard let usage = await fetchOptionalJSONObject(label: "Grok Bot usage", request: {
+        guard let usage = await fetchOptionalJSONObject(endpoint: "Grok Bot usage", request: {
             try await self.usageClient.fetchGrokBotUsage(accessToken: accessToken)
         }) else {
             return
@@ -314,7 +314,7 @@ final class CursorProvider: ProviderRuntime {
     }
 
     private func fetchPlanName(accessToken: String) async -> (String?, Bool) {
-        guard let body = await fetchOptionalJSONObject(label: "plan", request: {
+        guard let body = await fetchOptionalJSONObject(endpoint: "plan", request: {
             try await self.usageClient.fetchPlan(accessToken: accessToken)
         }) else {
             return (nil, true)
@@ -331,7 +331,7 @@ final class CursorProvider: ProviderRuntime {
     }
 
     private func fetchCreditGrants(accessToken: String) async -> [String: Any]? {
-        guard let body = await fetchOptionalJSONObject(label: "credit-grants", request: {
+        guard let body = await fetchOptionalJSONObject(endpoint: "credit-grants", request: {
             try await self.usageClient.fetchCredits(accessToken: accessToken)
         }) else {
             return nil
@@ -351,7 +351,7 @@ final class CursorProvider: ProviderRuntime {
     }
 
     private func fetchStripeBalanceCents(accessToken: String) async -> Double {
-        guard let body = await fetchOptionalJSONObject(label: "prepaid-balance", request: {
+        guard let body = await fetchOptionalJSONObject(endpoint: "prepaid-balance", request: {
             try await self.usageClient.fetchStripeBalance(accessToken: accessToken)
         }) else {
             return 0
@@ -365,9 +365,10 @@ final class CursorProvider: ProviderRuntime {
 
     /// Optional endpoints enrich a usable primary snapshot; they never fail the whole provider. Keep
     /// their boundary handling in one place so transport, preparation, status, and schema failures are
-    /// all visible with fixed, credential-free diagnostics.
+    /// all visible with fixed, credential-free diagnostics. `endpoint` only names the call in those log
+    /// lines, which stay in English.
     private func fetchOptionalJSONObject(
-        label: String,
+        endpoint label: String,
         request: () async throws -> HTTPResponse?
     ) async -> [String: Any]? {
         let response: HTTPResponse?
@@ -413,13 +414,13 @@ final class CursorProvider: ProviderRuntime {
         planName: String?,
         unavailableMessage: String
     ) async throws -> CursorMappedUsage {
-        let summary = await fetchOptionalJSONObject(label: "usage-summary", request: {
+        let summary = await fetchOptionalJSONObject(endpoint: "usage-summary", request: {
             try await self.usageClient.fetchUsageSummary(accessToken: accessToken)
         })
         if let summary, !CursorUsageSummaryMapper.hasUsableSummaryPayload(summary) {
             AppLog.warn(LogTag.plugin("cursor"), "optional usage-summary response contained no usable usage fields")
         }
-        let requestUsage = await fetchOptionalJSONObject(label: "request-based usage", request: {
+        let requestUsage = await fetchOptionalJSONObject(endpoint: "request-based usage", request: {
             try await self.usageClient.fetchRequestBasedUsage(accessToken: accessToken)
         })
         if let requestUsage, !CursorUsageSummaryMapper.hasUsableRequestPayload(requestUsage) {

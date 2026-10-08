@@ -32,6 +32,15 @@ enum L10n {
         bundle.localizedString(forKey: key, value: key, table: nil)
     }
 
+    /// The translation of `key` where the Portuguese depends on the context (the deadline verb "Limit"
+    /// reads "Esgota", while a "Limit" label reads "Limite"). Looked up as "<context>:<key>"; without
+    /// that entry — and under tests — falls back to `tr(key)`.
+    static func tr(_ key: String, context: String) -> String {
+        let contextual = context + ":" + key
+        let value = tr(contextual)
+        return value == contextual ? tr(key) : value
+    }
+
     /// `String(format:)` over the translated format string. Translations reorder arguments with
     /// positional specifiers (`%1$@`, `%2$@`); a literal percent sign is `%%`.
     static func format(_ key: String, _ arguments: CVarArg...) -> String {

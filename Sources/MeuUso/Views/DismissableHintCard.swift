@@ -4,7 +4,8 @@ import SwiftUI
 /// trailing dismiss (✕). A grouped content card (`cardSurface`) that scrolls with the sections. Shared
 /// scaffolding for the first-run `CustomizeHintCard` and the `UpdateBannerCard`, so the two read as one
 /// family and a spacing/appearance tweak lands in one place. Callers supply the copy and the two
-/// closures (each wraps its own animation as needed).
+/// closures (each wraps its own animation as needed). The copy is English keys, translated here
+/// (`L10n.tr`); a phrase the caller already formatted with `L10n.format` passes through unchanged.
 struct DismissableHintCard: View {
     let systemImage: String
     let title: String
@@ -21,13 +22,13 @@ struct DismissableHintCard: View {
                 .frame(width: 20, height: 20)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(title)
+                Text(L10n.tr(title))
                     .font(.subheadline.weight(.semibold))
-                Text(message)
+                Text(L10n.tr(message))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                Button(buttonTitle, action: action)
+                Button(L10n.tr(buttonTitle), action: action)
                     .controlSize(.small)
                     .padding(.top, 2)
             }

@@ -60,7 +60,7 @@ struct APIKeysSection: View {
             Text(provider.provider.displayName)
             Spacer(minLength: 8)
             statusDot
-            Button(isOpen ? "Done" : (status == .notSet ? "Add" : "Edit")) {
+            Button(isOpen ? L10n.tr("Done") : (status == .notSet ? L10n.tr("Add") : L10n.tr("Edit"))) {
                 toggleExpand()
             }
             .buttonStyle(.bordered)
@@ -159,9 +159,9 @@ struct APIKeysSection: View {
     /// declutter, living inside the field instead of as a label beside it.
     private var sourceHint: String {
         switch status {
-        case .fromEnvironment: "From Your Environment"
-        case .saved: "Saved in App"
-        case .overrideActive: "Custom Key"
+        case .fromEnvironment: L10n.tr("From Your Environment")
+        case .saved: L10n.tr("Saved in App")
+        case .overrideActive: L10n.tr("Custom Key")
         case .notSet: ""
         }
     }
@@ -170,15 +170,16 @@ struct APIKeysSection: View {
         !input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    /// `primaryButton` and `ghostButton` take an English key and translate it here (`L10n.tr`).
     private func primaryButton(_ title: String, disabled: Bool, action: @escaping () -> Void) -> some View {
-        Button(title, action: action)
+        Button(L10n.tr(title), action: action)
             .buttonStyle(.borderedProminent)
             .controlSize(.small)
             .disabled(disabled)
     }
 
     private func ghostButton(_ title: String, action: @escaping () -> Void) -> some View {
-        Button(title, action: action)
+        Button(L10n.tr(title), action: action)
             .buttonStyle(.borderless)
             .controlSize(.small)
     }
@@ -283,7 +284,8 @@ private struct APIKeyField: View {
         }
     }
 
-    /// A small borderless inline icon button beside the field — the clear (x) and the eye.
+    /// A small borderless inline icon button beside the field — the clear (x) and the eye. `label` is the
+    /// English key of its VoiceOver name, translated here.
     private func fieldIcon(_ symbol: String, action: @escaping () -> Void, label: String) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
@@ -293,6 +295,6 @@ private struct APIKeyField: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.borderless)
-        .accessibilityLabel(label)
+        .accessibilityLabel(L10n.tr(label))
     }
 }

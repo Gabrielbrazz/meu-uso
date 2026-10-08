@@ -28,13 +28,13 @@ enum OllamaAuthError: Error, LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .missingKey:
-            return "No Ollama key found. Install Ollama and run `ollama signin` to track cloud usage."
+            return L10n.tr("No Ollama key found. Install Ollama and run `ollama signin` to track cloud usage.")
         case .keyUnreadable:
-            return "Couldn't read ~/.ollama/id_ed25519. Check the file's permissions."
+            return L10n.tr("Couldn't read ~/.ollama/id_ed25519. Check the file's permissions.")
         case .invalidKey:
-            return "~/.ollama/id_ed25519 isn't a usable Ollama signing key."
+            return L10n.tr("~/.ollama/id_ed25519 isn't a usable Ollama signing key.")
         case .notSignedIn:
-            return "Not signed in to Ollama Cloud. Run `ollama signin` to see usage."
+            return L10n.tr("Not signed in to Ollama Cloud. Run `ollama signin` to see usage.")
         }
     }
 }

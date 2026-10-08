@@ -19,11 +19,11 @@ enum CursorAuthError: Error, LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .notLoggedIn:
-            return "Not logged in. Sign in via Cursor app or run `agent login`."
+            return L10n.tr("Not logged in. Sign in via Cursor app or run `agent login`.")
         case .sessionExpired:
-            return "Session expired. Sign in via Cursor app or run `agent login`."
+            return L10n.tr("Session expired. Sign in via Cursor app or run `agent login`.")
         case .tokenExpired:
-            return "Token expired. Sign in via Cursor app or run `agent login`."
+            return L10n.tr("Token expired. Sign in via Cursor app or run `agent login`.")
         }
     }
 }

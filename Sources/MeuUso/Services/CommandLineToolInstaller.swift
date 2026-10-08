@@ -60,31 +60,38 @@ final class CommandLineToolInstaller {
         refreshStatus()
         guard status != .installed else { return }
         guard status != .conflict else {
-            errorMessage = "\(destinationPath) already exists and wasn't installed by Meu Uso."
+            errorMessage = L10n.format("%@ already exists and wasn't installed by Meu Uso.", destinationPath)
             return
         }
         guard fileManager.isExecutableFile(atPath: sourcePath) else {
-            errorMessage = "The bundled terminal helper couldn't be found. Reinstall Meu Uso and try again."
+            errorMessage = L10n.tr("The bundled terminal helper couldn't be found. Reinstall Meu Uso and try again.")
             return
         }
-        handle(performPrivileged(.install, sourcePath, destinationPath), action: "install")
+        handle(performPrivileged(.install, sourcePath, destinationPath), operation: .install)
     }
 
     func uninstall() {
         refreshStatus()
         guard status == .installed else { return }
-        handle(performPrivileged(.uninstall, sourcePath, destinationPath), action: "remove")
+        handle(performPrivileged(.uninstall, sourcePath, destinationPath), operation: .uninstall)
     }
 
-    private func handle(_ result: OperationResult, action: String) {
+    private func handle(_ result: OperationResult, operation: Operation) {
         switch result {
         case .success:
             errorMessage = nil
         case .cancelled:
             break
         case .failure(let message):
-            errorMessage = "Couldn't \(action) the terminal helper: \(message)"
-            AppLog.error(.config, "Terminal helper \(action) failed: \(message)")
+            // One whole phrase per operation (the verb moves in Portuguese); the log stays English.
+            switch operation {
+            case .install:
+                errorMessage = L10n.format("Couldn't install the terminal helper: %@", message)
+                AppLog.error(.config, "Terminal helper install failed: \(message)")
+            case .uninstall:
+                errorMessage = L10n.format("Couldn't remove the terminal helper: %@", message)
+                AppLog.error(.config, "Terminal helper remove failed: \(message)")
+            }
         }
         refreshStatus()
     }
@@ -125,7 +132,7 @@ final class CommandLineToolInstaller {
 
         let source = "do shell script \(appleScriptStringLiteral(command)) with administrator privileges"
         guard let script = NSAppleScript(source: source) else {
-            return .failure("macOS couldn't prepare the authorization request.")
+            return .failure(L10n.tr("macOS couldn't prepare the authorization request."))
         }
         var errorInfo: NSDictionary?
         script.executeAndReturnError(&errorInfo)
@@ -135,7 +142,7 @@ final class CommandLineToolInstaller {
         }
         return .failure(
             (errorInfo[NSAppleScript.errorMessage] as? String)
-                ?? "macOS rejected the authorization request."
+                ?? L10n.tr("macOS rejected the authorization request.")
         )
     }
 

@@ -138,8 +138,10 @@ struct ProviderAccountAssembly {
             }) {
                 observations[index].sources.append(source)
             } else {
+                let organization = account.organizationName
+                    ?? L10n.format("Organization %@", String(account.organizationID.prefix(8)))
                 observations.append(ProviderAccountsStore.Observation(
-                    family: "claude", identityKey: account.identityKey, label: "\(account.email) (\(account.organizationName ?? "Organization \(account.organizationID.prefix(8))"))", sources: [source]
+                    family: "claude", identityKey: account.identityKey, label: "\(account.email) (\(organization))", sources: [source]
                 ))
             }
         }
@@ -189,7 +191,7 @@ struct ProviderAccountAssembly {
             let label = outcomes.first(where: { $0.family == "claude" }).flatMap { outcome -> String? in
                 guard case .resolved(_, let value, _) = outcome.outcome else { return nil }
                 return organizationLabel(value)
-            } ?? "Organization"
+            } ?? L10n.tr("Organization")
             cards.append(ClaudeAccountCard(
                 id: record.id, identityKey: defaultIdentity, organizationID: String(organization),
                 displayName: "Claude — \(label)", usesDesktopCredentials: false,
@@ -202,9 +204,10 @@ struct ProviderAccountAssembly {
                       $0.family == "claude" && $0.identityKey == defaultIdentity && !$0.removedTombstone
                   }) {
             // A UUID without an organization remains a default login, separate from scoped cards.
+            let loginLabel = record.label ?? L10n.tr("Default Login")
             cards.append(ClaudeAccountCard(
                 id: record.id, identityKey: defaultIdentity, organizationID: nil,
-                displayName: "Claude: \(record.label ?? "Default Login")", usesDesktopCredentials: false,
+                displayName: "Claude: \(loginLabel)", usesDesktopCredentials: false,
                 allowsUnattributedPiUsage: allowsUnattributedPiUsage
             ))
             identityKeys.removeValue(forKey: "claude")
@@ -316,8 +319,9 @@ struct ProviderAccountAssembly {
             )
             guard result.status == .available || result.status == .permissionRequired else { return nil }
             let plan = result.oauth?.subscriptionType?.lowercased()
-            let label = plan.map { ["max", "pro", "free"].contains($0) } == true ? "Personal"
-                : plan?.capitalized ?? "Organization \(organization.prefix(8))"
+            // Plan names ("Team", "Enterprise") come from the provider and stay as they are.
+            let label = plan.map { ["max", "pro", "free"].contains($0) } == true ? L10n.tr("Personal")
+                : plan?.capitalized ?? L10n.format("Organization %@", String(organization.prefix(8)))
             return DesktopOrganization(id: organization, identityKey: "\(user)|\(organization)", label: label)
         }
     }

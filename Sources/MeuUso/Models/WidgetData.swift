@@ -318,8 +318,9 @@ struct WidgetData: Hashable {
             let amount = Formatters.currency(limit, fractionDigits: digits)
             return Self.valuePhrase(amount, limitNoun ?? "limit")
         case .count:
-            // The unit (e.g. "credits") shows whether the count is bounded or a plain balance.
-            return countSuffix
+            // The unit (e.g. "credits") shows whether the count is bounded or a plain balance. The
+            // suffix is an English key in the data; only the displayed word is translated.
+            return countSuffix.map { L10n.tr($0) }
         }
     }
 
@@ -350,10 +351,11 @@ struct WidgetData: Hashable {
             }
             return selected.map { MetricFormatter.string(for: $0, style: .row) }.joined(separator: " · ")
         }
-        // Fallback for an unbounded row without typed values: "<value> <suffix> <word>".
+        // Fallback for an unbounded row without typed values: "<value> <suffix> <word>", with the
+        // "<value> <suffix>" part filling the same whole-phrase key as a bare value ("%@ left").
         let word = unboundedValueWord ?? displayMode.word
         if kind == .count, let countSuffix {
-            return "\(valueText) \(MetricFormatter.unitWord(countSuffix, for: displayedValue)) \(L10n.tr(word))"
+            return Self.valuePhrase("\(valueText) \(MetricFormatter.unitWord(countSuffix, for: displayedValue))", word)
         }
         return Self.valuePhrase(valueText, word)
     }

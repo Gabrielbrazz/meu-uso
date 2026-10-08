@@ -6,6 +6,7 @@ import SwiftUI
 /// shows the period total, so repeating it here would duplicate (and wrap on) long figures. Mirrors
 /// `UsageTrendDetail`'s calm — header + flat list + source note.
 struct ModelUsageDetail: View {
+    /// The period title, translated at display (`L10n.tr`); a title that is already translated passes through.
     let title: String
     let breakdown: ModelUsageBreakdown
     var onHoverChange: (Bool) -> Void
@@ -39,7 +40,7 @@ struct ModelUsageDetail: View {
     }
 
     private var header: some View {
-        Text(title)
+        Text(L10n.tr(title))
             .font(.system(size: density.headerPointSize, weight: .semibold))
             .foregroundStyle(.primary)
     }
@@ -50,7 +51,7 @@ struct ModelUsageDetail: View {
     private func modelRow(_ model: ModelUsageEntry, share: Double, percent: Int) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(model.model)
+                Text(Self.displayName(model.model))
                     .font(.system(size: density.supportingPointSize, weight: .semibold))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
@@ -60,7 +61,7 @@ struct ModelUsageDetail: View {
                         .foregroundStyle(.primary)
                         .monospacedDigit()
                 } else {
-                    Text("\u{2014}")
+                    Text(verbatim: "\u{2014}")
                         .foregroundStyle(.tertiary)
                 }
             }
@@ -92,6 +93,14 @@ struct ModelUsageDetail: View {
             .padding(.top, 2)
         }
         .padding(.vertical, density.textRowPadding)
+    }
+
+    /// A row's model name as shown. The two synthetic rows ("Unattributed", "Other") are English keys in the
+    /// data and are translated here; every real model name is shown as is.
+    private static func displayName(_ model: String) -> String {
+        model == ModelUsageEntry.unattributedModelName || model == ModelUsageEntry.otherModelName
+            ? L10n.tr(model)
+            : model
     }
 
     /// Share against the sum of the listed models' own (display-rounded) figures, not the spend row's
