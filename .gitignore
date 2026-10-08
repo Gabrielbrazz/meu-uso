@@ -5,6 +5,9 @@ node_modules/
 *.log
 .agents/worktrees/
 .agents/scheduled_tasks.lock
+# Claude Code writes local settings through the .claude -> .agents symlink.
+.agents/settings.local.json
+.claude/settings.local.json
 
 # Local environment files
 .env

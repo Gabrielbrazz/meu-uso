@@ -85,16 +85,16 @@ git fetch origin gh-pages && git show origin/gh-pages:appcast.xml | grep -F "Ope
 curl -s "https://robinebers.github.io/openusage/appcast.xml" | grep -F "OpenUsage-{version}.dmg"
 ```
 
-The second check matters: publishing is two hops — Release (or pricing-supplement) pushes `appcast.xml` to the **`gh-pages` branch**, then **`.github/workflows/deploy-pages.yml` on `main`** deploys that branch to the live site (Pages source is "GitHub Actions", not legacy branch deploy). Auto deploy runs on `workflow_run` after Release completes; GitHub sometimes returns **"Deployment failed, try again later"** even though `gh-pages` is already correct. If the branch has the version but the live URL does not after ~10 minutes, check `gh run list --workflow=deploy-pages.yml` and re-run **`gh workflow run deploy-pages.yml --ref main`** (must use `main` — the workflow file is not on `gh-pages`). Sparkle clients only see the live URL.
+The second check matters: the Release workflow pushes `appcast.xml` to the **`gh-pages` branch**, and GitHub Pages serves that branch (Pages source: "Deploy from a branch", `gh-pages` / root). If the branch has the version but the live URL does not after ~10 minutes, check the repo's Pages build under Settings → Pages. Sparkle clients only see the live URL.
 
 Require `isDraft=false`, `isPrerelease=true` for beta or `false` for stable, an `OpenUsage-<version>.dmg` asset, `bodyLen>0`, and the version present in the appcast. If a draft was left behind, migrate its notes/assets onto the published release, then delete it — but only once a separate PUBLISHED release for the tag already exists:
 
 ```sh
 tag="v{version}"
 if [ "$(gh release view "$tag" --json isDraft --jq '.isDraft')" = "false" ]; then
-  gh api repos/robinebers/openusage/releases --paginate \
+  gh api repos/Gabrielbrazz/meu-uso/releases --paginate \
     --jq '.[] | select(.draft and .tag_name=="'"$tag"'") | .id' \
-    | xargs -I{} gh api -X DELETE repos/robinebers/openusage/releases/{}
+    | xargs -I{} gh api -X DELETE repos/Gabrielbrazz/meu-uso/releases/{}
 else
   echo "No published release for $tag yet - publish it first; do NOT delete the draft."
 fi
