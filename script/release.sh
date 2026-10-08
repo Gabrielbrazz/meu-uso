@@ -145,21 +145,27 @@ for bundle in "$BUILD_DIR"/*.bundle; do
 done
 shopt -u nullglob
 
-# Install the app icon. Prefer the prebuilt compiled catalog: actool on GitHub's runners (Xcode 26.4.1
-# and 26.5) crashes on the Icon Composer `.icon` refractivity feature (Apple regression FB20183399), so
-# CI can't compile it. The committed Assets.car is produced by a working actool via script/compile_icon.sh;
-# regenerate it there whenever assets/AppIcon.icon changes. Fall back to actool where it works (e.g. local).
+# Install the app icon. The classic AppIcon.icns (rendered by script/brand/mark.py --icns) always ships.
+# A Liquid Glass Assets.car is added when one exists: committed by script/compile_icon.sh, or compiled
+# here by actool. actool on GitHub's runners (Xcode 26.4.1 and 26.5) crashes on Icon Composer files
+# (Apple regression FB20183399), so CI releases may ship the .icns alone; CFBundleIconName is only
+# declared when the catalog is present.
+cp "$ROOT_DIR/assets/AppIcon.prebuilt/AppIcon.icns" "$APP_RESOURCES/AppIcon.icns"
+ICON_NAME_ENTRY=""
 if [ -f "$ROOT_DIR/assets/AppIcon.prebuilt/Assets.car" ]; then
-  echo "==> installing prebuilt app icon"
+  echo "==> installing prebuilt Liquid Glass icon"
   cp "$ROOT_DIR/assets/AppIcon.prebuilt/Assets.car" "$APP_RESOURCES/Assets.car"
-  [ -f "$ROOT_DIR/assets/AppIcon.prebuilt/AppIcon.icns" ] \
-    && cp "$ROOT_DIR/assets/AppIcon.prebuilt/AppIcon.icns" "$APP_RESOURCES/AppIcon.icns"
-else
-  echo "==> compiling app icon"
-  xcrun actool "$ROOT_DIR/assets/AppIcon.icon" --compile "$APP_RESOURCES" \
+  ICON_NAME_ENTRY="<key>CFBundleIconName</key><string>AppIcon</string>"
+elif xcrun actool "$ROOT_DIR/assets/AppIcon.icon" --compile "$APP_RESOURCES" \
     --app-icon AppIcon --enable-on-demand-resources NO --development-region en \
     --target-device mac --platform macosx --minimum-deployment-target "$MIN_SYSTEM_VERSION" \
-    --output-partial-info-plist /dev/null --output-format human-readable-text --errors --warnings
+    --output-partial-info-plist /dev/null --output-format human-readable-text --errors --warnings; then
+  echo "==> compiled Liquid Glass icon"
+  ICON_NAME_ENTRY="<key>CFBundleIconName</key><string>AppIcon</string>"
+  # actool also writes an AppIcon.icns from the .icon; keep the rendered one for a consistent look.
+  cp "$ROOT_DIR/assets/AppIcon.prebuilt/AppIcon.icns" "$APP_RESOURCES/AppIcon.icns"
+else
+  echo "==> actool unavailable; shipping the classic AppIcon.icns only"
 fi
 
 cat >"$APP_CONTENTS/Info.plist" <<PLIST
@@ -175,7 +181,7 @@ cat >"$APP_CONTENTS/Info.plist" <<PLIST
   <key>CFBundleShortVersionString</key><string>$VERSION</string>
   <key>CFBundleVersion</key><string>$BUILD</string>
   <key>LSMinimumSystemVersion</key><string>$MIN_SYSTEM_VERSION</string>
-  <key>CFBundleIconName</key><string>AppIcon</string>
+  $ICON_NAME_ENTRY
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>LSUIElement</key><true/>
   <key>NSPrincipalClass</key><string>NSApplication</string>

@@ -1,9 +1,6 @@
 {
-  "features" : [
-    "refractivity"
-  ],
   "fill" : {
-    "automatic-gradient" : "extended-srgb:0.17008,0.49616,1.02141,1.00000"
+    "automatic-gradient" : "srgb:0.06275,0.72549,0.50588,1.00000"
   },
   "groups" : [
     {
@@ -18,14 +15,14 @@
             {
               "appearance" : "dark",
               "value" : {
-                "solid" : "extended-srgb:0.17008,0.49616,1.02141,1.00000"
+                "solid" : "srgb:0.20392,0.82745,0.60000,1.00000"
               }
             }
           ],
-          "image-name" : "dashboard-3-line.svg",
-          "name" : "dashboard-3-line",
+          "image-name" : "meuuso-mark.svg",
+          "name" : "meuuso-mark",
           "position" : {
-            "scale" : 37.48,
+            "scale" : 26.46,
             "translation-in-points" : [
               0,
               0
@@ -33,25 +30,17 @@
           }
         }
       ],
-      "refractivity" : {
-        "depth" : 0.4239062500000001,
-        "enabled" : true,
-        "strength" : 0.64328125
-      },
       "shadow" : {
         "kind" : "neutral",
-        "opacity" : 1.08
+        "opacity" : 0.5
       },
       "translucency" : {
         "enabled" : true,
-        "value" : 0.46
+        "value" : 0.4
       }
     }
   ],
   "supported-platforms" : {
-    "circles" : [
-      "watchOS"
-    ],
     "squares" : "shared"
   }
 }

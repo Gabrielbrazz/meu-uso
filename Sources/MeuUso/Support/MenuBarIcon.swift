@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Renders the Meu Uso brand gauge mark into a template `NSImage` for the menu bar.
+/// Renders the Meu Uso brand mark (the open usage ring) into a template `NSImage` for the menu bar.
 /// Reuses the same SVG→`ProviderIconShape` pipeline as the provider tiles, so there is no
 /// asset catalog or second SVG parser to maintain.
 @MainActor
@@ -15,8 +15,7 @@ enum MenuBarIcon {
     private static func render() -> NSImage? {
         guard let mark = ProviderMarks.mark(for: "meuuso") else { return nil }
         let renderer = ImageRenderer(
-            // Smaller inset than the provider default so the brand gauge keeps its prior menu-bar size
-            // (its art already carries ~8% margin inside the source viewBox).
+            // Smaller inset than the provider default so the ring reads at full size in the menu bar.
             content: ProviderIconShape(mark: mark, inset: 0.08)
                 .fill(Color.black)
                 .frame(width: side, height: side)
