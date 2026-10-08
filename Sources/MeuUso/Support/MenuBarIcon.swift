@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Renders the Meu Uso brand mark (the open usage ring) into a template `NSImage` for the menu bar.
+/// Renders the Meu Uso brand mark (the usage ring) into a template `NSImage` for the menu bar.
 /// Reuses the same SVG→`ProviderIconShape` pipeline as the provider tiles, so there is no
 /// asset catalog or second SVG parser to maintain.
 @MainActor

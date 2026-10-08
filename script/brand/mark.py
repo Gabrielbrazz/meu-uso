@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates the Meu Uso mark: an open usage ring with a marker dot in the gap.
+"""Generates the Meu Uso mark: a usage ring with a gap and a marker dot inside the gap.
 
 The mark is one SVG path made only of M/C/Z commands, because the app's SVG parser
 (Support/ProviderIconShape.swift) has no arc command. Circular arcs are approximated with cubic
