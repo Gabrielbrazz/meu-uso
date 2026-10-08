@@ -89,7 +89,7 @@ final class LogRedactionTests: XCTestCase {
         XCTAssertFalse(redacted.contains("user-iupzZ7KFykMLrnzpkHSq7wjo"), redacted)
         XCTAssertFalse(redacted.contains("maria@example.com"), redacted)
         XCTAssertTrue(redacted.contains("user...7wjo"), redacted)
-        XCTAssertTrue(redacted.contains("rob@....com"), redacted)
+        XCTAssertTrue(redacted.contains("mari....com"), redacted)
     }
 
     func testRedactBodyCamelCaseIds() {

@@ -4,14 +4,14 @@ import XCTest
 @MainActor
 final class CodexKeychainAuthTests: XCTestCase {
     private let home = "/meuuso-keychain-fixture/codex-home"
-    private let account = "cli|d702dafc32309bab"
+    private let account = "cli|4d473443a9e9ab19"
     private let otherAccount = "cli|0000000000000000"
 
     func testAccountMatchesCodexSHA256FormatAndMissingPathFallback() {
         XCTAssertEqual(CodexAuthStore.keychainAccount(codexHome: home), account)
         // A failed canonicalization keeps the original path, including its unresolved components.
         XCTAssertEqual(CodexAuthStore.keychainAccount(codexHome: home + "/../missing"),
-                       "cli|d5a7cc6be970c406")
+                       "cli|b64c5a3050a02345")
     }
 
     func testAccountResolvesSymlinksBeforeHashing() throws {

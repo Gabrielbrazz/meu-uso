@@ -70,3 +70,29 @@ jobs:
 
       - name: Run tests
         run: swift test
+
+  app:
+    name: Dev app
+    # Packages the ad-hoc-signed development build so it can be tried without a local Xcode:
+    #   gh run download <run-id> -n MeuUso-dev && ditto -x -k MeuUso-dev.zip .
+    # (`gh run download` sets no quarantine flag, so Gatekeeper lets the ad-hoc build open.)
+    needs: check
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Build and stage the app bundle
+        run: ./script/build_and_run.sh build
+
+      # upload-artifact drops executable bits and symlinks (Sparkle.framework has both), so zip first.
+      - name: Zip the app
+        run: ditto -c -k --keepParent dist/MeuUso.app dist/MeuUso-dev.zip
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: MeuUso-dev
+          path: dist/MeuUso-dev.zip
+          retention-days: 7
