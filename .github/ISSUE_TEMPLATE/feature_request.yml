@@ -1,34 +1,34 @@
-name: Feature Request
-description: Suggest a feature or improvement
-labels: ["enhancement"]
+name: Sugerir uma melhoria
+description: Ideia de recurso ou melhoria para o Meu Uso
+labels: ["melhoria"]
 body:
   - type: markdown
     attributes:
       value: |
-        Before requesting a feature, check existing issues to avoid duplicates.
-        Meu Uso focuses on AI subscription usage tracking. Requests outside that scope will be closed.
+        Antes de sugerir, veja se já existe uma issue parecida.
+        O Meu Uso foca em acompanhar o uso das assinaturas de IA.
   - type: textarea
     id: problem
     attributes:
-      label: Problem
-      description: What problem does this solve? What is frustrating or missing?
-      placeholder: I want to ...
+      label: Problema
+      description: Que problema isso resolve? O que falta ou incomoda hoje?
+      placeholder: Eu queria ...
     validations:
       required: true
   - type: textarea
     id: solution
     attributes:
-      label: Proposed Solution
-      description: How do you think this should work?
+      label: Proposta
+      description: Como você imagina que deveria funcionar?
     validations:
       required: true
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternatives Considered
-      description: Have you considered other approaches? Why is this one better?
+      label: Alternativas consideradas
+      description: Pensou em outros caminhos? Por que este é melhor?
   - type: textarea
     id: additional
     attributes:
-      label: Additional Context
-      description: Screenshots, mockups, links, or anything else that helps explain.
+      label: Mais contexto
+      description: Prints, rascunhos, links ou o que mais ajudar a explicar.

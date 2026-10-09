@@ -1,45 +1,28 @@
-# Security Policy
+# Política de segurança
 
-## Reporting a Vulnerability
+## Como relatar uma vulnerabilidade
 
-If you find a security vulnerability in Meu Uso, please report it responsibly. Do not open a public issue.
+Se encontrar uma falha de segurança no Meu Uso, relate em particular. **Não abra uma issue pública.**
 
-### Preferred: GitHub Security Advisories
+1. Abra a página de [relato privado de vulnerabilidade](https://github.com/Gabrielbrazz/meu-uso/security/advisories/new).
+2. Descreva o problema.
 
-1. Go to the [Security Advisories page](https://github.com/Gabrielbrazz/meu-uso/security/advisories/new)
-2. Click "Report a vulnerability"
-3. Fill in the details
+O relato fica privado até a correção sair.
 
-This keeps the report private until a fix is released.
+## O que incluir
 
-## What to Include
+- descrição da vulnerabilidade;
+- passos para reproduzir;
+- versões afetadas;
+- impacto: o que alguém mal-intencionado consegue fazer.
 
-- Description of the vulnerability
-- Steps to reproduce
-- Affected versions
-- Impact assessment (what can an attacker do?)
+## Prazo de resposta
 
-## Response Timeline
+O projeto é mantido por uma pessoa, então os prazos são de melhor esforço:
+- confirmação de recebimento em até 7 dias;
+- uma avaliação inicial logo depois.
 
-- Acknowledgment within 48 hours
-- Assessment and plan within 7 days
-- Fix released as soon as practical, depending on severity
+## Escopo
 
-## Scope
-
-The following are in scope:
-
-- The Meu Uso desktop application
-- The built-in providers (credential handling, API calls)
-- The local HTTP API
-- Build and release infrastructure
-
-The following are out of scope:
-
-- Third-party provider APIs (report to the provider directly)
-- Social engineering attacks
-- Denial of service attacks
-
-## Supported Versions
-
-Only the latest release is supported with security updates.
+- **O que conta:** o app Meu Uso e o código deste repositório. Isso inclui a leitura de credenciais dos provedores, a CLI `meu-uso` e a API local em `127.0.0.1:6737`.
+- **O que não conta:** falhas nos próprios provedores (Anthropic, OpenAI, GitHub, Cursor etc.). Relate essas a cada um deles.

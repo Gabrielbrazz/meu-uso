@@ -1,63 +1,51 @@
 # Z.ai
 
-Tracks [Z.ai](https://z.ai) (Zhipu AI) GLM Coding Plan usage quotas for coding subscriptions.
+Acompanha as cotas de uso do GLM Coding Plan do [Z.ai](https://z.ai) (Zhipu AI), a assinatura para programação.
 
-## What it tracks
+## O que mostra
 
-| Metric | Meaning |
+| Métrica | O que significa |
 |---|---|
-| Session | 5-hour rolling window token usage (percentage) |
-| Weekly | 7-day rolling window token usage (percentage) |
-| Web Searches | Monthly web-search / web-reader / Zread calls (used / limit) |
+| Sessão | Uso de tokens na janela móvel de 5 horas (porcentagem) |
+| Semanal | Uso de tokens na janela móvel de 7 dias (porcentagem) |
+| Buscas na web | Chamadas mensais de busca na web, leitura da web e Zread (usado / limite) |
 
-When Z.ai reports your plan name, Meu Uso shows it beside the provider name.
+Quando o Z.ai informa o nome do seu plano, o Meu Uso mostra o plano ao lado do nome do provedor.
 
-## Where credentials come from
+## De onde vêm as credenciais
 
-Z.ai has no companion CLI/app that Meu Uso can reuse a credential from, so you supply an API key.
-Meu Uso reads it from the first place it finds one, in this order:
+O Z.ai não tem uma CLI ou app de onde o Meu Uso possa reaproveitar uma credencial, então você fornece uma chave de API. O Meu Uso lê a chave do primeiro lugar onde ela aparecer, nesta ordem:
 
-1. `~/.config/meu-uso/zai.json` — `{"apiKey":"…"}` (the file Settings writes to)
+1. `~/.config/meu-uso/zai.json`: `{"apiKey":"…"}` (o arquivo que a seção Chave de API grava)
 2. `~/.config/zai/key.json`
-3. The `ZAI_API_KEY` environment variable
-4. The `GLM_API_KEY` environment variable (the legacy Zhipu name, still accepted)
+3. A variável de ambiente `ZAI_API_KEY`
+4. A variável de ambiente `GLM_API_KEY` (o nome antigo da Zhipu, ainda aceito)
 
-You can also add and rotate the key from **Settings → API Keys** without touching a file. Either
-way, nothing leaves your Mac except the same API calls Z.ai's own subscription UI makes.
+Você também pode adicionar e trocar a chave em **Personalizar** → Z.ai → **Chave de API**, sem mexer em arquivo. De qualquer jeito, nada sai do seu Mac além das mesmas chamadas de API que a própria página de assinatura do Z.ai faz.
 
-## Setup
+## Configuração
 
-1. [Subscribe to a GLM Coding plan](https://z.ai/subscribe) and get your API key from the
-   [Z.ai console](https://z.ai/manage-apikey/apikey-list).
-2. Add the key to Meu Uso via **Settings → API Keys**, **or** export it:
+1. [Assine um GLM Coding Plan](https://z.ai/subscribe) e pegue a sua chave de API no [console do Z.ai](https://z.ai/manage-apikey/apikey-list).
+2. Adicione a chave ao Meu Uso em **Personalizar** → Z.ai → **Chave de API**, **ou** exporte-a:
 
 ```bash
-export ZAI_API_KEY="YOUR_API_KEY"
+export ZAI_API_KEY="SUA_CHAVE_DE_API"
 ```
 
-3. Z.ai appears on the dashboard and (after you star a metric) the menu bar on the next refresh.
+3. Se o Z.ai estiver desligado, ative-o em **Personalizar**. Ele aparece no painel na próxima atualização. Para vê-lo também na barra de menus, use **Adicionar à barra de menus** numa métrica (numa instalação nova, Sessão e Semanal já começam lá).
 
-## Under the hood
+## Por dentro
 
-Two undocumented internal endpoints Z.ai's own subscription UI uses (stable in practice):
+Dois endpoints internos e não documentados que a própria página de assinatura do Z.ai usa (estáveis na prática):
 
-- `GET https://api.z.ai/api/biz/subscription/list` — plan name (best-effort; a failure here doesn't
-  blank the meters).
-- `GET https://api.z.ai/api/monitor/usage/quota/limit` — the quota meters.
+- `GET https://api.z.ai/api/biz/subscription/list`: o nome do plano (opcional; uma falha aqui não apaga os medidores).
+- `GET https://api.z.ai/api/monitor/usage/quota/limit`: os medidores de cota.
 
-The quota response carries a `limits` array. Each `CREDIT_LIMIT` entry (called `TOKENS_LIMIT` in
-older responses) is a percentage quota window; its window length decides which meter it feeds
-(sub-daily → Session, multi-day → Weekly), while a `TIME_LIMIT` entry is the monthly web-search
-count. Reset times come back as epoch milliseconds. Missing required usage values are reported as
-an invalid response instead of being shown as zero.
+A resposta de cota traz uma lista `limits`. Cada entrada `CREDIT_LIMIT` (chamada `TOKENS_LIMIT` em respostas antigas) é uma janela de cota em porcentagem, e a duração da janela decide qual medidor ela alimenta: menos de um dia vira Sessão, e um dia ou mais vira Semanal. Já uma entrada `TIME_LIMIT` é a contagem mensal de buscas na web. Os horários de renovação vêm como timestamp Unix em milissegundos. Valores de uso obrigatórios que faltam são tratados como resposta inválida, em vez de aparecer como zero.
 
-## Troubleshooting
+## Solução de problemas
 
-- **"No Z.ai API key"** — add a key in Settings → API Keys, or export `ZAI_API_KEY`.
-- **"Z.ai API key invalid"** — the key was rejected (401/403). Regenerate it in the
-  [Z.ai console](https://z.ai/manage-apikey/apikey-list).
-- **"No active GLM Coding Plan"** (amber notice by the name) — the key is valid, but the account has no
-  GLM Coding Plan, so there's nothing to meter. Subscribe at [z.ai/subscribe](https://z.ai/subscribe);
-  usage appears once your plan is active.
-- **Meters show "No usage data"** — you have a plan, but the quota endpoint returned no usable limits
-  yet. Check your [plan](https://z.ai/manage-apikey/coding-plan/personal/my-plan).
+- **"Nenhuma chave de API do Z.ai"**: adicione uma chave em Personalizar → Z.ai → Chave de API ou exporte `ZAI_API_KEY`.
+- **"Chave de API do Z.ai inválida"**: a chave foi recusada (401/403). Gere outra no [console do Z.ai](https://z.ai/manage-apikey/apikey-list).
+- **"Nenhum GLM Coding Plan ativo"** (aviso âmbar ao lado do nome): a chave é válida, mas a conta não tem GLM Coding Plan, então não há o que medir. Assine em [z.ai/subscribe](https://z.ai/subscribe). O uso aparece quando o plano estiver ativo.
+- **Os medidores mostram "Sem dados de uso"**: você tem um plano, mas o endpoint de cota ainda não devolveu limites que possam ser usados. Confira o seu [plano](https://z.ai/manage-apikey/coding-plan/personal/my-plan).

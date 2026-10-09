@@ -1,79 +1,104 @@
 # AGENTS.md
 
-Meu Uso is a SwiftPM-based SwiftUI menu-bar app for macOS that shows AI provider usage widgets (Claude, Codex, Cursor, Grok, Devin, and more).
+O Meu Uso é um app de barra de menus para macOS, feito em SwiftUI sobre SwiftPM, que mostra o uso dos provedores de IA (Claude, Codex, Cursor, Grok, Devin e outros). A interface é em português do Brasil.
 
-This file documents the engineering conventions for the project. Read it before contributing.
+Este arquivo documenta as convenções de engenharia do projeto. Leia antes de contribuir.
 
-## Agent Instructions
+## Instruções para agentes
 
-AGENTS.md is the source of truth for agent instructions in this repository. CLAUDE.md files may only point to the nearest AGENTS.md file with `@AGENTS.md`; do not add guidance, duplicate instructions, or project rules to CLAUDE.md.
-
-> **Repository note:** This is the native Swift edition of Meu Uso. Active development happens on the `main` branch. (NOT the legacy Tauri version which now sits in the `tauri-legacy` branch)
+- **Fonte única.** O AGENTS.md é a fonte das instruções para agentes neste repositório. Os arquivos CLAUDE.md só podem apontar para o AGENTS.md mais próximo com `@AGENTS.md`; não coloque orientação, instrução duplicada nem regra de projeto neles.
+- **Fork independente.** O Meu Uso é um fork independente do [OpenUsage](https://github.com/robinebers/openusage) e não sincroniza com ele.
+  - Nada no código, nos scripts ou nos workflows pode apontar para a infraestrutura do projeto original: appcast, Pages, analytics, contatos.
+  - Referências a issues de lá ficam qualificadas como `robinebers/openusage#123`.
+- **Sem telemetria.** O app não coleta dados. Não adicione analytics, crash reporting nem chamadas de rede que não sejam aos provedores ou às tabelas de preço (veja `docs/privacy.md`).
 
 ## Releases
 
-`main` is the active development line; it ships via `.github/workflows/release.yml` (Sparkle appcast on `gh-pages`). Cut releases with the release-swift skill.
+- `main` é a linha ativa. O `.github/workflows/release.yml` publica uma versão a partir de uma tag `v*`, com appcast do Sparkle em `gh-pages`. Ele só funciona depois de configurar os segredos da Apple (Developer ID, notarização) e as chaves EdDSA do Sparkle; até lá não há release assinada. O passo a passo está na skill release-swift.
+- **Nunca aumente o número da versão por conta própria.** Proponha o número e espere a aprovação explícita do mantenedor antes de criar tag ou release. As versões começam em `0.1.0`.
+- Beta usa tag `-beta.N` e fica como pre-release no canal beta do Sparkle; versão estável usa tag simples e vira a "Latest" do GitHub.
+- Nunca deixe uma release em rascunho nem publique notas em branco.
 
-### Guardrails (do not break)
-- Versions are `0.7.x` and up. Never reuse a `0.6.x` number — those are the original edition's released tags, now frozen on the `tauri-legacy` branch (final release `v0.6.28`).
-- **Never increase the version number on your own initiative — always ask for explicit approval first.** The version is a deliberate owner decision: propose the number and wait for explicit sign-off before tagging or cutting a release.
-- Beta releases use `-beta.N` tags and stay GitHub pre-releases on Sparkle's beta channel. Stable releases use plain tags and become GitHub "Latest".
-- Stable releases must carry forward the legacy `latest.json` so any remaining `0.6.x` installs can still update to `v0.6.28`. `release.yml` handles this; verify it with the release-swift skill.
-- Never leave a release in Draft, and never ship blank notes: the release-swift skill generates the changelog and verifies the published release after every cut.
+## Arquitetura
 
-## Architecture
+- Target executável SwiftPM; conteúdo SwiftUI dentro de um `NSStatusItem` e de um `NSPanel` próprio do AppKit, que aceita foco de teclado.
+- Swift 6 com concorrência estrita.
+- Cada provedor implementa o protocolo `ProviderRuntime`:
+  - um auth store lê as credenciais que já estão na máquina;
+  - um cliente chama a API do provedor;
+  - um mapper normaliza a resposta em `MetricLine`.
 
-- SwiftPM executable target; SwiftUI content hosted in an AppKit-owned `NSStatusItem` + custom key-capable `NSPanel`.
-- Swift 6 with strict concurrency.
-- Providers implement the small `ProviderRuntime` protocol: an auth store reads credentials already on the user's machine, a usage client calls the provider's API, and a mapper normalizes the response into `MetricLine` values. The UI renders those normalized values.
-- See `docs/` for behavior docs and the developer docs (architecture overview, adding a provider).
+  A interface só renderiza esses valores normalizados.
+- Veja `docs/` para o comportamento do app e para os docs de desenvolvimento (arquitetura, como adicionar um provedor).
 
-## Providers
+## Idioma e tradução
 
-Conventions for the per-provider modules under `Sources/MeuUso/Providers/<Name>/`.
+- **Código em inglês, tela em pt-BR.** Nomes e comentários ficam em inglês. Todo texto de tela é pt-BR e sai da tabela `assets/Localization/pt-BR.lproj/Localizable.strings`, cuja chave é o texto em inglês do código.
+- **Regras completas** em `docs/glossario.md`:
+  - literal de SwiftUI só precisa da entrada na tabela;
+  - fora do SwiftUI, use `L10n.tr` / `L10n.format` / `L10n.plural`;
+  - frases inteiras com placeholder;
+  - nunca `bundle: .module` nem `#bundle`.
+- **Rótulos que servem de chave ficam em inglês nos dados:** nomes de métrica, períodos do Gasto total, unidades. Eles são traduzidos só na exibição.
+- **Testes em inglês.** O `swift test` roda sem tabela, então a saída em inglês precisa continuar idêntica.
+- **Números e datas** no padrão brasileiro, via `AppLocale.current`.
+- **Antes de abrir PR**, rode `python3 script/check_localization.py`. O CI roda o mesmo.
 
-- **Structure:** one folder per provider with an auth store (reads credentials already on the user's machine), a usage client (calls the provider API), and a mapper (normalizes to `MetricLine`), conforming to `ProviderRuntime` — `refresh()` plus `hasLocalCredentials()`, the local-only credential probe used by first-run detection (`FirstRunSeeder`) and by new-provider detection on the first launch after the provider ships (`NewProviderSeeder`); mirror the same local credential sources and usability filters that `refresh()` starts with, reusing the auth-store loaders instead of adding a second credential-reading path. See `docs/adding-a-provider.md` and `docs/provider-enablement.md`.
-- **Model pricing:** all spend imputation (Claude, Codex, Cursor, Grok) prices through the shared engine in `Sources/MeuUso/Pricing/` (see `docs/pricing.md`). Cursor-native model rates and alias rules live in `Sources/MeuUso/Resources/pricing_supplement.json` — sync new or changed models from [Cursor models & pricing](https://cursor.com/docs/models-and-pricing.md) (update `updated_at`, pricing entries, and `alias_rules` for CSV model slugs); merging to `main` publishes it to gh-pages, so installed apps pick it up without a release. The bundled LiteLLM/models.dev snapshots regenerate with `script/update_pricing_snapshots.sh` (a release-time chore).
-- **Default order:** Claude, Codex, Cursor first (the established providers, in that order), then every other provider alphabetically by display name (Antigravity, Devin, Grok, …). The order is the array order in `AppContainer`, which seeds `LayoutStore`'s default provider order (and `resetToDefault`). A new provider slots into the alphabetical tail.
-- **Metric placement defaults:** when adding or changing a metric, confirm its four defaults with the owner before choosing — never pick silently:
-  1. enabled on/off (`DefaultLayout.metricIDs`),
-  2. Always Visible vs. On Demand — above the fold vs. behind the per-provider caret (`DefaultLayout.expandedMetricIDs`). Note: a provider always keeps at least one Always Visible row — the dashboard promotes all metrics when every one is marked On Demand, so a fully On Demand provider isn't possible; leave one metric Always Visible for the caret to appear,
-  3. pinned to the menu bar (`DefaultLayout.pinnedMetricIDs`),
-  4. order (within a provider, the `widgetDescriptors` declaration order).
+## Provedores
 
-## Running / Testing Changes
+Convenções para os módulos em `Sources/MeuUso/Providers/<Nome>/`.
 
-- There is no hot reload. The app is a long-lived menu-bar process, so **every code change requires a full rebuild and restart of the running app** to take effect — kill the running instance, rebuild, and relaunch before testing.
+- **Estrutura:** uma pasta por provedor, com auth store, cliente de uso e mapper, implementando `ProviderRuntime`:
+  - `refresh()`;
+  - `hasLocalCredentials()`, a sondagem de credenciais locais que o `FirstRunSeeder` usa na primeira execução e o `NewProviderSeeder` usa na primeira abertura depois que o provedor é lançado. Use as mesmas fontes de credencial e os mesmos filtros que o `refresh()`, reaproveitando os leitores do auth store em vez de criar um segundo caminho.
 
-## Pull Requests
+  Veja `docs/adding-a-provider.md` e `docs/provider-enablement.md`.
+- **Preço de modelos:** toda estimativa de gasto (Claude, Codex, Cursor, Grok, Antigravity) passa pelo motor de `Sources/MeuUso/Pricing/` (veja `docs/pricing.md`).
+  - Preços e regras de alias de modelos nativos do Cursor ficam em `Sources/MeuUso/Resources/pricing_supplement.json`; sincronize com [Cursor models & pricing](https://cursor.com/docs/models-and-pricing.md) (atualize `updated_at`, preços e `alias_rules`).
+  - Os apps instalados leem esse arquivo direto do `main`, então o merge já publica. O CI valida o JSON antes.
+  - Os snapshots do LiteLLM e do models.dev se regeneram com `script/update_pricing_snapshots.sh`, uma tarefa de release.
+- **Ordem padrão:** Claude, Codex e Cursor primeiro, nessa ordem; depois os demais em ordem alfabética do nome exibido (Antigravity, Devin, Grok, …). A ordem é a da lista em `ProviderCatalog.make` (`Sources/MeuUso/Providers/ProviderCatalog.swift`), que alimenta a ordem padrão do `LayoutStore` e o `resetToDefault`. Provedor novo entra na parte alfabética.
+- **Posição padrão das métricas:** ao criar ou mudar uma métrica, confirme os quatro padrões com o mantenedor antes de escolher; nunca decida sozinho:
+  1. ligada ou desligada (`DefaultLayout.metricIDs`);
+  2. sempre visível ou sob demanda, atrás da seta do provedor (`DefaultLayout.expandedMetricIDs`). Todo provedor mantém pelo menos uma linha sempre visível;
+  3. fixada na barra de menus (`DefaultLayout.pinnedMetricIDs`);
+  4. ordem dentro do provedor (a ordem de declaração em `widgetDescriptors`).
+- **Tradução do provedor:** títulos de métrica e mensagens de erro de um provedor novo entram na tabela pt-BR.
 
-Every PR description must follow this structure so reviewers can skim it quickly:
+## Rodar e testar
 
-- **TL;DR** — open with a one- or two-sentence plain-English summary of the change.
-- **What was happening** — plain-English bullet points describing the prior behavior, bug, or gap that motivated the change.
-- **What this changes** — bullet points describing what the PR actually changes.
-- **Heads-up** (optional) — noteworthy things a reviewer or future maintainer should consider (risks, follow-ups, trade-offs).
-- **Tests** (optional) — how the change was verified.
-- **Screenshots** (optional in general, but **required for any PR that makes a visual change**) — images of the affected UI after the change.
+- **Compilar:** é preciso o Xcode 26. `swift build`, `swift test` e `./script/build_and_run.sh`, que compila e abre o app de dev a partir de `dist/`.
+- **Sem Xcode local:** o CI compila, testa e publica o app de dev como artefato `MeuUso-dev`.
+- **Sem hot reload.** O app é um processo de barra de menus de vida longa, então **toda mudança de código exige recompilar e reabrir o app**. O script encerra só a cópia de dev que ele mesmo abriu, nunca outro app instalado.
 
-## Documentation
+## Pull requests
 
-- Logic changes must update any docs in `docs/` that describe the affected behavior.
-- Keep docs simple, less-technical, and easy to skim; exclude visual design details.
+A descrição de todo PR segue o modelo em `.github/PULL_REQUEST_TEMPLATE.md`, para que a revisão seja rápida:
+- **Resumo:** uma ou duas frases sobre a mudança.
+- **Contexto:** o comportamento anterior, o bug ou a lacuna.
+- **O que muda:** o que o PR muda de fato.
+- **Atenção** (opcional): riscos, pendências, trade-offs.
+- **Testes** (opcional): como a mudança foi verificada.
+- **Prints:** obrigatórios em qualquer mudança visual.
 
-## Code Conventions
+## Documentação
 
-- Add a regression test when fixing a bug, where it fits.
-- Keep files under ~500 LOC; split or refactor as needed.
-- No new dependencies without justification.
-- When adding a provider, follow the conventions in "## Providers".
+- Mudança de lógica atualiza os docs de `docs/` que descrevem o comportamento afetado.
+- Docs em português, simples, pouco técnicos e fáceis de escanear; sem detalhes de design visual.
 
-## Error Handling
+## Convenções de código
 
-Always fail loudly into error logging (log file) and show friendly errors to the user. Do not add silent fallbacks that hide real problems. Only validate at system boundaries (user input, external APIs); trust internal code and framework guarantees.
+- Ao corrigir bug, adicione teste de regressão quando couber.
+- Arquivos com menos de ~500 linhas; divida ou refatore quando passar disso.
+- Nenhuma dependência nova sem justificativa.
+- Ao adicionar um provedor, siga as convenções de "Provedores".
 
-## UI
+## Tratamento de erros
 
-- Use title case for any hardcoded copy used as a title.
-- Match the existing design language; Meu Uso has a specific look and feel.
-- Only add tooltips (`hoverTooltip`) when explicitly asked to. Don't add them proactively to new controls.
+Falhe de forma visível: registre o erro no log e mostre uma mensagem amigável a quem usa. Não crie fallbacks silenciosos que escondem problemas reais. Valide só nas fronteiras do sistema (entrada do usuário, APIs externas); confie no código interno e nas garantias dos frameworks.
+
+## Interface
+
+- Em português, maiúscula só no começo de título, botão e item de menu; os termos seguem o glossário (`docs/glossario.md`).
+- Siga a linguagem visual existente; o app tem uma aparência própria.
+- Só adicione tooltips (`hoverTooltip`) quando pedirem explicitamente. Não coloque por iniciativa própria em controles novos.

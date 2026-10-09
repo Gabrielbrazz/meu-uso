@@ -1,13 +1,12 @@
 import Foundation
 
-/// A stable, machine-readable bucket for a refresh failure, so telemetry can group "what kind of
-/// errors happen" without sending the free-form (localized, user-facing) error message — which is not
-/// groupable and risks leaking detail. Every provider error enum maps its cases to one of these via
-/// `CategorizedError`; the raw values are the strings reported to telemetry, so keep them stable.
+/// A stable, machine-readable bucket for a refresh failure: "what kind of error" without the
+/// free-form (localized, user-facing) message, which is not groupable and risks leaking detail. Every
+/// provider error enum maps its cases to one of these via `CategorizedError`; the raw values show up
+/// in logs, so keep them stable.
 ///
 /// `notLoggedIn` is split out deliberately: a large share of refresh "failures" are simply providers
-/// the user has not authenticated, which is expected noise rather than a bug — keeping it as its own
-/// category lets analysis filter it out.
+/// the user has not authenticated, which is expected noise rather than a bug.
 enum ErrorCategory: String, Sendable, CaseIterable, Codable {
     case notLoggedIn = "not_logged_in"
     /// A previously-valid credential went bad (expired / revoked / conflicting session).
@@ -40,7 +39,7 @@ enum ErrorCategory: String, Sendable, CaseIterable, Codable {
     }
 }
 
-/// An error that knows its own telemetry bucket. Conformed by every provider error enum below so the
+/// An error that knows its own category. Conformed by every provider error enum below so the
 /// classification lives next to the cases it describes and stays exhaustive as cases are added.
 protocol CategorizedError: Error {
     var errorCategory: ErrorCategory { get }
