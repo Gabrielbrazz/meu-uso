@@ -1,7 +1,6 @@
 name: CI
 
 on:
-  # The Swift edition ships from `main`. The frozen Tauri edition is preserved on `tauri-legacy`.
   push:
     branches: [main]
   pull_request:
@@ -10,7 +9,48 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  pricing:
+    name: Pricing supplement
+    # Installed apps fetch Sources/MeuUso/Resources/pricing_supplement.json straight from `main`
+    # (raw.githubusercontent.com), so a malformed edit must never merge.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Validate supplement JSON
+        run: |
+          python3 - << 'PY'
+          import json, re, sys
+          with open("Sources/MeuUso/Resources/pricing_supplement.json") as f:
+              supplement = json.load(f)
+          problems = []
+          for model, entry in supplement["pricing"].items():
+              for field in ("input_per_million", "output_per_million"):
+                  if not isinstance(entry.get(field), (int, float)):
+                      problems.append(f"pricing[{model}].{field} missing or not a number")
+          for rule in supplement["alias_rules"]:
+              try:
+                  re.compile(rule["pattern"])
+              except re.error as error:
+                  problems.append(f"alias pattern {rule['pattern']!r}: {error}")
+              if not rule.get("canonical"):
+                  problems.append(f"alias pattern {rule['pattern']!r} has no canonical")
+          for model, multiplier in (supplement.get("fast_multipliers") or {}).items():
+              if not isinstance(multiplier, (int, float)) or multiplier <= 0:
+                  problems.append(f"fast_multipliers[{model}] must be a positive number")
+          if problems:
+              sys.exit("Supplement validation failed:\n" + "\n".join(problems))
+          print(f"Supplement OK: {len(supplement['pricing'])} models, "
+                f"{len(supplement['alias_rules'])} alias rules.")
+          PY
+
   check:
     name: Build and Test
     # Builds against the macOS 26 SDK with the package's macOS 15 deployment target (Package.swift
@@ -30,3 +70,29 @@ jobs:
 
       - name: Run tests
         run: swift test
+
+  app:
+    name: Dev app
+    # Packages the ad-hoc-signed development build so it can be tried without a local Xcode:
+    #   gh run download <run-id> -n MeuUso-dev && ditto -x -k MeuUso-dev.zip .
+    # (`gh run download` sets no quarantine flag, so Gatekeeper lets the ad-hoc build open.)
+    needs: check
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Build and stage the app bundle
+        run: ./script/build_and_run.sh build
+
+      # upload-artifact drops executable bits and symlinks (Sparkle.framework has both), so zip first.
+      - name: Zip the app
+        run: ditto -c -k --keepParent dist/MeuUso.app dist/MeuUso-dev.zip
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: MeuUso-dev
+          path: dist/MeuUso-dev.zip
+          retention-days: 7

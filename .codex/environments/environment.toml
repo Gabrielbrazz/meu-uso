@@ -1,5 +1,5 @@
 version = 1
-name = "OpenUsage"
+name = "Meu Uso"
 
 [setup]
 script = '''
@@ -10,7 +10,7 @@ cd "$CODEX_WORKTREE_PATH"
 swift package resolve
 
 # Sync AI-agent config dirs from the source tree into this worktree.
-for d in .agents .claude .codex .cursor; do
+for d in .agents .claude .codex; do
     if [ -d "$CODEX_SOURCE_TREE_PATH/$d" ]; then
         mkdir -p "$CODEX_WORKTREE_PATH/$d"
         rsync -a --exclude worktrees --exclude scheduled_tasks.lock "$CODEX_SOURCE_TREE_PATH/$d/." "$CODEX_WORKTREE_PATH/$d/"
@@ -26,7 +26,7 @@ done
 '''
 
 [[actions]]
-name = "OpenUsage Preview"
+name = "Meu Uso Preview"
 icon = "run"
 command = "./script/build_and_run.sh verify"
 

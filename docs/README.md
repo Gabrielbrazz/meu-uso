@@ -1,4 +1,4 @@
-# OpenUsage Documentation
+# Meu Uso Documentation
 
 What the app does and how it behaves. These pages describe **behavior, not visuals**, and they are updated together with any change to that behavior — if the app and a page here disagree, that's a bug.
 
@@ -16,7 +16,7 @@ What the app does and how it behaves. These pages describe **behavior, not visua
 ## Integrations
 
 - [Command-line interface](cli.md) — one-shot cached and forced usage reads for agents and scripts
-- [Local HTTP API](local-http-api.md) — read your usage from other apps on `127.0.0.1:6736`
+- [Local HTTP API](local-http-api.md) — read your usage from other apps on `127.0.0.1:6737`
 - [Proxy](proxy.md) — route provider requests through SOCKS5 or HTTP(S)
 
 ## Providers

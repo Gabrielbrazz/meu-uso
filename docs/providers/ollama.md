@@ -12,7 +12,7 @@ shows on its own settings page.
 | Monthly | Monthly usage (percentage of your plan's allowance), when reported for your account |
 | Last 4 Weeks | Charges beyond your plan over the last four weeks. $0.00 on a subscription; real amounts for pay-as-you-go and API-key usage |
 
-Your plan (Free, Pro, Max) is shown beside the provider name. If Ollama can't tell OpenUsage which plan
+Your plan (Free, Pro, Max) is shown beside the provider name. If Ollama can't tell Meu Uso which plan
 you're on, the badge is left off and the card explains why — the meters keep working either way.
 
 Session, Weekly, and Monthly are always visible; Session and Weekly start pinned to the menu bar.
@@ -28,10 +28,10 @@ toward these limits; only cloud models do.
 ## Where credentials come from
 
 Nothing to paste. Ollama creates a signing key at `~/.ollama/id_ed25519` the first time it runs, and
-`ollama signin` links that key to your ollama.com account. OpenUsage reads the key, signs each request
+`ollama signin` links that key to your ollama.com account. Meu Uso reads the key, signs each request
 with it exactly as the Ollama CLI does, and never sends the key anywhere — only the signature goes out.
 
-Because that key exists whether or not you've signed in, OpenUsage can tell only that Ollama is
+Because that key exists whether or not you've signed in, Meu Uso can tell only that Ollama is
 installed — not that Ollama Cloud is set up. So Ollama never switches itself on, even when the key is
 there: if you use Ollama for local models alone, it stays out of your way instead of showing you a
 sign-in warning for a product you don't use. Turn it on in **Customize** when you want it.
@@ -62,7 +62,7 @@ Each request carries an `Authorization` header of `<public key>:<signature>`, si
 `<METHOD>,<request-uri>` where the URI includes a `ts` unix-seconds parameter — the same scheme the
 Ollama CLI uses, so a captured header can't be replayed later.
 
-The usage endpoint is undocumented (it backs Ollama's own settings page), so OpenUsage reads it
+The usage endpoint is undocumented (it backs Ollama's own settings page), so Meu Uso reads it
 defensively: `usage` is a fraction (`0.349` → 34.9%) and `cost` is a decimal string; a limit that isn't
 in the response is omitted from the API and shows "No data" if its dashboard row is enabled, rather
 than being shown as zero usage. A response with no `limits` at all is reported as an invalid response.
@@ -76,7 +76,7 @@ than being shown as zero usage. A response with no `limits` at all is reported a
 - **"Couldn't read ~/.ollama/id_ed25519"** — the key file exists but isn't readable. Check its
   permissions (it should be owned by you, mode `600`).
 - **"Couldn't read your Ollama plan"** (an amber notice by the name) — the plan badge is missing because
-  Ollama either didn't answer that request or answered with something OpenUsage couldn't read. Your
+  Ollama either didn't answer that request or answered with something Meu Uso couldn't read. Your
   meters are unaffected and still current; the badge comes back on its own once Ollama answers normally.
 - **Meters show "No usage data"** — you're signed in, but Ollama returned no limits for the account yet.
   Check your usage at [ollama.com/settings](https://ollama.com/settings).
