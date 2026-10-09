@@ -1,32 +1,32 @@
-# Which Providers Are On
+# Quais provedores ficam ativados
 
-How Meu Uso decides which providers start on, what happens when an update adds a new provider, and the one rule that governs it all: **your own toggles always win and are never overridden.**
+Como o Meu Uso decide quais provedores começam ativados, o que acontece quando uma atualização traz um provedor novo e a regra que vale para tudo: **as escolhas que você faz sempre valem e nunca são desfeitas pelo app.**
 
-## First install
+## Primeira instalação
 
-A fresh install doesn't turn on every provider Meu Uso knows about. It starts with Claude, Codex, and Cursor, then quickly checks which providers have credentials available on your Mac — an existing local login, saved API key, or supported environment variable; nothing is sent anywhere — and switches to exactly that set. All providers are checked at once, so detection takes as long as the slowest single check, not the sum of them. If nothing is found, the Claude/Codex/Cursor starter set stays. Providers the check turns on are fetched right away, so they appear with data instead of waiting for the next scheduled refresh. See [Dashboard § First launch](dashboard.md#first-launch) for how the dashboard presents this.
+Uma instalação nova não ativa todos os provedores que o Meu Uso conhece. Ela começa com Claude, Codex e Cursor e logo confere quais provedores têm credenciais no seu Mac (um login local, uma chave de API salva ou uma variável de ambiente suportada; nada é enviado para lugar nenhum). Depois passa a usar exatamente esse conjunto. Todos os provedores são conferidos ao mesmo tempo, então a detecção leva o tempo da conferência mais lenta, não a soma de todas. Se nada for encontrado, ficam Claude, Codex e Cursor. Os provedores ativados pela conferência são buscados na hora, então já aparecem com dados, sem esperar a próxima atualização agendada. Veja [Painel § Primeira abertura](dashboard.md#primeira-abertura) para saber como o painel mostra isso.
 
-## When an update adds a new provider
+## Quando uma atualização traz um provedor novo
 
-The same detection runs for providers that arrive later. On the first launch after an update, Meu Uso compares the providers it now ships with the ones this install has seen before. For each brand-new one, it runs the same local-only credential check:
+A mesma detecção roda para provedores que chegam depois. Na primeira abertura depois de uma atualização, o Meu Uso compara os provedores que a versão nova traz com os que esta instalação já viu. Para cada provedor inédito, ele faz a mesma conferência de credenciais, só no seu Mac:
 
-- **Credentials are available locally** → the provider turns on and appears on the dashboard.
-- **No credentials are available** → it stays off. You can always turn it on later in **Customize**.
+- **Há credenciais no Mac** → o provedor é ativado e aparece no painel.
+- **Não há credenciais** → ele continua desativado. Você sempre pode ativá-lo depois, em **Personalizar**.
 
-This check happens **once per provider**. After that, the provider is yours to manage: if you turn it off, no update will ever turn it back on, and installing the tool later won't flip it on behind your back either — head to Customize when you want it.
+Essa conferência acontece **uma vez por provedor**. Depois disso, quem decide é você: se você desativar o provedor, nenhuma atualização vai ativá-lo de novo, e instalar a ferramenta mais tarde também não vai ativá-lo sem você saber. Quando quiser, ative em Personalizar.
 
-## Your choices always stick
+## Suas escolhas sempre valem
 
-Everything you set in Customize — providers on or off, metric layout, menu-bar stars — carries across updates untouched. The only thing an update may ever change is turning **on** a provider you have never seen before, and only when you actually have that tool installed.
+Tudo o que você define em Personalizar (provedores ativados ou desativados, arrumação das métricas, estrelas da barra de menus) continua intacto depois das atualizações. A única coisa que uma atualização pode mudar é **ativar** um provedor que você nunca viu, e só se você tiver mesmo a ferramenta instalada.
 
-The one exception is deliberate: the **Reset All Customization** button at the top of the Customize provider list. Because you asked for a clean slate, it re-runs the same local credential detection as first launch and switches the enabled set back to exactly the providers with credentials available on your Mac (Claude/Codex/Cursor if none are found) — so it can turn a provider off even if you had it on, or back on if you had turned it off. It also asks for confirmation first. See [Dashboard](dashboard.md) for the metric side of that reset.
+A única exceção é de propósito: o botão **Redefinir toda a personalização**, no topo da lista de provedores de Personalizar. Como você pediu para começar do zero, ele roda de novo a mesma detecção local de credenciais da primeira abertura e volta o conjunto ativado para exatamente os provedores com credenciais no seu Mac (Claude, Codex e Cursor, se nada for encontrado). Por isso ele pode desativar um provedor que você tinha ativado, ou ativar um que você tinha desativado. Ele também pede confirmação antes. Veja [Painel](dashboard.md) para o que essa redefinição faz com as métricas.
 
-## How it works (for the curious)
+## Como funciona (para curiosos)
 
-The app persists three small lists in its settings:
+O app guarda duas listas pequenas nos ajustes, e cada provedor sabe conferir as próprias credenciais:
 
-- **Enabled providers** — the providers currently on. This is the source of truth the dashboard and menu bar read.
-- **Known providers** — every provider this install has ever seen. This is what makes "new in this update" distinguishable from "you turned it off": a provider missing from the enabled list but present in the known list is a deliberate choice, and is left alone. Only providers missing from *both* get the credential check, and each is marked known immediately so the check never repeats.
-- Each provider implements a cheap, local-only credential probe (`hasLocalCredentials()`) — the same files, keychain entries, saved keys, and environment variables its normal refresh reads, never the network.
+- **Provedores ativados**: os provedores ligados agora. É a fonte que o painel e a barra de menus leem.
+- **Provedores conhecidos**: todo provedor que esta instalação já viu. É isso que separa "novo nesta atualização" de "você desativou": um provedor que não está na lista de ativados, mas está na de conhecidos, foi desativado de propósito e fica como está. Só os provedores que faltam nas *duas* listas passam pela conferência de credenciais, e cada um vira conhecido na hora, para a conferência nunca se repetir.
+- Cada provedor tem uma conferência de credenciais rápida e só local (`hasLocalCredentials()`). Ela olha os mesmos arquivos, itens das chaves do macOS, chaves salvas e variáveis de ambiente que a atualização normal do provedor lê, e nunca usa a rede.
 
-Older installs (from before first-run detection existed) started with every provider on and stored only the ones turned *off*. A one-time settings migration converts them to the lists above with the exact same providers on and off as before — nothing visibly changes on the launch that migrates; those installs simply join the same new-provider detection from then on.
+Instalações mais antigas, de antes de existir a detecção na primeira abertura, começavam com todos os provedores ativados e guardavam só os que estavam *desativados*. Uma migração única dos ajustes converte esses dados para as listas acima, com exatamente os mesmos provedores ativados e desativados de antes. Nada muda na tela na abertura em que a migração acontece; a partir daí, essas instalações entram na mesma detecção de provedores novos.

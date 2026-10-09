@@ -1,32 +1,32 @@
-# Menu Bar
+# Barra de menus
 
-Star your most important metrics straight into the menu bar strip.
+Marque com estrela as métricas mais importantes para elas aparecerem direto na barra de menus.
 
-## Right-clicking the icon
+## Clique com o botão direito no ícone
 
-Right-click (or control-click) the menu bar icon for a quick menu with **Settings** and **Quit**. Left-click opens the popover as usual.
+Clique com o botão direito (ou com a tecla Control pressionada) no ícone da barra de menus para abrir um menu rápido com **Ajustes** e **Encerrar o Meu Uso**. O clique normal abre a janela do app, como sempre.
 
-## Starring
+## Estrelas
 
-Star a metric from any row's right-click menu, or from the always-visible star beside a metric in Customize.
+Marque uma métrica com estrela pelo menu do clique com o botão direito em qualquer linha (**Adicionar à barra de menus**) ou pela estrela que fica sempre visível ao lado de cada métrica em Personalizar.
 
-- On first launch the app ships with a default set of stars (Antigravity Session/Weekly, Claude Session/Weekly, Codex Session/Weekly, Cursor Models/Other Models, Copilot Credits, OpenRouter Credits, Z.ai Session/Weekly) so the strip shows numbers right away. Change them anytime; a provider's Reset restores its defaults, and Reset All restores the full set. Only providers that are turned on render in the strip — and a fresh install starts with just the providers detected on your Mac (see [Dashboard § First launch](dashboard.md#first-launch)) — so the default stars don't crowd the menu bar with tools you don't use.
-- At most **2 stars per provider**.
-- When a star isn't allowed, the star button stays clickable — clicking it shakes and shows the reason in a temporary pill over the bottom of Customize (for example, "Up to 2 stars per provider").
+- Na primeira abertura, o app já vem com algumas estrelas, para a barra mostrar números logo de cara: Sessão e Semanal no Antigravity, no Claude, no Codex, no Ollama e no Z.ai; Modelos do Cursor e Outros modelos no Cursor; Créditos no Copilot e no OpenRouter. Mude quando quiser: o **Redefinir** de um provedor restaura as estrelas padrão dele, e **Redefinir toda a personalização** restaura o conjunto inteiro. Só os provedores ativados aparecem na barra, e uma instalação nova começa só com os provedores encontrados no seu Mac (veja [Painel § Primeira abertura](dashboard.md#primeira-abertura)). Assim as estrelas padrão não enchem a barra de menus com ferramentas que você não usa.
+- No máximo **2 estrelas por provedor**.
+- Quando uma estrela não é permitida, o botão da estrela continua clicável: ao clicar, ele balança e mostra o motivo num aviso temporário na parte de baixo de Personalizar (por exemplo, "Até 2 estrelas por provedor").
 
-## Styles
+## Estilos
 
-Settings → Appearance → Icon Style:
+**Ajustes → Aparência → Estilo do ícone**:
 
-- **Text** — provider icon plus values; two starred metrics from the same provider stack as a labeled pair.
-- **Bars** — a compact glyph containing the first four starred metrics that have a limit (metrics without limits only appear in Text style).
+- **Texto**: o ícone do provedor e os valores. Duas métricas com estrela do mesmo provedor aparecem empilhadas, uma sobre a outra, sem rótulo.
+- **Barras**: um ícone compacto com as quatro primeiras métricas com estrela que têm limite (métricas sem limite só aparecem no estilo Texto).
 
-## Hiding usage while screen sharing
+## Ocultar o uso ao compartilhar a tela
 
-Settings → Privacy → **Hide From Screen Share** (off by default). While your screen is being shared or recorded — a Zoom/Meet/Teams share, a screen recording, macOS Screen Sharing — the strip is replaced with the Meu Uso icon and wordmark, so token counts and spend never show up in front of an audience. The moment the capture ends, your starred metrics come right back. Captures you start yourself (a screen recording, for example) count too, so those get the wordmark as well.
+**Ajustes → Privacidade → Ocultar ao compartilhar a tela** (vem desativado). Enquanto sua tela está sendo compartilhada ou gravada (no Zoom, no Meet ou no Teams, numa gravação de tela ou pelo Compartilhamento de Tela do macOS), a barra troca os números pelo ícone e pelo nome do Meu Uso. Assim, contagens de tokens e gastos nunca aparecem para quem está assistindo. Quando a captura termina, suas métricas com estrela voltam na hora. Capturas que você mesmo inicia (uma gravação de tela, por exemplo) também contam e mostram o nome no lugar dos números.
 
-Detection rides the system's own "an app is capturing the screen" signal — the same one that lights the capture indicator in the menu bar — checked the instant it changes and re-checked every few seconds while the setting is on.
+A detecção usa o próprio aviso do sistema de que "um app está capturando a tela", o mesmo que acende o indicador de captura na barra de menus. Ela confere esse aviso no instante em que ele muda e de novo a cada poucos segundos enquanto o ajuste está ativado.
 
-## What the strip shows
+## O que a barra mostra
 
-The strip only renders real data. A starred metric with nothing fetched yet is skipped; a provider whose stars all lack data disappears entirely (icon included). When nothing has data, the strip falls back to the app icon. Stars follow your Customize order — Always Visible metrics first, then On Demand ones. A metric can be starred whether it's Always Visible or On Demand.
+A barra só mostra dados reais. Uma métrica com estrela que ainda não foi buscada fica de fora; um provedor cujas estrelas estão todas sem dados some por completo (inclusive o ícone). Quando nada tem dados, a barra volta a mostrar só o ícone do app. As estrelas seguem a ordem de Personalizar: primeiro as métricas de Sempre visível, depois as de Sob demanda. Uma métrica pode ter estrela tanto em Sempre visível quanto em Sob demanda.

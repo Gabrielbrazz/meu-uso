@@ -138,4 +138,21 @@ Only include category sections that have entries.
 - The version is the tag; never edit version files.
 - The appcast is append-only: older installs and the other channel's latest build must keep working, so the workflow aborts rather than shrink it.
 
-Release secrets and one-time setup live in the README under [Release setup](../../../README.md#release-setup-one-time).
+## One-time release setup
+
+No signed release exists yet. Before the first `v*` tag, the maintainer needs an Apple Developer Program membership and these repository secrets (Settings → Secrets and variables → Actions):
+
+| Secret | What it is |
+| --- | --- |
+| `APPLE_CERTIFICATE` | base64 of the Developer ID Application `.p12` |
+| `APPLE_CERTIFICATE_PASSWORD` | the password set when exporting that `.p12` |
+| `APPLE_ID` | the Apple ID email used for notarization |
+| `APPLE_PASSWORD` | an app-specific password for that Apple ID |
+| `APPLE_TEAM_ID` | the Apple Developer team ID |
+| `APPLE_DEVELOPER_ID_ICLOUD_PROFILE` | base64 Developer ID provisioning profile for the production iCloud container |
+| `SPARKLE_PUBLIC_KEY` | base64 EdDSA public key, baked into the build as `SUPublicEDKey` |
+| `SPARKLE_PRIVATE_KEY` | base64 EdDSA private key used to sign the DMG |
+
+Export the Developer ID Application certificate (with its private key) from Keychain Access as a `.p12`, then `base64 -i DeveloperID.p12 | pbcopy`. App-specific passwords come from appleid.apple.com → Sign-In and Security → App-Specific Passwords. Generate the Sparkle EdDSA key pair once with Sparkle's `generate_keys` tool; the public and private values must be a matching pair or signing is silently skipped. The appcast is served from GitHub Pages (`gh-pages` branch, `https://gabrielbrazz.github.io/meu-uso/appcast.xml`), so Pages must be enabled for that branch.
+
+For iCloud Sync, keep the development and Developer ID provisioning profiles somewhere safe. Install the development profile on each registered Mac; base64-encode the Developer ID profile and store it only in the `APPLE_DEVELOPER_ID_ICLOUD_PROFILE` secret. See [Sincronização com o iCloud](../../../docs/icloud-sync.md#configuração-para-desenvolvimento-e-release) for the container identifiers.

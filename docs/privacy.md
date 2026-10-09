@@ -1,80 +1,40 @@
-# Privacy & Usage Data
+# Privacidade
 
-Meu Uso always sends an **anonymous daily active ping** and **anonymous crash reports** so we can
-count active users and fix app crashes. These are not optional.
+O Meu Uso não tem telemetria. Ele não envia estatísticas de uso, relatórios de falha nem aviso de "app ativo" para serviço nenhum, e não existe ajuste para ligar isso. Esta página mostra com quem o app fala pela rede, o que ele guarda no seu Mac e quem consegue ler a API local.
 
-You can also share extra anonymous usage analytics to help us understand how the app is used and catch
-problems. Extra analytics is on by default for new installs. Turn it off any time in
-**Settings → Privacy → Help Make Meu Uso Better**. Existing
-installs keep the choice they already stored.
+## Com quem o app fala pela rede
 
-## What is always shared
+- **Os provedores que você ativou.** Para mostrar seu uso, o Meu Uso chama a API de cada provedor ativado com as credenciais que já estão no seu Mac. São as mesmas chamadas que as ferramentas do próprio provedor fazem: consultar uso, plano e limites e, quando preciso, renovar o login. O app não consulta provedores desativados (o comando `meu-uso` só consulta um provedor desativado se você pedir por ele pelo nome). A detecção de provedores, na primeira abertura ou quando chega um provedor novo, só olha o seu Mac, sem usar a rede. As páginas de cada provedor, listadas em [Provedores](README.md#provedores), mostram os endereços usados.
+- **As tabelas públicas de preço.** Para estimar o custo em dólar a partir dos tokens, o app baixa três listas públicas de [preços dos modelos](pricing.md), no máximo uma vez por hora cada (depois de uma falha, tenta de novo em 30 minutos):
+  - `https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json` (LiteLLM);
+  - `https://models.dev/api.json` (models.dev);
+  - `https://raw.githubusercontent.com/Gabrielbrazz/meu-uso/main/Sources/MeuUso/Resources/pricing_supplement.json` (o suplemento de preços do Meu Uso).
 
-Once per local day, Meu Uso sends an anonymous **app use** ping: that the app was active today, the
-app and macOS version, which providers and metrics you have enabled, and which metrics you've pinned
-to the menu bar or tucked behind the "show more" caret. A random ID (not tied to you or any account)
-lets us count daily active users without identifying anyone.
+  São downloads simples de dados públicos: não levam uso, logs nem dados de conta. O app traz cópias embutidas dessas listas para funcionar sem internet.
+- **O feed de atualização, só em builds de release.** Um build de release confere o feed `https://gabrielbrazz.github.io/meu-uso/appcast.xml` a cada hora (se **Buscar automaticamente** estiver ativado) e, quando você instala uma atualização, baixa o DMG das releases do GitHub. Essa busca não leva dados de uso. Os builds de desenvolvimento, os únicos que existem hoje, não têm feed e nunca fazem essa busca. Veja [Atualizações](updates.md).
+- **O iCloud, só se você ativar.** Com **Sincronizar entre Macs** ativado (vem desativado), o app grava no container privado dele, na sua conta do iCloud: os tokens e gastos diários normalizados, os totais por modelo, os nomes de modelos desconhecidos, o nome do Mac e identificadores das contas do Claude e do Codex (nos cards de conta do Codex, o identificador inclui o e-mail da conta). Credenciais, limites de conta, respostas dos provedores e logs brutos nunca vão para lá. Veja [Sincronização com o iCloud](icloud-sync.md), que também explica por que a opção fica indisponível nos builds de hoje.
 
-- **Crash reports** — if Meu Uso crashes, it saves a report and sends it the next time you open the
-  app: the technical stack trace (which parts of *Meu Uso's own code* were running when it crashed)
-  plus the app and macOS version. This contains no account details, credentials, or usage values —
-  just where in the app the crash happened.
+As linhas de gasto calculadas a partir dos logs locais das ferramentas (como as do Claude e do Codex) são montadas inteiramente no seu Mac; nenhum dado desses logs sai dele. O botão **Relatar um problema…** e os botões de atalho dos cards só abrem páginas no seu navegador. Fora a exceção acima, o comando `meu-uso` segue as mesmas regras do app. Se você configurar um [proxy](proxy.md), as chamadas aos provedores e às tabelas de preço passam por ele.
 
-## What the toggle shares
+## O que fica no seu Mac
 
-When extra analytics are on, Meu Uso also sends, for each provider refreshed that day, at most one
-provider-refresh event:
+- **Log.** O arquivo `~/Library/Logs/MeuUso/MeuUso.log`, mais uma cópia anterior (`MeuUso.1.log`), com no máximo uns 20 MB no total. Tokens, cookies e chaves de API são mascarados antes de qualquer linha ser gravada (sobram só os 4 primeiros e os 4 últimos caracteres, ou `[REDACTED]` quando o valor é curto demais), caminhos dentro da sua pasta pessoal viram `[PATH]` e as respostas dos provedores nunca são gravadas inteiras. O log só sai do Mac se você mesmo enviar. Veja [Logs](logging.md).
+- **Ajustes e últimos valores.** Os ajustes e o cache com os últimos valores de cada provedor (o que aparece na hora quando o app abre) ficam nas preferências do app, em `~/Library/Preferences/io.github.gabrielbrazz.meuuso.plist` (no build de desenvolvimento, `io.github.gabrielbrazz.meuuso.dev.plist`).
+- **Tabelas de preço.** As cópias baixadas das tabelas públicas de preço ficam em `~/Library/Application Support/MeuUso/pricing/`.
+- **Cache da leitura de logs.** Para não reler a cada abertura os logs do Claude, do Codex, do Grok e do pi que não mudaram, o Meu Uso guarda os eventos de uso já lidos em `~/Library/Application Support/MeuUso/log-scan-cache/`. Esses registros têm só os dados de uso necessários para os totais locais, inclusive o custo por evento quando o provedor já registra esse valor, e não guardam linhas JSONL brutas nem texto de conversa. Ficam restritos à sua conta do macOS e nunca são enviados a um provedor nem ao iCloud. Registros de arquivos antigos saem à medida que a janela de leitura avança, e caches de identidades sem uso há 35 dias são removidos. O cálculo de preço roda depois da leitura do cache, então os totais calculados não ficam salvos nele.
+- **Chaves de API.** As chaves do OpenRouter e do Z.ai que você digita em Personalizar ficam em `~/.config/meu-uso/openrouter.json` e `~/.config/meu-uso/zai.json`, num JSON simples (`{"apiKey": …}`) que só a sua conta do macOS pode ler. Se a chave vem de uma variável de ambiente (`OPENROUTER_API_KEY`, `ZAI_API_KEY`), o app só lê e não grava nada.
+- **ID deste Mac.** Um ID aleatório deste Mac, usado pela sincronização com o iCloud, fica nas chaves do macOS (item `io.github.gabrielbrazz.meuuso.icloud-sync-device-id.v1`). Ele é criado mesmo com a sincronização desativada, mas só sai do Mac se você ativá-la.
 
-- **Provider refreshes** — per provider, how many refreshes succeeded or failed that day, the **kinds**
-  of errors that happened (for example "not logged in", "network", or an HTTP status group), and how
-  many manual refreshes you triggered.
+## Credenciais guardadas neste Mac
 
-Turning the toggle off stops these extra events. Daily activity and crash reports continue.
+O Meu Uso usa principalmente as credenciais que as ferramentas dos provedores já guardam no seu Mac. Quando ele grava uma chave de API digitada por você ou salva uma credencial renovada, o arquivo é substituído de uma vez só e fica restrito à sua conta do macOS (leitura e escrita só para o dono). O cache de curta duração com tokens renovados do Antigravity (`~/Library/Application Support/MeuUso/antigravity/auth.json`) fica amarrado ao login atual nas chaves do macOS por uma impressão digital de mão única; a credencial de renovação em si não é copiada. Esse cache nunca é usado depois de um logout, de uma troca de conta ou enquanto o acesso às chaves do macOS estiver indisponível.
 
-## What is never shared
+O acesso ao Claude Desktop é só de leitura. O Meu Uso pode pedir ao macOS permissão para usar o item `Claude Safe Storage` das chaves do macOS, para decifrar o token de acesso atual do Desktop. Ele nunca usa o token de renovação do Desktop, que muda a cada uso, e nunca altera a configuração, os cookies ou os itens do Desktop nas chaves do macOS.
 
-- No account details, names, emails, or credentials.
-- No actual usage **values** (no spend amounts, token counts, or limits).
-- No error **messages** or file paths — only coarse error categories as counts.
+## API local
 
-## Credentials stored on this Mac
+A [API HTTP local](local-http-api.md) só escuta em `127.0.0.1:6737`, então outros aparelhos da sua rede não conseguem acessá-la. Ela só permite leitura e entrega os mesmos dados de uso da barra de menus, inclusive nomes de conta que podem conter o seu e-mail, mas nunca credenciais nem tokens. E ela não atende páginas da web: as respostas não trazem CORS, e requisições com `Origin` ou com `Host` diferente de `127.0.0.1:6737` e `localhost:6737` recebem 403. Assim, um site aberto no seu navegador não consegue ler esses dados; `curl`, scripts e apps do seu Mac continuam lendo. Veja [CORS e privacidade](local-http-api.md#cors-e-privacidade).
 
-Meu Uso primarily reads credentials that provider tools already keep on your Mac. When it writes a
-user-supplied API key or saves a refreshed credential, the file is replaced atomically and restricted to
-your macOS account (owner read and write only). Antigravity's short-lived refreshed-token cache is tied
-to the current Keychain login using a one-way fingerprint; the refresh credential itself is not copied.
-The cache is never used after logout, an account change, or while Keychain access is unavailable.
+## Na tela
 
-Claude Desktop access is strictly read-only. Meu Uso may ask macOS for permission to use the
-`Claude Safe Storage` Keychain item so it can decrypt Desktop's current access token. It never uses
-Desktop's rotating refresh token and never modifies Desktop's config, cookies, or Keychain data.
-
-## Other network requests
-
-Besides the provider API calls the vendor's own tools would make, Meu Uso fetches public [model price lists](pricing.md) about once an hour (from `raw.githubusercontent.com`, `models.dev`, and this project's GitHub Pages). These are plain downloads of public data — they carry no usage, log, or account information, and they run regardless of the analytics toggle. The spend tiles are computed from local CLI logs entirely on your Mac; no log data ever leaves it.
-
-To avoid re-reading unchanged Claude, Codex, and pi logs after every relaunch, Meu Uso keeps their
-parsed usage events in `~/Library/Application Support/MeuUso/log-scan-cache/`. These records contain
-the usage metadata needed for local totals, including any per-event cost already recorded by a provider,
-but not raw JSONL lines or conversation text. They are private to your macOS account and are never sent
-to PostHog, a provider, or iCloud. Old source-file records are dropped as the scan window advances, and
-identity caches that have not been used for 35 days are removed. Meu Uso's pricing engine runs after
-the cache is read, so its computed aggregates and totals are not persisted in this cache.
-
-If you explicitly turn on [iCloud Sync](icloud-sync.md), Meu Uso writes normalized daily tokens,
-spend, and model totals to its private iCloud container so your own Macs can show one combined summary.
-Credentials, account limits, provider responses, and raw logs are never written there. This is separate
-from anonymous usage analytics: iCloud Sync defaults off and uses your iCloud account, while the
-analytics toggle controls extra PostHog events, not daily activity or crash reports.
-
-## How it works
-
-- Data is fully anonymous: Meu Uso never identifies you to the analytics service and creates no user profile.
-- Daily activity and crash reports are always enabled, regardless of the extra-analytics switch.
-- Counts are rolled up locally and sent as daily summaries, so the app's normal 5-minute refresh never turns into a flood of network calls.
-- Your analytics choice and the anonymous ID are stored separately from the rest of the app's settings, so settings migrations and updates do not re-enable extra analytics or change your ID.
-
-## Turning extra analytics off
-
-Open **Settings → Privacy** and switch **Help Make Meu Uso Better**
-off. Extra usage analytics stop. Daily activity and crash reports continue.
+Para esconder os números da barra de menus quando você compartilha ou grava a tela, ative **Ajustes → Privacidade → Ocultar ao compartilhar a tela**. Veja [Barra de menus](menu-bar.md#ocultar-o-uso-ao-compartilhar-a-tela).

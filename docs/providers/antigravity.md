@@ -1,61 +1,63 @@
 # Antigravity
 
-Tracks pool quotas for Antigravity (Google's AI IDE) using credentials the app or the `agy` CLI already stored on your Mac.
+Acompanha as cotas do Antigravity (a IDE de IA do Google) com as credenciais que o app ou a CLI `agy` já guardaram no seu Mac.
 
-## What it tracks
+## O que mostra
 
-Antigravity has two shared quota pools, and each pool has two windows — a rolling 5-hour window and a weekly window:
+O Antigravity tem duas cotas compartilhadas, e cada uma tem duas janelas: uma janela móvel de 5 horas e uma janela semanal.
 
-| Metric | Meaning |
+| Métrica | O que significa |
 |---|---|
-| Session | The shared Gemini pool (Pro and Flash draw from the same quota), rolling 5-hour window |
-| Weekly | The same Gemini pool's weekly window |
-| Claude | The shared non-Gemini pool (Claude, GPT-OSS, …), rolling 5-hour window |
-| Claude Weekly | The same non-Gemini pool's weekly window |
-| Usage Trend | Daily token usage from local Antigravity conversations |
-| Today / Yesterday / Last 30 Days | Local token usage and estimated API-equivalent spend |
+| Sessão | A cota compartilhada do Gemini (Pro e Flash usam a mesma cota), na janela móvel de 5 horas |
+| Semanal | A janela semanal dessa mesma cota do Gemini |
+| Claude | A cota compartilhada dos modelos que não são Gemini (Claude, GPT-OSS, …), na janela móvel de 5 horas |
+| Claude semanal | A janela semanal dessa mesma cota |
+| Tendência de uso | Uso diário de tokens nas conversas locais do Antigravity |
+| Hoje / Ontem / Últimos 30 dias | Uso local de tokens e gasto estimado, equivalente ao da API |
 
-When Antigravity reports your subscription tier (such as `Pro` or `Ultra`), Meu Uso shows it beside the provider name.
+Quando o Antigravity informa o seu plano (como `Pro` ou `Ultra`), o Meu Uso mostra o plano ao lado do nome do provedor.
 
-Gemini Pro and Gemini Flash are one pool: using either model drains the same quota, so Meu Uso shows one meter per window instead of separate Pro and Flash meters. That pair is named Session and Weekly to match the other providers' rows. Every non-Gemini model shares the second pool, shown under the Claude name (like Codex's Spark pair). The quota API reports fractions, while token usage and estimated spend come separately from local conversation databases.
+O Gemini Pro e o Gemini Flash formam uma cota só: usar qualquer um dos dois consome a mesma cota. Por isso o Meu Uso mostra um medidor por janela, e não medidores separados para Pro e Flash. Esse par se chama Sessão e Semanal, como nas linhas dos outros provedores. Todos os modelos que não são Gemini dividem a segunda cota, que aparece com o nome Claude (como o par Spark do Codex). A API de cotas informa frações. O uso de tokens e o gasto estimado vêm à parte, dos bancos de dados locais das conversas.
 
-While a pool's rolling 5-hour window has no usage yet, that meter reads **Not started** on the trailing label instead of a reset countdown; hover explains that the session begins after your first message. The weekly meters always show a normal reset countdown.
+Enquanto a janela de 5 horas de uma cota ainda não tem uso, o medidor mostra **Não iniciada** no lugar da contagem até a renovação. Ao passar o mouse, uma dica explica que a sessão começa quando você envia a primeira mensagem. Os medidores semanais sempre mostram a contagem normal até a renovação.
 
-## Where credentials come from
+## De onde vêm as credenciais
 
-Meu Uso never asks for a token — it reads what Antigravity already has:
+O Meu Uso nunca pede um token. Ele lê o que o Antigravity já tem:
 
-- **Antigravity running** — Meu Uso talks to the app's local language server (the richest source, and where the plan name comes from).
-- **App closed** — it falls back to the OAuth token Antigravity / `agy` store in your macOS Keychain and queries Google's Cloud Code API. An expired token is refreshed automatically (Meu Uso never writes back to Antigravity's own keychain item). Its short-lived cache is reused only while the same Keychain login is present and readable.
+- **Antigravity aberto:** o Meu Uso conversa com o servidor de linguagem local do app. É a fonte mais completa, e é de onde vem o nome do plano.
+- **App fechado:** ele usa o token OAuth que o Antigravity e o `agy` guardam nas chaves do macOS (Keychain) e consulta a API Cloud Code do Google. Um token expirado é renovado automaticamente (o Meu Uso nunca grava no item das chaves do próprio Antigravity). O cache de curta duração desse token só é reaproveitado enquanto o mesmo login continuar presente e legível nas chaves do macOS.
 
-If neither is available you'll see *Start Antigravity or run `agy` and try again.*
+Se nenhum dos dois estiver disponível, você verá *Abra o Antigravity ou rode `agy` e tente de novo.*
 
-## Spend and usage history
+## Gasto e histórico de uso
 
-Meu Uso reads generation token counts, including the fixed system prompt, from every `~/.gemini/antigravity*/conversations` store (the `agy` CLI, the Antigravity IDE, the Antigravity 2.0 app, and ACP sessions) and estimates their API-equivalent cost using the shared [model pricing](../pricing.md). Today, Yesterday, and Last 30 Days contribute to the Total Spend card alongside the other providers. These are estimates, not charges from your Antigravity subscription, and conversation data never leaves your Mac. Previously scanned conversations are reused on refresh, so only new generation records need to be read.
+O Meu Uso lê a contagem de tokens de cada geração, incluindo o prompt de sistema fixo, em todas as pastas `~/.gemini/antigravity*/conversations` (da CLI `agy`, da IDE Antigravity, do app Antigravity 2.0 e das sessões ACP). Com esses números, ele estima o custo equivalente ao da API usando os [preços dos modelos](../pricing.md) compartilhados. Hoje, Ontem e Últimos 30 dias entram no card Gasto total, junto com os outros provedores. São estimativas, não cobranças da sua assinatura do Antigravity, e os dados das conversas nunca saem do seu Mac. Conversas já lidas são reaproveitadas a cada atualização, então só os registros de geração novos precisam ser lidos.
 
-When the model picker is on its default, Antigravity logs a placeholder ID (`gemini-default`, `gemini-pro-default`) and records the model that actually served the turn as a display label such as "Gemini 3.1 Pro (High)". Meu Uso prices those turns by that label, falling back to the placeholder ID when the label has no known rate (`gemini-pro-default` prices as Gemini 3.1 Pro). Anything that still cannot be priced remains visible in the unknown-models warning.
+Quando o seletor de modelo está no padrão, o Antigravity registra um ID genérico (`gemini-default`, `gemini-pro-default`) e grava o modelo que de fato respondeu como um nome de exibição, por exemplo "Gemini 3.1 Pro (High)". O Meu Uso calcula o preço dessas respostas pelo nome de exibição. Se esse nome não tiver preço conhecido, ele usa o ID genérico (`gemini-pro-default` tem o preço do Gemini 3.1 Pro). O que mesmo assim ficar sem preço continua visível no aviso de modelo desconhecido.
 
-The model breakdown groups by model family: effort variants such as `gemini-3.1-pro-low`, display labels, and placeholder IDs all count under one `gemini-3.1-pro` row, since they bill at the same rate. Names Meu Uso cannot map keep their raw text. Prompt-context records that carry no model and no generated tokens are not generations and are ignored.
+O detalhamento por modelo agrupa por família: variantes de esforço como `gemini-3.1-pro-low`, nomes de exibição e IDs genéricos entram todos na linha `gemini-3.1-pro`, porque têm o mesmo preço. Nomes que o Meu Uso não consegue mapear ficam com o texto original. Registros de contexto de prompt sem modelo e sem tokens gerados não são gerações e são ignorados.
 
-Subagents that Antigravity launches with a model tier (`flash_lite`, `flash`, `pro`) are logged with a `-tiered` model ID, such as `gemini-3.7-flash-tiered`. That is the same model at the same rate, so it counts under the base model's row.
+Subagentes que o Antigravity abre com um nível de modelo (`flash_lite`, `flash`, `pro`) aparecem no log com um ID terminado em `-tiered`, como `gemini-3.7-flash-tiered`. É o mesmo modelo, com o mesmo preço, então o uso entra na linha do modelo base.
 
-The transcript logs don't include token accounting, so they aren't used. Missing or unpriced models aren't assigned an invented price, and unusually large generation records are skipped with a warning to keep memory usage bounded.
+Os logs de transcrição não trazem a contagem de tokens, por isso não são usados. Modelos ausentes ou sem preço não recebem um preço inventado. Registros de geração grandes demais são pulados, com um aviso no log, para manter o uso de memória sob controle.
 
-## Troubleshooting
+## Solução de problemas
 
-- **"Start Antigravity or run `agy`…"** — sign in to the Antigravity app (or run `agy`) so a usable token exists, then refresh.
-- **"Couldn't read Antigravity credentials…"** — unlock Keychain or sign in to Antigravity again. Meu Uso will not use its cached access token until the current login can be verified.
-- **The weekly meters show "No data"** — your Antigravity build doesn't expose the quota-summary endpoint yet (only newer builds do). The 5-hour meters still work from the older endpoints; updating Antigravity brings the weekly meters back.
-- **A meter shows "No data"** — that pool/window wasn't in the latest response (some tiers only report certain windows). The other meters still update.
-- **Spend or usage history shows "No data"** — Antigravity hasn't written usable conversation databases yet. Run an Antigravity or `agy` session, then refresh.
-- **Where did the Gemini Pro and Flash meters go?** — merged: both models draw from the one shared Gemini pool, which is now the single Session meter.
-- **Quotas look full after heavy use** — the 5-hour windows reset on a rolling basis and the weekly windows once a week; the reset time is shown on each meter.
+- **"Abra o Antigravity ou rode `agy`…"**: entre no app Antigravity (ou rode `agy`) para que exista um token válido e atualize.
+- **"Não foi possível ler as credenciais do Antigravity…"**: desbloqueie as chaves do macOS ou entre no Antigravity de novo. O Meu Uso não usa o token de acesso em cache enquanto não conseguir confirmar o login atual.
+- **Os medidores semanais mostram "Sem dados"**: a sua versão do Antigravity ainda não tem o endpoint de resumo de cotas (só as versões mais novas têm). Os medidores de 5 horas continuam funcionando pelos endpoints antigos. Atualize o Antigravity para os medidores semanais voltarem.
+- **Um medidor mostra "Sem dados"**: essa cota ou janela não veio na última resposta (alguns planos só informam certas janelas). Os outros medidores continuam atualizando.
+- **O gasto ou o histórico de uso mostram "Sem dados"**: o Antigravity ainda não gravou bancos de dados de conversa que possam ser lidos. Use o Antigravity ou o `agy` numa sessão e atualize.
+- **Onde foram parar os medidores do Gemini Pro e do Flash?** Eles foram unidos: os dois modelos usam a mesma cota compartilhada do Gemini, que agora é o medidor único de Sessão.
+- **As cotas parecem esgotadas depois de muito uso**: as janelas de 5 horas renovam de forma contínua, e as semanais, uma vez por semana. Cada medidor mostra quando renova.
 
-## Under the hood
+## Por dentro
 
-Best source first: the local language server discovered by scanning for the `language_server` / `agy` process and reading its CSRF token and listening ports; then Google Cloud Code using the Keychain token, refreshed via Google OAuth when needed. Meu Uso binds its short-lived refreshed-token cache to a one-way fingerprint of the current Keychain refresh credential. Logout, account changes, legacy caches, and expired or malformed entries cannot reuse a previous account's access token. On each source Meu Uso asks the quota-summary endpoint first (`RetrieveUserQuotaSummary` on the language server, `v1internal:retrieveUserQuotaSummary` on Cloud Code) — the only endpoint that reports the merged pools and the weekly windows. Builds without it fall back to the legacy per-model endpoints (`GetUserStatus` / `GetCommandModelConfigs` locally, `fetchAvailableModels` / `retrieveUserQuota` remotely), whose per-model quotas are merged into the two pools by keeping each pool's worst remaining fraction; those endpoints only know the 5-hour windows. The plan name prefers Antigravity's own `userTier` over the inherited Windsurf plan field. Spend history comes from the generation-accounting protobuf records in each local conversation database.
+A melhor fonte vem primeiro: o servidor de linguagem local, encontrado procurando o processo `language_server` / `agy` e lendo o token CSRF e as portas em que ele escuta. Depois vem o Google Cloud Code, com o token das chaves do macOS, renovado pelo OAuth do Google quando preciso. O Meu Uso vincula o cache do token renovado a um hash de mão única da credencial de renovação que está nas chaves do macOS. Assim, logout, troca de conta, caches antigos e entradas expiradas ou malformadas nunca reaproveitam o token de acesso de uma conta anterior.
 
-Thanks to [FelixIsaac](https://github.com/FelixIsaac) for identifying the conversation-database source and contributing the original SQLite/protobuf implementation in [issue robinebers/openusage#1120](https://github.com/robinebers/openusage/issues/1120) and [pull request robinebers/openusage#1058](https://github.com/robinebers/openusage/pull/1058).
+Em cada fonte, o Meu Uso chama primeiro o endpoint de resumo de cotas (`RetrieveUserQuotaSummary` no servidor de linguagem, `v1internal:retrieveUserQuotaSummary` no Cloud Code). É o único endpoint que informa as cotas unidas e as janelas semanais. Versões sem ele caem nos endpoints antigos, por modelo (`GetUserStatus` / `GetCommandModelConfigs` localmente, `fetchAvailableModels` / `retrieveUserQuota` remotamente). As cotas por modelo são reunidas nas duas cotas compartilhadas, ficando com a menor fração restante de cada uma, e esses endpoints só conhecem as janelas de 5 horas. Para o nome do plano, o Meu Uso prefere o `userTier` do próprio Antigravity ao campo de plano herdado do Windsurf. O histórico de gasto vem dos registros protobuf de contabilização de geração em cada banco de dados local de conversa.
 
-> Reverse-engineered from the app and language-server binary; endpoints and storage may change without notice.
+Agradecimentos a [FelixIsaac](https://github.com/FelixIsaac), que identificou o banco de dados das conversas como fonte e contribuiu com a primeira implementação em SQLite/protobuf na [issue robinebers/openusage#1120](https://github.com/robinebers/openusage/issues/1120) e no [pull request robinebers/openusage#1058](https://github.com/robinebers/openusage/pull/1058).
+
+> Obtido por engenharia reversa do app e do binário do servidor de linguagem. Endpoints e armazenamento podem mudar sem aviso.

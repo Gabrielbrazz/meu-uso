@@ -1,14 +1,20 @@
-provider:
+provedor:
   - changed-files:
       - any-glob-to-any-file: "Sources/MeuUso/Providers/**"
 
-tests:
+testes:
   - changed-files:
       - any-glob-to-any-file: "Tests/**"
 
 docs:
   - changed-files:
       - any-glob-to-any-file: "docs/**"
+
+tradução:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "assets/Localization/**"
+          - "docs/glossario.md"
 
 ci:
   - changed-files:

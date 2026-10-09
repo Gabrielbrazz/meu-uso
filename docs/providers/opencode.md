@@ -1,82 +1,44 @@
 # OpenCode
 
-Tracks your OpenCode-hosted usage — the **Go** subscription and the **Zen** pay-as-you-go gateway. Go
-plan windows come from OpenCode's official usage API. Spend tiles and the usage trend still come from
-OpenCode's logs already on your Mac.
+Acompanha o seu uso hospedado pelo OpenCode: a assinatura **Go** e o gateway pago por uso **Zen**. As janelas do plano Go vêm da API de uso oficial do OpenCode. As linhas de gasto e a tendência de uso continuam vindo dos logs do OpenCode que já estão no seu Mac.
 
-## What it tracks
+## O que mostra
 
-| Metric | Meaning |
+| Métrica | O que significa |
 |---|---|
-| Session | Go usage in the rolling 5-hour window, as a percent, with the reset countdown |
-| Weekly | Go usage this week, as a percent (resets Monday UTC) |
-| Monthly | Go usage this billing cycle, as a percent |
-| Today / Yesterday / Last 30 Days | Local cost and tokens across all your OpenCode-hosted usage (Go + Zen) |
-| Usage Trend | A day-by-day sparkline of tokens over the last month |
+| Sessão | Uso do Go na janela móvel de 5 horas, em porcentagem, com a contagem até a renovação |
+| Semanal | Uso do Go nesta semana, em porcentagem (renova na segunda-feira, em UTC) |
+| Mensal | Uso do Go neste ciclo de cobrança, em porcentagem |
+| Hoje / Ontem / Últimos 30 dias | Custo e tokens locais de todo o seu uso hospedado pelo OpenCode (Go + Zen) |
+| Tendência de uso | Um gráfico dia a dia dos tokens do último mês |
 
-When you have the Go subscription, Meu Uso shows "Go" beside the provider name.
+Quando você tem a assinatura Go, o Meu Uso mostra "Go" ao lado do nome do provedor.
 
-The Session / Weekly / Monthly meters are **account-wide** — the same percents the OpenCode dashboard
-shows, including usage from other machines. If you only use the Zen pay-as-you-go gateway (no Go
-subscription), the cap meters are hidden and you'll just see the spend tiles.
+Os medidores de Sessão, Semanal e Mensal valem para a **conta inteira**: são as mesmas porcentagens que o painel do OpenCode mostra, incluindo o uso em outras máquinas. Se você só usa o gateway pago por uso Zen (sem assinatura Go), esses medidores mostram "Sem dados" e só as linhas de gasto trazem números.
 
-## Where credentials come from
+## De onde vêm as credenciais
 
-Use OpenCode as usual. Meu Uso reads the `opencode-go` API key from OpenCode's local data directory
-(`~/.local/share/opencode`, or `$OPENCODE_DATA_DIR` / `$XDG_DATA_HOME` if you've set them) and sends it
-as a Bearer token to the usage API. OpenCode 2 keeps that key in its local databases; OpenCode 1 keeps
-it in `auth.json`. OpenCode 2 leaves an old copy of `auth.json` behind after upgrading, so once the
-databases hold credentials, Meu Uso ignores that file — logging out of Go in OpenCode 2 is respected. There's no login prompt and no token to paste. Spend tiles
-still read the local SQLite logs in that same directory.
+Use o OpenCode normalmente. O Meu Uso lê a chave de API `opencode-go` na pasta de dados local do OpenCode (`~/.local/share/opencode`, ou `$OPENCODE_DATA_DIR` / `$XDG_DATA_HOME`, se você definiu essas variáveis) e a envia como token Bearer para a API de uso. O OpenCode 2 guarda essa chave nos bancos de dados locais; o OpenCode 1, no `auth.json`. O OpenCode 2 deixa para trás uma cópia antiga do `auth.json` depois da atualização. Por isso, quando os bancos de dados já têm credenciais, o Meu Uso ignora esse arquivo, e sair do Go no OpenCode 2 é respeitado. Não há pedido de login nem token para colar. As linhas de gasto continuam lendo os logs SQLite locais nessa mesma pasta.
 
-When OpenCode uses its built-in ChatGPT Pro/Plus OAuth login, that usage belongs to the Codex
-subscription and appears in Meu Uso's **Codex** spend tiles and trend, including OpenCode 2's
-local logs. It is not mixed into the OpenCode-hosted Go + Zen totals. Its separate per-request token
-buckets are estimated with the same cache, long-context, and fast/priority rules as native Codex
-usage. Each release channel (stable `opencode.db`, preview `opencode-next.db`) is judged by its own
-login, so one channel on an API key never hides another channel's ChatGPT usage. Ordinary OpenAI
-API-key traffic is not attributed to Codex.
+Quando o OpenCode usa o login OAuth do ChatGPT Pro/Plus que vem nele, esse uso pertence à assinatura do Codex. Ele aparece nas linhas de gasto e na tendência do **Codex** no Meu Uso, incluindo os logs locais do OpenCode 2, e não se mistura aos totais de Go + Zen hospedados pelo OpenCode. Os tokens de cada pedido, separados por tipo, são estimados com as mesmas regras de cache, contexto longo e fast/priority do uso nativo do Codex. Cada canal de lançamento (estável, `opencode.db`; prévia, `opencode-next.db`) é avaliado pelo próprio login, então um canal com chave de API nunca esconde o uso do ChatGPT de outro canal. O tráfego comum com chave de API da OpenAI não é atribuído ao Codex.
 
-## The meters and spend tiles
+## Medidores e linhas de gasto
 
-Go meters are percents from `GET https://opencode.ai/zen/go/v1/usage` — OpenCode's own accounting, not
-an estimate. Each spend tile shows cost and tokens together (`$4.08 · 1.2M tokens`), the same as Claude /
-Codex / Cursor. Those dollars come straight from the per-message cost OpenCode records for its hosted
-gateways on this Mac, so they can be lower than account-wide Go usage. A period with no recorded local
-usage reads "No data" rather than a misleading `$0.00`. No log data leaves your Mac.
+Os medidores do Go são porcentagens de `GET https://opencode.ai/zen/go/v1/usage`, a contabilidade do próprio OpenCode, e não uma estimativa. Cada linha de gasto mostra custo e tokens juntos (`US$ 4,08 · 1,2 mi tokens`), como no Claude, no Codex e no Cursor. Esses dólares vêm direto do custo por mensagem que o OpenCode registra neste Mac para os gateways hospedados, então podem ser menores que o uso do Go na conta inteira. Um período sem uso local registrado mostra "Sem dados", e não um enganoso `US$ 0,00`. Nenhum dado dos logs sai do seu Mac.
 
-While the rolling 5-hour session window has no usage in it, the Session row shows **Not started** on
-the trailing label; hover explains that the session begins after your first message. Once the window is
-running the row shows the countdown to its reset — including when OpenCode's whole-percent numbers
-still read 0% because less than 1% has been used.
+Enquanto a janela móvel de 5 horas não tem uso, a linha Sessão mostra **Não iniciada** no lugar da contagem. Ao passar o mouse, uma dica explica que a sessão começa quando você envia a primeira mensagem. Quando a janela está correndo, a linha mostra a contagem até a renovação, inclusive quando os números inteiros do OpenCode ainda mostram 0% porque menos de 1% foi usado.
 
-## Troubleshooting
+## Solução de problemas
 
-- **No Session / Weekly / Monthly meters** — those are Go-plan windows. You'll see them when you're
-  logged into OpenCode Go and the key has an active subscription.
-  Zen-only users see the spend tiles instead.
-- **"OpenCode Go key was rejected"** — the local key was not accepted. Log into OpenCode Go again. If
-  you have local usage, the spend tiles still show; only the Go meters are hidden. The same applies
-  when the usage API can't be reached.
-- **"No OpenCode Go subscription on this key"** — the key is valid but this account isn't on Go. The
-  spend tiles still work if you use Zen locally.
-- **"Couldn't read OpenCode's auth.json"** — the file exists but is unreadable or not valid JSON. Check
-  its permissions, or log into OpenCode Go again to rewrite it.
-- **Spend tiles show "No data"** — Meu Uso needs OpenCode's local database at
-  `~/.local/share/opencode/opencode*.db`. Run an OpenCode session, then refresh.
-- **"Couldn't read OpenCode's local database"** — the database (or data directory) exists but couldn't be
-  read this refresh. If you're on Go, the percent meters still refresh; quit OpenCode and refresh to
-  restore the tiles. If it persists, check the permissions on `~/.local/share/opencode`.
+- **Sessão, Semanal e Mensal mostram "Sem dados"**: são janelas do plano Go. Os números aparecem quando você está conectado no OpenCode Go e a chave tem uma assinatura ativa. Quem usa só o Zen vê os números nas linhas de gasto.
+- **"A chave do OpenCode Go foi recusada"**: a chave local não foi aceita. Entre no OpenCode Go de novo. Se você tem uso local, as linhas de gasto continuam aparecendo, sem essa mensagem, e só os medidores do Go ficam em "Sem dados". O mesmo vale quando a API de uso não responde.
+- **"Nenhuma assinatura do OpenCode Go nesta chave"**: a chave é válida, mas esta conta não está no Go. As linhas de gasto continuam funcionando se você usa o Zen neste Mac.
+- **"Não foi possível ler o auth.json do OpenCode"**: o arquivo existe, mas não pode ser lido ou não é um JSON válido. Confira as permissões ou entre no OpenCode Go de novo para regravá-lo.
+- **As linhas de gasto mostram "Sem dados"**: o Meu Uso precisa do banco de dados local do OpenCode em `~/.local/share/opencode/opencode*.db`. Use o OpenCode numa sessão e atualize.
+- **"Não foi possível ler o banco de dados local do OpenCode"**: o banco de dados (ou a pasta de dados) existe, mas não pôde ser lido nesta atualização. Se você está no Go, os medidores de porcentagem continuam atualizando. Encerre o OpenCode e atualize para as linhas de gasto voltarem. Se o problema continuar, confira as permissões de `~/.local/share/opencode`.
 
-## Under the hood
+## Por dentro
 
-Go windows: `GET https://opencode.ai/zen/go/v1/usage` with the `opencode-go` key as `Authorization:
-Bearer …`. The response is `{ usage: { rolling, weekly, monthly } }`, each with `percent` and
-`resetsAt`. A 401 is a rejected key; a 403 `EntitlementError` means no Go subscription.
+Janelas do Go: `GET https://opencode.ai/zen/go/v1/usage` com a chave `opencode-go` como `Authorization: Bearer …`. A resposta é `{ usage: { rolling, weekly, monthly } }`, cada um com `percent` e `resetsAt`. Um 401 é uma chave recusada; um 403 `EntitlementError` quer dizer que não há assinatura Go.
 
-Spend tiles and trend: assistant-message `cost` and token fields from every `opencode*.db` in the data
-directory (OpenCode partitions its database by release channel — stable is `opencode.db`, the preview
-line is `opencode-next.db` — so all channels are unioned). Both `opencode-go` (Go) and `opencode` (Zen)
-count. OpenCode 1 logs to the `message` table and OpenCode 2 to `session_message`; both are read, and
-completed context compactions count too. OpenCode 2 copies old messages into the new table under the
-same ID, so each message is counted once. Read-only.
+Linhas de gasto e tendência: os campos `cost` e de tokens das mensagens do assistente em todo `opencode*.db` da pasta de dados. O OpenCode separa o banco de dados por canal de lançamento (o estável é `opencode.db` e a linha de prévia é `opencode-next.db`), então todos os canais são somados. Contam tanto `opencode-go` (Go) quanto `opencode` (Zen). O OpenCode 1 grava na tabela `message` e o OpenCode 2 na `session_message`. As duas são lidas, e compactações de contexto concluídas também contam. O OpenCode 2 copia as mensagens antigas para a tabela nova com o mesmo ID, então cada mensagem conta uma vez. Tudo só leitura.

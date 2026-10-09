@@ -1,34 +1,30 @@
-<!-- Meu Uso has a strict, issue-first PR policy. External pull requests are closed
-automatically unless they link an issue a maintainer has approved with the `approved`
-label and assigned to the PR author. PRs adding more than 1,000 lines receive a warning.
-Visual changes require screenshots during maintainer review.
-See CONTRIBUTING.md. Maintainers and collaborators may open PRs directly. -->
+<!-- Obrigado pela contribuição! Mudanças grandes devem ser combinadas numa issue antes. Veja o CONTRIBUTING.md. -->
 
-## Approved issue
+## Resumo
 
-<!-- External PRs require an open issue labeled `approved` and assigned to their author. -->
-Fixes #
+<!-- Uma ou duas frases: o que este PR faz? -->
 
-## TL;DR
+## Contexto
 
-<!-- One or two plain-English sentences: what does this PR do? -->
+<!-- O comportamento anterior, o bug ou a lacuna que motivou a mudança. Se houver issue, cite: Fixes #123 -->
 
-## What was happening
+## O que muda
 
-<!-- The prior behavior, bug, or gap that motivated this change. -->
+<!-- O que este PR muda de fato. -->
 
-## What this changes
+## Atenção
 
-<!-- What this PR actually changes. -->
+<!-- Opcional: riscos, pendências ou trade-offs que vale saber. Apague se não houver. -->
 
-## Heads-up
+## Testes
 
-<!-- Optional: risks, follow-ups, or trade-offs a reviewer should know. Delete if none. -->
+<!-- Como você verificou a mudança (swift test, app de dev, passos manuais). -->
 
-## Tests
+## Prints
 
-<!-- Optional: how you verified the change. Delete if none. -->
+<!-- Obrigatório para mudança visual: antes e depois. Escreva "Não se aplica" se não for visual. -->
 
-## Screenshots
+## Checklist
 
-<!-- Required for any visual change: include before/after images. Write "Not applicable" if this isn't a visual change. -->
+- [ ] Texto novo de interface tem tradução na tabela pt-BR (`python3 script/check_localization.py`)
+- [ ] Docs atualizados se o comportamento visível mudou

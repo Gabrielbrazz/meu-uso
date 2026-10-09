@@ -10,7 +10,7 @@ enum ProviderCatalog {
         codex: CodexAccountDiscovery = CodexAccountDiscovery(),
         claudeIdentityKeys: [String: String] = [:]
     ) -> [ProviderRuntime] {
-        // Default provider order (see AGENTS.md "## Providers"): the three established providers first,
+        // Default provider order (see AGENTS.md "## Provedores"): the three established providers first,
         // then every other provider alphabetically by display name.
         var providers: [ProviderRuntime]
         if claudeCards.isEmpty {

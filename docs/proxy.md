@@ -1,13 +1,13 @@
 # Proxy
 
-Meu Uso can route all provider requests through an optional proxy.
+O Meu Uso pode mandar todas as requisições aos provedores por um proxy, se você quiser.
 
-- Supported: `socks5://`, `http://`, `https://`
-- Config file: `~/.meu-uso/config.json`
-- Default: off
-- UI: none — file only
+- Suporta: `socks5://`, `http://`, `https://`
+- Arquivo de configuração: `~/.meu-uso/config.json`
+- Padrão: desativado
+- Interface: nenhuma, só o arquivo
 
-## Config file
+## Arquivo de configuração
 
 ```json
 {
@@ -18,7 +18,7 @@ Meu Uso can route all provider requests through an optional proxy.
 }
 ```
 
-Authenticated proxies put credentials in the URL:
+Para um proxy com autenticação, coloque as credenciais na URL:
 
 ```json
 {
@@ -29,14 +29,14 @@ Authenticated proxies put credentials in the URL:
 }
 ```
 
-When the URL has no port, the scheme's default applies (socks5 → 1080, http → 80, https → 443).
+Se a URL não tiver porta, vale a porta padrão do esquema (socks5 → 1080, http → 80, https → 443).
 
-## Behavior
+## Comportamento
 
-- The config is read once at launch — **restart Meu Uso after changing the file**.
-- `localhost`, `127.0.0.1`, and `::1` always bypass the proxy (the [local HTTP API](local-http-api.md) is unaffected).
-- A missing, disabled, invalid, or unreadable config simply leaves proxying off.
+- O arquivo é lido uma vez, quando o app abre. **Reinicie o Meu Uso depois de mudar o arquivo.** O comando `meu-uso` lê o arquivo a cada execução.
+- `localhost`, `127.0.0.1` e `::1` nunca passam pelo proxy (a [API HTTP local](local-http-api.md) não é afetada).
+- Se o arquivo não existir, não puder ser lido, for inválido ou estiver com `"enabled": false`, o proxy simplesmente fica desligado.
 
-## Scope
+## Alcance
 
-Applies to provider HTTP requests made by the app, including the daily [model pricing](pricing.md) refresh. It is not a system-wide proxy.
+Vale para as requisições HTTP que o app faz aos provedores, inclusive a atualização dos [preços dos modelos](pricing.md), que acontece a cada hora. Não é um proxy do sistema todo: a busca de atualizações (Sparkle) e o iCloud não passam por ele.

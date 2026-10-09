@@ -1,65 +1,64 @@
-name: Bug Report
-description: Report a bug in Meu Uso
+name: Relatar um bug
+description: Algo não funciona como deveria no Meu Uso
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for reporting a bug. Please fill in the details below.
+        Obrigado por relatar. Quanto mais detalhes, mais rápido dá para corrigir.
+        Nunca cole chaves de API, tokens ou cookies.
   - type: textarea
     id: description
     attributes:
-      label: Description
-      description: What happened?
-      placeholder: A clear description of the bug.
+      label: Descrição
+      description: O que aconteceu?
+      placeholder: Uma descrição clara do bug.
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Steps to Reproduce
-      description: How can we reproduce this?
+      label: Passos para reproduzir
+      description: Como chegar no problema?
       placeholder: |
-        1. Open Meu Uso
-        2. Go to ...
-        3. Click on ...
-        4. See error
+        1. Abra o Meu Uso
+        2. Vá em ...
+        3. Clique em ...
+        4. Veja o erro
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: Expected Behavior
-      description: What should have happened?
+      label: O que deveria acontecer
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
-      label: Actual Behavior
-      description: What actually happened?
+      label: O que aconteceu de fato
     validations:
       required: true
   - type: input
     id: version
     attributes:
-      label: Meu Uso Version
-      description: Which version are you running?
-      placeholder: "e.g. 0.1.0"
+      label: Versão do Meu Uso
+      description: Aparece no rodapé do painel e em "Sobre o Meu Uso".
+      placeholder: "ex.: 0.1.0"
     validations:
       required: true
   - type: input
     id: macos
     attributes:
-      label: macOS Version
-      description: Meu Uso requires macOS 15 (Sequoia) or later.
-      placeholder: "e.g. 15.5"
+      label: Versão do macOS
+      description: O Meu Uso precisa do macOS 15 (Sequoia) ou mais novo.
+      placeholder: "ex.: 26.0"
     validations:
       required: true
   - type: dropdown
     id: chip
     attributes:
-      label: Mac Type
+      label: Tipo de Mac
       options:
         - Apple Silicon
         - Intel
@@ -68,10 +67,10 @@ body:
   - type: textarea
     id: screenshots
     attributes:
-      label: Screenshots
-      description: If applicable, drag and drop or paste screenshots here.
+      label: Prints
+      description: Se ajudar, arraste ou cole imagens aqui (esconda dados pessoais).
   - type: textarea
     id: additional
     attributes:
-      label: Additional Context
-      description: Any other information that might be helpful.
+      label: Mais contexto
+      description: Qualquer outra informação útil, como trechos do log em ~/Library/Logs/MeuUso.

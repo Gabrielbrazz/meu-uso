@@ -1,34 +1,35 @@
 # Grok
 
-Tracks Grok Build credit usage using the login from the Grok CLI.
+Acompanha o uso de créditos do Grok Build usando o login da CLI do Grok.
 
-## What it tracks
+## O que mostra
 
-| Metric | Meaning |
+| Métrica | O que significa |
 |---|---|
-| Weekly | The shared weekly pool's usage percent (the limit Grok's unified billing enforces), with the weekly reset countdown |
-| Extra Usage | Pay-as-you-go cap as a status (e.g. `2500 cap` or `Disabled`) |
-| Today / Yesterday / Last 30 Days | Local cost and tokens from completed Grok CLI sessions |
+| Semanal | Porcentagem usada da cota semanal compartilhada (o limite que a cobrança unificada do Grok aplica), com a contagem até a renovação semanal |
+| Uso extra | Limite do modo pago por uso, em forma de status (ex.: `limite de 2.500` ou `Desativado`) |
+| Tendência de uso | Gráfico diário de tokens dos últimos 30 dias, dos mesmos logs das linhas de gasto |
+| Hoje / Ontem / Últimos 30 dias | Custo e tokens locais das sessões concluídas da CLI do Grok |
 
-When Grok reports your subscription tier, Meu Uso shows it beside the provider name.
+Quando o Grok informa o seu plano, o Meu Uso mostra o plano ao lado do nome do provedor.
 
-The weekly shared pool is the limit Grok enforces for unified-billing accounts (the old monthly credits meter is legacy and no longer shown). Accounts that haven't been migrated to unified billing have no weekly pool, so the Weekly tile reads "No data" there.
+A cota semanal compartilhada é o limite que o Grok aplica às contas com cobrança unificada (o antigo medidor de créditos mensais é legado e não aparece mais). Contas que ainda não migraram para a cobrança unificada não têm cota semanal, então a linha Semanal mostra "Sem dados".
 
-## Where credentials come from
+## De onde vêm as credenciais
 
-Sign in once with the Grok CLI (`grok login`); Meu Uso reads the same `~/.grok/auth.json`. Access tokens refresh automatically before expiry, and rotated tokens are written back to the file.
+Entre uma vez pela CLI do Grok (`grok login`); o Meu Uso lê o mesmo `~/.grok/auth.json`. Os tokens de acesso são renovados automaticamente antes de expirar, e os tokens trocados são gravados de volta no arquivo.
 
-## The spend tiles
+## As linhas de gasto
 
-Today / Yesterday / Last 30 Days are computed **locally** from completed Grok CLI sessions under `~/.grok/sessions/` (or `$GROK_HOME/sessions/`). This includes subagent, resumed, and forked sessions: their work is not necessarily included in the parent session's usage. Copies of the same completed event are counted once per model across session logs. Meu Uso uses the cost Grok recorded for each completed turn when available; older turns without a recorded cost are estimated using the shared [model pricing](../pricing.md). Days follow your Mac's local time zone, and each period shows cost and tokens together (`$4.08 · 1.2M tokens`). These amounts are separate from the credits reported by Grok's billing API, and no session data leaves your Mac. A period with no completed usage reads "No data" rather than `$0.00 · 0 tokens`.
+Hoje, Ontem e Últimos 30 dias são calculados **localmente** a partir das sessões concluídas da CLI do Grok em `~/.grok/sessions/` (ou `$GROK_HOME/sessions/`). Isso inclui sessões de subagentes, retomadas e bifurcadas, porque o trabalho delas nem sempre entra no uso da sessão pai. Cópias do mesmo evento concluído contam uma vez por modelo, mesmo que apareçam em vários logs de sessão. O Meu Uso usa o custo que o Grok registrou em cada turno concluído, quando existe. Turnos antigos sem custo registrado são estimados com os [preços dos modelos](../pricing.md) compartilhados. Os dias seguem o fuso horário local do seu Mac, e cada período mostra custo e tokens juntos (`US$ 4,08 · 1,2 mi tokens`). Esses valores são separados dos créditos informados pela API de faturamento do Grok, e nenhum dado das sessões sai do seu Mac. Um período sem uso concluído mostra "Sem dados", e não `US$ 0,00 · 0 tokens`.
 
-## Troubleshooting
+## Solução de problemas
 
-- **"Session expired" / auth errors** — run `grok login` again, then refresh.
-- **Weekly shows "No data"** — your account still reports a monthly (non-weekly) period, meaning it hasn't been migrated to Grok's unified weekly billing yet.
-- **Weekly and Extra Usage stay blank on a team/business login** — Grok's credits endpoint only resolves a personal team (`HTTP 412` / "No personal team"). That's an account shape, not a failed login. Meu Uso keeps the Grok card up, shows the plan name when settings returns it, and still fills Today / Yesterday / Last 30 Days from local session logs. A header note explains the blank quota rows.
-- **Spend tiles show "No data"** — they need completed Grok CLI turns under `~/.grok/sessions/`; a turn that is still running has not been recorded yet. Finish a Grok CLI session, then refresh.
+- **"Login do Grok expirado" ou "Login do Grok inválido"**: rode `grok login` de novo e atualize.
+- **Semanal mostra "Sem dados"**: a sua conta ainda informa um período mensal (não semanal), ou seja, ainda não migrou para a cobrança semanal unificada do Grok.
+- **Semanal e Uso extra ficam em branco num login de equipe ou empresa**: o endpoint de créditos do Grok só funciona com uma equipe pessoal (`HTTP 412` / "No personal team"). É uma característica da conta, e não um login com falha. O Meu Uso mantém o card do Grok, mostra o nome do plano quando o endpoint de ajustes (`settings`) o informa e continua preenchendo Hoje, Ontem e Últimos 30 dias pelos logs de sessão locais. Um aviso no cabeçalho ("Contas de equipe não têm cota pessoal…") explica as linhas de cota em branco.
+- **As linhas de gasto mostram "Sem dados"**: elas precisam de turnos concluídos da CLI do Grok em `~/.grok/sessions/`. Um turno ainda em andamento não foi registrado. Termine uma sessão da CLI do Grok e atualize.
 
-## Under the hood
+## Por dentro
 
-`GET https://cli-chat-proxy.grok.com/v1/billing?format=credits` for the weekly pool and pay-as-you-go cap — the exact call the Grok CLI itself makes — and `…/v1/settings` for the plan name; token refresh via `auth.x.ai`. A 401/403 triggers one token refresh and retry.
+`GET https://cli-chat-proxy.grok.com/v1/billing?format=credits` para a cota semanal e o limite do modo pago por uso (a mesma chamada que a própria CLI do Grok faz) e `…/v1/settings` para o nome do plano. A renovação de token passa por `auth.x.ai`. Um 401/403 provoca uma renovação de token e uma nova tentativa.

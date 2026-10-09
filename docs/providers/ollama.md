@@ -1,82 +1,56 @@
 # Ollama
 
-Tracks [Ollama Cloud](https://ollama.com) plan usage — the session, weekly, and monthly limits Ollama
-shows on its own settings page.
+Acompanha o uso do plano do [Ollama Cloud](https://ollama.com): os limites de sessão, semanal e mensal que o Ollama mostra na própria página de ajustes.
 
-## What it tracks
+## O que mostra
 
-| Metric | Meaning |
+| Métrica | O que significa |
 |---|---|
-| Session | 5-hour window usage (percentage of your plan's allowance) |
-| Weekly | 7-day window usage (percentage of your plan's allowance) |
-| Monthly | Monthly usage (percentage of your plan's allowance), when reported for your account |
-| Last 4 Weeks | Charges beyond your plan over the last four weeks. $0.00 on a subscription; real amounts for pay-as-you-go and API-key usage |
+| Sessão | Uso na janela de 5 horas (porcentagem da franquia do seu plano) |
+| Semanal | Uso na janela de 7 dias (porcentagem da franquia do seu plano) |
+| Mensal | Uso no mês (porcentagem da franquia do seu plano), quando a sua conta informa |
+| Últimas 4 semanas | Cobranças além do seu plano nas últimas quatro semanas. US$ 0,00 em planos de assinatura; valores reais no modo pago por uso e no uso com chave de API |
 
-Your plan (Free, Pro, Max) is shown beside the provider name. If Ollama can't tell Meu Uso which plan
-you're on, the badge is left off and the card explains why — the meters keep working either way.
+O seu plano (Free, Pro, Max) aparece ao lado do nome do provedor. Se o Ollama não conseguir dizer ao Meu Uso em qual plano você está, o plano fica de fora e o card explica por quê. Os medidores continuam funcionando de qualquer forma.
 
-Session, Weekly, and Monthly are always visible; Session and Weekly start pinned to the menu bar.
-Monthly starts unpinned and follows Weekly. Last 4 Weeks sits behind the provider's caret — you can
-move any of them in **Customize**. A $0.00 on that row means no extra charges,
-not an idle month: usage inside your plan's allowance is counted by the limit meters.
+Sessão, Semanal e Mensal ficam sempre visíveis, e Sessão e Semanal já começam na barra de menus. Mensal começa fora da barra de menus e vem logo depois de Semanal. Últimas 4 semanas fica atrás da seta do card. Você pode mover qualquer uma delas em **Personalizar**. Um US$ 0,00 nessa linha quer dizer que não houve cobrança extra, e não que o mês ficou sem uso: o uso dentro da franquia do plano aparece nos medidores de limite.
 
-The session window is 5 hours and the weekly window is 7 days, but Ollama reports only how much of each
-window you have used — never when the current one started or ends. These meters therefore show no reset
-countdown, rather than a guessed one. Monthly also has no reset countdown. Local models don't count
-toward these limits; only cloud models do.
+A janela de sessão tem 5 horas e a semanal tem 7 dias, mas o Ollama só informa quanto de cada janela você usou, nunca quando a janela atual começou ou termina. Por isso, esses medidores não mostram uma contagem até a renovação, para não exibir um número chutado. O Mensal também não tem contagem. Modelos locais não contam para esses limites; só os modelos na nuvem.
 
-## Where credentials come from
+## De onde vêm as credenciais
 
-Nothing to paste. Ollama creates a signing key at `~/.ollama/id_ed25519` the first time it runs, and
-`ollama signin` links that key to your ollama.com account. Meu Uso reads the key, signs each request
-with it exactly as the Ollama CLI does, and never sends the key anywhere — only the signature goes out.
+Não há nada para colar. O Ollama cria uma chave de assinatura digital em `~/.ollama/id_ed25519` na primeira vez que roda, e o `ollama signin` liga essa chave à sua conta no ollama.com. O Meu Uso lê a chave, assina cada pedido com ela exatamente como a CLI do Ollama faz e nunca manda a chave para lugar nenhum. Só a assinatura digital sai do seu Mac.
 
-Because that key exists whether or not you've signed in, Meu Uso can tell only that Ollama is
-installed — not that Ollama Cloud is set up. So Ollama never switches itself on, even when the key is
-there: if you use Ollama for local models alone, it stays out of your way instead of showing you a
-sign-in warning for a product you don't use. Turn it on in **Customize** when you want it.
+Como essa chave existe mesmo que você nunca tenha entrado, o Meu Uso só consegue saber que o Ollama está instalado, e não que o Ollama Cloud está configurado. Por isso, o Ollama nunca se ativa sozinho, mesmo com a chave presente. Se você usa o Ollama só com modelos locais, ele não atrapalha mostrando um aviso de login de um produto que você não usa. Ative-o em **Personalizar** quando quiser.
 
-## Setup
+## Configuração
 
-1. Install [Ollama](https://ollama.com/download) and create an account for a [cloud plan](https://ollama.com/pricing),
-   including Free.
-2. Sign in:
+1. Instale o [Ollama](https://ollama.com/download) e crie uma conta num [plano na nuvem](https://ollama.com/pricing), incluindo o Free.
+2. Entre:
 
 ```bash
 ollama signin
 ```
 
-3. Turn **Ollama** on in **Customize** — unlike most providers, it never enables itself (see above).
+3. Ative o **Ollama** em **Personalizar**. Ao contrário da maioria dos provedores, ele nunca se ativa sozinho (veja acima).
 
-The limits Ollama reports for your account appear on the next refresh. Free accounts can report a
-Monthly limit without Session or Weekly limits.
+Os limites que o Ollama informa para a sua conta aparecem na próxima atualização. Contas Free podem informar um limite Mensal sem limites de Sessão ou Semanal.
 
-## Under the hood
+## Por dentro
 
-Two ollama.com endpoints, both authenticated with a signature from your local Ollama key:
+Dois endpoints do ollama.com, os dois autenticados com uma assinatura digital feita pela sua chave local do Ollama:
 
-- `GET https://ollama.com/api/usage` — the session, weekly, and monthly meters plus recent activity spend.
-- `POST https://ollama.com/api/me` — the plan name (best-effort; a failure here doesn't blank the meters).
+- `GET https://ollama.com/api/usage`: os medidores de sessão, semanal e mensal, mais o gasto da atividade recente.
+- `POST https://ollama.com/api/me`: o nome do plano (opcional; uma falha aqui não apaga os medidores).
 
-Each request carries an `Authorization` header of `<public key>:<signature>`, signing the string
-`<METHOD>,<request-uri>` where the URI includes a `ts` unix-seconds parameter — the same scheme the
-Ollama CLI uses, so a captured header can't be replayed later.
+Cada pedido leva um header `Authorization` no formato `<public key>:<signature>`, assinando o texto `<METHOD>,<request-uri>`, em que a URI inclui um parâmetro `ts` em segundos Unix. É o mesmo esquema que a CLI do Ollama usa, então um header capturado não pode ser reaproveitado depois.
 
-The usage endpoint is undocumented (it backs Ollama's own settings page), so Meu Uso reads it
-defensively: `usage` is a fraction (`0.349` → 34.9%) and `cost` is a decimal string; a limit that isn't
-in the response is omitted from the API and shows "No data" if its dashboard row is enabled, rather
-than being shown as zero usage. A response with no `limits` at all is reported as an invalid response.
+O endpoint de uso não é documentado (é ele que alimenta a página de ajustes do próprio Ollama), então o Meu Uso lê a resposta com cuidado: `usage` é uma fração (`0.349` → 34,9%) e `cost` é um texto decimal. Um limite que não vem na resposta fica de fora da API local e aparece como "Sem dados" se a linha dele estiver ativada no painel, em vez de aparecer como uso zero. Uma resposta sem nenhum `limits` é tratada como resposta inválida.
 
-## Troubleshooting
+## Solução de problemas
 
-- **"No Ollama key found"** — Ollama has never run on this Mac. [Install it](https://ollama.com/download)
-  and run `ollama signin`.
-- **"Not signed in to Ollama Cloud"** — Ollama is installed but the key isn't linked to an account.
-  Run `ollama signin`.
-- **"Couldn't read ~/.ollama/id_ed25519"** — the key file exists but isn't readable. Check its
-  permissions (it should be owned by you, mode `600`).
-- **"Couldn't read your Ollama plan"** (an amber notice by the name) — the plan badge is missing because
-  Ollama either didn't answer that request or answered with something Meu Uso couldn't read. Your
-  meters are unaffected and still current; the badge comes back on its own once Ollama answers normally.
-- **Meters show "No usage data"** — you're signed in, but Ollama returned no limits for the account yet.
-  Check your usage at [ollama.com/settings](https://ollama.com/settings).
+- **"Nenhuma chave do Ollama encontrada"**: o Ollama nunca rodou neste Mac. [Instale-o](https://ollama.com/download) e rode `ollama signin`.
+- **"Nenhum login no Ollama Cloud encontrado"**: o Ollama está instalado, mas a chave não está ligada a uma conta. Rode `ollama signin`.
+- **"Não foi possível ler ~/.ollama/id_ed25519"**: o arquivo da chave existe, mas não pode ser lido. Confira as permissões (o dono deve ser você, com modo `600`).
+- **"Não foi possível ler seu plano do Ollama"** (aviso âmbar ao lado do nome): o plano sumiu porque o Ollama não respondeu a esse pedido ou respondeu algo que o Meu Uso não conseguiu ler. Os seus medidores não são afetados e continuam em dia. O plano volta sozinho quando o Ollama responder normalmente.
+- **Os medidores mostram "Sem dados de uso"**: você entrou, mas o Ollama ainda não devolveu nenhum limite para a conta. Confira o seu uso em [ollama.com/settings](https://ollama.com/settings).

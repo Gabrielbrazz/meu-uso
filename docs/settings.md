@@ -1,96 +1,99 @@
-# Settings
+# Ajustes
 
-Settings lives inside the popover — there is no separate window. Open it from the footer's **Options** menu, with ⌘, while the popover is showing, or by right-clicking the menu bar icon and choosing Settings. The dashboard slides over to the Settings screen, which carries a back button in its top-left corner. Go back with that button, the ⌘, shortcut, or Esc (Esc always backs out to the dashboard first — pressing it again closes the popover).
+Os Ajustes ficam dentro da janela do Meu Uso; não existe uma janela separada. Abra pelo menu **Opções** do rodapé, pelo atalho **⌘,** (com a janela aberta) ou clicando com o botão direito no ícone da barra de menus e escolhendo **Ajustes**. O painel desliza para a tela de Ajustes, que tem um botão de voltar no canto superior esquerdo. Volte por esse botão, pelo atalho **⌘,** ou com Esc (o Esc sempre volta primeiro para o painel; apertar de novo fecha a janela).
 
-## General
+## Geral
 
-| Setting | Options | What it does |
+| Ajuste | Opções | O que faz |
 |---|---|---|
-| Show Total Spend | on/off | Whether the cross-provider [Total Spend](dashboard.md#total-spend) card shows at the top of the dashboard. On by default; the card appears whenever at least one enabled provider tracks spend (Claude, Codex, Cursor, Grok, OpenCode). |
-| Launch at Login | on/off | Registers the app as a login item (the system's login-item registry is the source of truth). |
-| Global Shortcut | record a shortcut | Global shortcut that toggles the popover from anywhere. Click the field and press a combo; the ⓧ clears it and disables the shortcut. |
+| Mostrar gasto total | Ativado / Desativado | Mostra ou não, no topo do painel, o card de [Gasto total](dashboard.md#gasto-total), que soma os provedores. Vem ativado. O card aparece sempre que pelo menos um provedor ativado acompanha gasto (Antigravity, Claude, Codex, Cursor, Grok, OpenCode). |
+| Abrir ao iniciar sessão | Ativado / Desativado | Registra o app como item de início do macOS (vale o que está registrado no sistema). Se o macOS recusar a mudança, aparece um aviso para conferir em Ajustes do Sistema → Itens de Início. |
+| Atalho global | gravar um atalho | Atalho que abre e fecha a janela de qualquer lugar. Clique no campo (**Gravar atalho**) e aperte a combinação; o ⓧ (**Limpar atalho**) apaga a combinação e desativa o atalho. |
 
+## Sincronização com o iCloud
 
-## iCloud Sync
+**Sincronizar entre Macs** vem desativado. Ao ativar, o Meu Uso compartilha o histórico de uso normalizado pelo container privado do app no iCloud e soma os tokens e gastos que ficam em cada Mac, entre os Macs com a mesma conta do iCloud. A seção lista cada Mac e quando ele atualizou o histórico pela última vez (por exemplo, "Atualizado há 5min"), com a etiqueta **Este Mac** no Mac que você está usando. Ela também avisa quando o iCloud está indisponível, quando ainda está esperando a primeira gravação, quando uma gravação falha e quando algum arquivo está com defeito. A sincronização só funciona num build assinado com o perfil do iCloud, e nenhum build atual tem esse perfil. Veja [Sincronização com o iCloud](icloud-sync.md) para saber o que entra, quais telas usam os valores somados e quando a opção fica indisponível.
 
-**Sync Across Macs** is off by default. Turning it on shares normalized Meu Uso history through the
-app's private iCloud container and combines machine-local tokens and spend across Macs signed into the
-same iCloud account. Settings shows the five-minute write cadence and each Mac's relative **Updated**
-time; it also reports unavailable iCloud, loading, write, and malformed-file states. See
-[iCloud Sync](icloud-sync.md) for what is included and which surfaces use the combined values.
+## Aparência
 
-## Appearance
-
-| Setting | Options | What it does |
+| Ajuste | Opções | O que faz |
 |---|---|---|
-| Icon Style | Text / Bars | How starred metrics render in the menu bar. See [Menu bar](menu-bar.md). |
-| Theme | System / Light / Dark | App-wide appearance override for the popover. |
-| Density | Default / Compact | Default breathes; Compact is a real information-dense mode — text steps down one size, rows and provider sections pull together, and Customize / Settings rows tighten with them. In both, consecutive one-line metrics (Today / Yesterday / …) pull together; Compact pulls harder. |
-| Reduce Animations | Off / On | Off by default. On removes transitions, motion effects, and continuous decorative animation throughout the popover. The app also honors the macOS Reduce Motion accessibility setting. |
-| Time Format | Auto / 12-hour / 24-hour | How exact times read (e.g. "Resets today at 6:38 PM" vs "18:38"). Auto follows the system. |
-| Increase Transparency | Off / On | Off (default) keeps the popover a solid panel. On makes it translucent so your desktop shows through, while keeping the numbers and Options control legible with adaptive surfaces. It pauses automatically when you have the macOS **Reduce Transparency** or **Increase Contrast** accessibility setting turned on (a note explains why), so it never works against those preferences. |
+| Estilo do ícone | Texto / Barras | Como as métricas com estrela aparecem na barra de menus. Veja [Barra de menus](menu-bar.md). |
+| Tema | Sistema / Claro / Escuro | Escolhe a aparência da janela do app ou segue a do sistema. |
+| Densidade | Padrão / Compacta | Padrão é mais arejada. Compacta é um modo realmente denso: o texto desce um tamanho, as linhas e as seções de provedor ficam mais juntas, e as linhas de Personalizar e dos Ajustes apertam junto. Nas duas, métricas de uma linha em sequência (Hoje, Ontem, …) ficam mais próximas; na Compacta, ainda mais. |
+| Reduzir animações | Desativado / Ativado | Vem desativado. Ativado, tira as transições, os efeitos de movimento e as animações decorativas contínuas da janela. O app também respeita o ajuste de acessibilidade **Reduzir movimento** do macOS. |
+| Formato de hora | Automático / 12 horas / 24 horas | Como aparecem os horários exatos (por exemplo, "Renova hoje às 18:38" ou "Renova hoje às 6:38 PM"). Automático segue o ajuste de 12 ou 24 horas do Mac. |
+| Aumentar transparência | Desativado / Ativado | Desativado (padrão), a janela fica sólida. Ativado, ela fica translúcida e deixa ver a mesa por trás, com superfícies que se adaptam para manter os números e o botão Opções legíveis. Fica em pausa sozinho quando **Reduzir transparência** ou **Aumentar contraste** estão ativados nos ajustes de acessibilidade do macOS (um aviso explica o motivo), para nunca contrariar essas preferências. |
 
-## Usage Display
+## Exibição do uso
 
-| Setting | Options | What it does |
+| Ajuste | Opções | O que faz |
 |---|---|---|
-| Show Usage As | Used / Left | Whether bounded metrics read "48% used" or "52% left" — same toggle as clicking a headline. |
-| Reset Times | Countdown / Exact time | "Resets in 3h 25m" vs "Resets today at 6:38 PM" — same toggle as clicking a reset label. |
-| Always Show Pacing | Off / On | Off (default) shows pacing only when a metric is close to or over its limit. On surfaces it on every metric with a reset window: on-track rows gain their projection ("~33% left at reset") and an even-pace tick marking where steady use would put you right now. Metrics without a reset window have no pace to show, and a metric with nothing used yet stays plain until something has been spent. |
+| Mostrar uso como | Usado / Restante | Se as métricas com limite mostram "48% usado" ou "52% restante" (o padrão é Restante). É a mesma troca de clicar no título de uma linha. |
+| Prazos de renovação | Contagem regressiva / Horário exato | "Renova em 3h 25min" ou "Renova hoje às 18:38" (o padrão é Contagem regressiva). É a mesma troca de clicar num texto de renovação. |
+| Sempre mostrar o ritmo | Desativado / Ativado | Desativado (padrão), o ritmo só aparece quando uma métrica está perto do limite ou a caminho de passar dele. Ativado, aparece em toda métrica com período de renovação: as linhas no rumo certo ganham a projeção ("~33% restante na renovação") e uma marca de ritmo constante, que mostra onde o uso estaria agora num consumo regular. Métricas sem período de renovação não têm ritmo para mostrar, e uma métrica ainda sem uso fica sem esses extras até algo ser gasto. |
 
-## Notifications
+## Notificações
 
-Meu Uso can alert you with a macOS notification when a metric runs low or its pace gets worse, so you don't have to keep the popover open to catch a quota creeping toward its limit. Alerts work while the app runs in the menu bar, even with the popover closed.
+O Meu Uso pode avisar você com uma notificação do macOS quando uma métrica estiver acabando ou o ritmo piorar. Assim você não precisa deixar a janela aberta para ver uma cota chegando perto do limite. Os alertas funcionam enquanto o app roda na barra de menus, mesmo com a janela fechada.
 
-| Setting | Options | What it does |
+| Ajuste | Opções | O que faz |
 |---|---|---|
-| Almost Out | On / Off | Alerts when a metric crosses under 10% remaining, including balances without a reset window. |
-| Cutting It Close | On / Off | Alerts when a metric is projected to finish the period with little left — close to its limit. |
-| Will Run Out | On / Off | Alerts when a metric is projected to run out before it resets. |
+| Quase esgotado | Ativado / Desativado | Avisa quando uma métrica passa a ter menos de 10% restante, inclusive saldos sem período de renovação. |
+| Margem apertada | Ativado / Desativado | Avisa quando, no ritmo atual, uma métrica vai terminar o período com pouca folga, perto do limite. |
+| Vai esgotar | Ativado / Desativado | Avisa quando, no ritmo atual, uma métrica vai esgotar antes de renovar. |
 
-Alerts fire on a new crossing or pace worsening, then stay deduplicated while that condition is unchanged, so you do not get repeats on every refresh. A quota already in a bad state when Meu Uso launches establishes the baseline without alerting. If it recovers and later worsens again, the alert re-arms; a new reset period also clears the reset-based history. **Almost Out** is based only on the remaining share, so it also works for bounded balances without a reset window. **Cutting It Close** and **Will Run Out** require reset-window pace context. Metrics whose data cannot be read never alert. Turn all three triggers off to silence everything. When several alerts fire at once, they stack into a single grouped banner.
+Os alertas disparam quando um limite é cruzado ou o ritmo piora e não se repetem enquanto a situação continuar igual, então você não recebe o mesmo aviso a cada atualização. Uma cota que já está ruim quando o Meu Uso abre vira o ponto de partida, sem alerta. Se ela melhorar e depois piorar de novo, o alerta volta a valer; um novo período de renovação também zera o histórico ligado à renovação. **Quase esgotado** olha só a parte restante, então também funciona para saldos com limite e sem período de renovação. **Margem apertada** e **Vai esgotar** precisam do ritmo dentro de um período de renovação. Métricas cujos dados não podem ser lidos nunca geram alerta. Desative os três para silenciar tudo. Quando vários alertas disparam juntos, eles se agrupam numa notificação só.
 
-All three alerts default off. The first time you turn one on, Meu Uso asks for notification permission; if you decline (or turn notifications off for Meu Uso in System Settings later), a warning mark appears on the Notifications header and an "Open System Settings" button shows under the toggles so you can re-enable them. A notification's title is the alert name, its subtitle names the provider and metric, and its body is the plain-language verdict. Tapping an alert opens the popover on the dashboard.
+Os três alertas vêm desativados. Na primeira vez que você ativa um deles, o Meu Uso pede permissão para enviar notificações. Se você recusar (ou desativar depois as notificações do Meu Uso nos Ajustes do Sistema), aparece um sinal de aviso no título Notificações e o botão **Abrir Ajustes do Sistema** embaixo das chaves, para você reativá-las. Se você ainda não respondeu ao pedido, o botão é **Permitir notificações**. O título da notificação é o nome do alerta, o subtítulo traz o provedor e a métrica (por exemplo, "Claude · Sessão") e o texto explica a situação em linguagem simples. Clicar num alerta abre a janela no painel.
 
-## Privacy
+## Privacidade
 
-| Setting | Options | What it does |
+| Ajuste | Opções | O que faz |
 |---|---|---|
-| Hide From Screen Share | On / Off | Off (default). On replaces the menu bar strip with the Meu Uso icon and wordmark while your screen is being shared or recorded, and restores your starred metrics the moment the capture ends. See [Menu bar](menu-bar.md#hiding-usage-while-screen-sharing). |
-| Help Make Meu Uso Better | On / Off | On (default) shares extra anonymous usage analytics — provider-refresh summaries and error categories. Off stops that extra sharing. Daily activity and crash reports are always sent. See [Privacy & Usage Data](privacy.md) for exactly what is and isn't sent. |
+| Ocultar ao compartilhar a tela | Ativado / Desativado | Desativado (padrão). Ativado, troca os números da barra de menus pelo ícone e pelo nome do Meu Uso enquanto sua tela é compartilhada ou gravada, e devolve as métricas com estrela assim que a captura termina. Veja [Barra de menus](menu-bar.md#ocultar-o-uso-ao-compartilhar-a-tela). |
 
-## Advanced
+O Meu Uso não tem telemetria, então não há ajuste para isso. Veja [Privacidade](privacy.md) para saber com quem o app fala pela rede e o que ele guarda no seu Mac.
 
-| Setting | Options | What it does |
+## Linha de comando
+
+| Ajuste | Opções | O que faz |
 |---|---|---|
-| Log Level | Error / Warning / Info / Debug | How much detail the app writes to its log file. Defaults to Info and persists across launches; raise to Debug while reproducing a problem. Applies immediately. |
-| Copy Log Path | button | Copies the log file path (`~/Library/Logs/MeuUso/MeuUso.log`) to the clipboard. |
-| Reveal in Finder | button | Opens a Finder window with the log file selected. |
-| Reset All Settings… | button | Restores every setting to its default, behind a confirmation alert. |
+| Utilitário de terminal | botão (**Instalar…** / **Desinstalar**) | Instala o comando global `meu-uso`, que agentes e scripts podem usar para acompanhar limites. Pede a senha de administrador do macOS e cria em `/usr/local/bin/meu-uso` um link para o utilitário que vem dentro do app. Mostra **Indisponível** quando já existe um `/usr/local/bin/meu-uso` que não foi instalado pelo Meu Uso. |
 
-See [Logging](logging.md) for the full behavior: subsystem tags, the file size cap, and the guarantee that secrets are never written.
+Veja [Interface de linha de comando](cli.md) para saber como usar o comando.
 
-**Reset All Settings…** restores every setting on this screen to its default — appearance, usage display, notifications, privacy, log level, the global shortcut (cleared), Launch at Login (turned off), iCloud sync (turned off), and the update preferences (stable channel, automatic checks on) — and also resets all customization, exactly like Customize's Reset All: default layout, order, and menu-bar stars, with providers turned back on for the tools you have installed. The reset cannot be undone.
+## Avançado
 
-Not touched: provider logins and API keys, cached usage data, and your extra-analytics choice. Turning iCloud sync off as part of the reset works exactly like flipping its toggle off: this Mac's synced history is removed from the shared iCloud data, and your other Macs keep their own.
-
-## Updates
-
-The Updates section appears in official packaged builds that include the signed update feed. Local
-developer builds do not show it.
-
-| Setting | Options | What it does |
+| Ajuste | Opções | O que faz |
 |---|---|---|
-| Check Automatically | On / Off | Whether Sparkle checks for updates in the background. You can still check manually when this is off. |
-| Beta Updates | On / Off | Adds pre-release builds to the updates you can receive. Stable releases remain available either way. |
-| Check for Updates… | button | Starts a manual update check and opens Sparkle's update window. |
+| Nível de log | Erro / Aviso / Informação / Depuração | Quanto detalhe o app grava no arquivo de log. O padrão é Informação, e a escolha fica salva para as próximas aberturas. Suba para Depuração enquanto reproduz um problema. A mudança vale na hora. |
+| Copiar caminho do log | botão | Copia para a área de transferência o caminho do arquivo de log (`~/Library/Logs/MeuUso/MeuUso.log`). |
+| Mostrar no Finder | botão | Abre uma janela do Finder com o arquivo de log selecionado. |
+| Redefinir todos os ajustes… | botão | Volta todos os ajustes ao padrão, depois de um alerta de confirmação. |
 
-See [Updates](updates.md) for the dashboard banner, channels, and signature verification.
+Veja [Logs](logging.md) para o comportamento completo: as etiquetas por subsistema, o limite de tamanho do arquivo e a garantia de que segredos nunca são gravados.
 
-## Version
+**Redefinir todos os ajustes…** volta ao padrão todos os ajustes desta tela: aparência, exibição do uso, notificações, privacidade, nível de log, o atalho global (apagado), Abrir ao iniciar sessão (desativado), a sincronização com o iCloud (desativada) e as preferências de atualização (canal estável e busca automática ativada). Também redefine toda a personalização, igual a **Redefinir toda a personalização** em Personalizar: o layout, a ordem e as estrelas da barra de menus voltam ao padrão, e os provedores são ativados de novo conforme as ferramentas que você tem instaladas. Não dá para desfazer.
 
-The app version shows in the popover footer.
+Ficam como estão: os logins dos provedores, as chaves de API e os dados de uso em cache. Desativar a sincronização com o iCloud como parte da redefinição funciona igual a desligar a chave dela: o histórico sincronizado deste Mac sai dos dados compartilhados no iCloud, e seus outros Macs ficam com o histórico deles.
 
-Your settings carry across updates — layout, stars, preferences, and the menu-bar shortcut all stay put. When an update changes how a setting is stored, the app upgrades it in place on launch, stepping through any in-between versions if you skipped a few. Nothing is reset. (Earlier betas wiped all settings on every update; that no longer happens.)
+## Atualizações
 
-Which providers you have on also carries across updates — your choices are never overridden. A brand-new install picks its starting set by detecting the AI tools on your Mac (see [Dashboard § First launch](dashboard.md#first-launch)). When an update ships a provider you've never seen, the same local detection runs once for just that provider and turns it on only if you actually have the tool; everything you've already decided about stays exactly as you set it. See [Which Providers Are On](provider-enablement.md).
+A seção Atualizações só aparece em builds de release, que trazem o feed de atualização assinado. Ainda não existe nenhum: os builds de desenvolvimento (feitos no seu Mac ou pelo CI) não mostram essa seção.
+
+| Ajuste | Opções | O que faz |
+|---|---|---|
+| Buscar automaticamente | Ativado / Desativado | Se o Sparkle busca atualizações em segundo plano, a cada hora. Vem ativado. Mesmo desativado, você pode buscar manualmente. |
+| Acesso antecipado | Ativado / Desativado | Inclui versões prévias (beta) entre as atualizações que você pode receber. As versões estáveis continuam chegando de qualquer jeito. |
+| Buscar atualizações… | botão | Faz uma busca manual e abre a janela de atualização do Sparkle. |
+
+Veja [Atualizações](updates.md) para o aviso no painel, os canais e a verificação de assinatura.
+
+## Versão
+
+A versão do app aparece no rodapé da janela.
+
+Seus ajustes continuam depois das atualizações: layout, estrelas, preferências e o atalho global ficam como estão. Quando uma atualização muda o jeito de guardar um ajuste, o app converte o ajuste ao abrir, passando por todas as versões intermediárias se você pulou algumas. Nada é redefinido.
+
+Os provedores que você ativou também continuam depois das atualizações; suas escolhas nunca são substituídas. Uma instalação nova escolhe o conjunto inicial detectando as ferramentas de IA do seu Mac (veja [Painel § Primeira abertura](dashboard.md#primeira-abertura)). Quando uma atualização traz um provedor que você nunca viu, a mesma detecção local roda uma vez, só para ele, e ele só é ativado se você tiver mesmo a ferramenta. Tudo o que você já decidiu fica exatamente como você deixou. Veja [Quais provedores ficam ativados](provider-enablement.md).

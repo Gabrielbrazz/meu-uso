@@ -1,44 +1,41 @@
 # Cursor
 
-Tracks your Cursor plan usage using the login from the Cursor app.
+Acompanha o uso do seu plano do Cursor usando o login do app Cursor.
 
-## What it tracks
+## O que mostra
 
-| Metric | Meaning |
+| Métrica | O que significa |
 |---|---|
-| Total Usage | Plan usage for the billing cycle (percent or dollars; included request count vs. cap on request-based Enterprise accounts) |
-| Cursor Models | Usage percent for Cursor's own models, including Cursor Grok and Composer |
-| Other Models | Usage percent for other models |
-| Grok Bot | Grok Bot weekly usage percent and reset countdown; enabled by default |
-| Extra Usage | On-demand spend; user-scoped when available, otherwise the team aggregate; shown as a meter when Cursor returns a limit |
-| Requests | Optional copy of the included request count vs. cap for custom layouts |
-| Credits | Credit balance left from grants and prepaid account balance |
+| Uso total | Uso do plano no ciclo de cobrança (porcentagem ou dólares; em contas Enterprise por requisição, as requisições incluídas usadas em relação ao teto) |
+| Modelos do Cursor | Porcentagem de uso dos modelos do próprio Cursor, incluindo Cursor Grok e Composer |
+| Outros modelos | Porcentagem de uso dos outros modelos |
+| Grok Bot | Porcentagem de uso semanal do Grok Bot e contagem até a renovação; ativado por padrão |
+| Uso extra | Gasto sob demanda: o do próprio usuário quando disponível, senão o total da equipe. Vira medidor quando o Cursor informa um limite |
+| Requisições | Cópia opcional das requisições incluídas usadas em relação ao teto, para layouts personalizados |
+| Créditos | Saldo de créditos restante, somando concessões de crédito e o saldo pré-pago da conta |
+| Tendência de uso | Gráfico diário de tokens dos últimos 30 dias, da exportação de uso do Cursor |
+| Hoje / Ontem / Últimos 30 dias | Custo estimado e tokens, da exportação de uso do Cursor (veja abaixo) |
 
-Teams seats with two usable model-pool percentages use those percentages instead of the legacy
-included-dollar cap. Total Usage uses Cursor's structured total percentage when supplied; it is
-unavailable when Cursor supplies only the two pools. Older team accounts without usable pool data
-keep their dollar meter, including accounts that return zero placeholders beside positive spend.
+Em licenças Teams que trazem as duas porcentagens por grupo de modelos, essas porcentagens substituem o antigo teto em dólares incluído no plano. Uso total usa a porcentagem total estruturada do Cursor quando ela vem, e fica indisponível quando o Cursor manda só os dois grupos. Contas de equipe antigas, sem dados de grupo utilizáveis, mantêm o medidor em dólar. Isso inclui as contas que mandam zeros de preenchimento ao lado de um gasto positivo.
 
-When Cursor reports your plan name, Meu Uso shows it beside the provider name.
+Quando o Cursor informa o nome do seu plano, o Meu Uso mostra o plano ao lado do nome do provedor.
 
-Grok Bot has its own usage allowance, separate from Cursor's normal billing-cycle meter. Its widget
-is enabled by default in Cursor's On Demand section. It uses your existing Cursor login, so signing
-into the Grok CLI is not required.
+O Grok Bot tem uma franquia de uso própria, separada do medidor normal do ciclo de cobrança do Cursor. A linha dele vem ativada por padrão na seção Sob demanda do Cursor. Ela usa o seu login atual do Cursor, então não é preciso entrar na CLI do Grok.
 
-## Where credentials come from
+## De onde vêm as credenciais
 
-Just be signed into the Cursor app. Meu Uso reads Cursor's local state database (and its keychain entries) for the session tokens; refreshed tokens are persisted back. Nothing extra to install or configure.
+Basta estar conectado no app Cursor (ou na CLI do Cursor, com `agent login`). O Meu Uso lê o banco de dados de estado local do Cursor e os itens dele nas chaves do macOS (Keychain) para obter os tokens de sessão. Tokens renovados são gravados de volta. Não há nada extra para instalar ou configurar.
 
-## Spend history
+## Histórico de gasto
 
-Today, Yesterday, Last 30 Days, and Usage Trend come from Cursor's usage export. Meu Uso uses the exported token counts and shared model pricing to estimate the cost locally. Cursor's export may occasionally arrive late, so the newest figures can lag behind current activity. Meu Uso leaves isolated malformed rows out instead of silently counting broken values as zero. A failed download, an export that takes longer than 20 seconds, invalid export schema, or broken CSV structure leaves spend history unavailable for that refresh; live plan usage still updates. Each failure is recorded in the diagnostic log without including the exported usage data.
+Hoje, Ontem, Últimos 30 dias e Tendência de uso vêm da exportação de uso do Cursor. O Meu Uso usa a contagem de tokens exportada e os preços dos modelos compartilhados para estimar o custo localmente. A exportação do Cursor às vezes chega atrasada, então os números mais recentes podem ficar para trás da atividade atual. O Meu Uso deixa de fora linhas da exportação com problema, em vez de contar valores quebrados como zero sem avisar. Se o download falhar, se a exportação levar mais de 20 segundos, se o formato dela for inválido ou se a estrutura do CSV estiver quebrada, o histórico de gasto fica indisponível naquela atualização. O uso do plano em tempo real continua atualizando. Cada falha fica registrada no log de diagnóstico, sem incluir os dados de uso exportados.
 
-## Troubleshooting
+## Solução de problemas
 
-- **"Not logged in" / token errors** — open Cursor and make sure you're signed in, then refresh.
-- **Some metrics missing** — Cursor omits fields depending on plan type; missing metrics simply show "No data".
-- **Optional lookup failed** — Grok Bot, plan, credit-grant, prepaid-balance, and request-fallback failures stay nonfatal when primary usage is available. Meu Uso records fixed, credential-free reasons in the diagnostic log.
+- **"Nenhum login encontrado", "Sessão expirada" ou "Token expirado"**: abra o Cursor, confira se você está conectado (ou rode `agent login`) e atualize.
+- **Algumas métricas não aparecem**: o Cursor omite campos conforme o tipo de plano. Métricas ausentes simplesmente mostram "Sem dados".
+- **Uma consulta opcional falhou**: falhas do Grok Bot, do plano, das concessões de crédito, do saldo pré-pago e da consulta alternativa por requisições não derrubam o provedor quando o uso principal está disponível. O Meu Uso registra no log de diagnóstico motivos fixos, sem credenciais.
 
-## Under the hood
+## Por dentro
 
-Connect RPC on `api2.cursor.sh` (dashboard usage and `DashboardService/GetSandUsageStatus` for Grok Bot), combined REST fallback at `cursor.com/api/usage` and `cursor.com/api/usage-summary` for Enterprise/team accounts, Stripe balance at `cursor.com/api/auth/stripe`, and the usage-events CSV export at `cursor.com/api/dashboard/export-usage-events-csv`. The fallback combines the included request allowance with structured percentages and user-scoped on-demand spend; neither REST response is treated as the whole account snapshot by itself. The primary dashboard usage request refreshes the token and retries once after a 401/403; optional endpoint failures stay nonfatal when the other fallback response is usable and are recorded in the diagnostic log. Per-day spend imputation uses exported token counts priced through the shared [model pricing](../pricing.md); Cursor-native models (`auto`, `composer-*`, …) come from its supplement layer, which maintainers sync from [Cursor models & pricing](https://cursor.com/docs/models-and-pricing.md).
+Connect RPC em `api2.cursor.sh` (o uso do painel do Cursor e `DashboardService/GetSandUsageStatus` para o Grok Bot); alternativa REST combinada em `cursor.com/api/usage` e `cursor.com/api/usage-summary` para contas Enterprise e de equipe; saldo do Stripe em `cursor.com/api/auth/stripe`; e a exportação CSV de eventos de uso em `cursor.com/api/dashboard/export-usage-events-csv`. A alternativa combina a franquia de requisições incluídas com as porcentagens estruturadas e o gasto sob demanda do usuário. Nenhuma das respostas REST é tratada sozinha como o retrato completo da conta. O pedido principal de uso renova o token e tenta de novo uma vez depois de um 401/403. Falhas de endpoints opcionais não derrubam o provedor quando a outra resposta da alternativa pode ser usada, e ficam registradas no log de diagnóstico. O gasto por dia usa a contagem de tokens exportada, com preço pelos [preços dos modelos](../pricing.md) compartilhados. Os modelos próprios do Cursor (`auto`, `composer-*`, …) vêm da camada suplementar, que os mantenedores sincronizam a partir de [Cursor models & pricing](https://cursor.com/docs/models-and-pricing.md).

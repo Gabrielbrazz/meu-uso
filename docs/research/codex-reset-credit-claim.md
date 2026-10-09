@@ -1,35 +1,26 @@
-# Codex Rate-Limit Reset Credits: How Claiming Works
+# Renovações de limite do Codex: como funciona o resgate
 
-Research + live verification of the Codex "reset credit" claim flow, done 2026-07-12.
-Meu Uso already lists these credits (the "Resets" surface on the Codex provider); this
-documents what it would take to *claim* one from the app. No implementation yet — this is
-the protocol reference.
+Pesquisa e verificação ao vivo do fluxo de resgate de "reset credits" (renovações de limite) do Codex, feitas em 12 de julho de 2026. O Meu Uso já listava esses créditos (a linha **Renovações de limite** do Codex); esta nota documenta o que seria preciso para *resgatar* um deles pelo app. Na época ainda não havia implementação; a nota era a referência do protocolo.
 
-Sources: the open-source Codex CLI (`openai/codex`, `codex-rs/backend-client/src/client/rate_limit_resets.rs`,
-`codex-rs/tui/src/chatwidget/reset_credits.rs`, `codex-rs/tui/src/chatwidget/usage.rs`,
-`codex-rs/app-server/src/request_processors/account_processor/rate_limit_resets.rs`), plus a
-live end-to-end claim against a real account (one credit, hours before it expired).
+> **Situação atual:** o resgate foi implementado depois, seguindo esta referência, em `CodexResetClaimService` (o serviço) e `RateLimitResetsDetail` (a interface). Ao passar o mouse no valor da linha **Renovações de limite**, abre uma lista das renovações, e cada uma mostra o botão **Usar** quando o mouse passa por ela. O app pede confirmação ("Usar esta renovação?", botão **Renovar**) antes de chamar o endpoint de consumo e mostra o resultado no topo da lista (por exemplo, "Limites renovados. Aproveite!" ou "Seus limites ainda não precisam ser renovados"). Veja as [notas de implementação](#notas-de-implementação-para-o-meu-uso).
 
-## What a reset credit is
+Fontes: a CLI open source do Codex (`openai/codex`, `codex-rs/backend-client/src/client/rate_limit_resets.rs`, `codex-rs/tui/src/chatwidget/reset_credits.rs`, `codex-rs/tui/src/chatwidget/usage.rs`, `codex-rs/app-server/src/request_processors/account_processor/rate_limit_resets.rs`), mais um resgate de ponta a ponta, ao vivo, numa conta real (um crédito, horas antes de expirar).
 
-OpenAI grants Codex users occasional free "rate limit resets". Redeeming one immediately
-resets the account's Codex rate-limit windows — on paid plans the 5-hour **and** weekly
-windows together (`windows_reset: 2`); on Free/Go plans the monthly window. Credits expire
-(typically 30 days after being granted) and are gone once redeemed or expired.
+## O que é uma renovação
+
+A OpenAI dá aos usuários do Codex, de vez em quando, "rate limit resets" gratuitos. Resgatar um renova na hora as janelas de limite do Codex da conta: nos planos pagos, a janela de 5 horas **e** a semanal juntas (`windows_reset: 2`); nos planos Free e Go, a janela mensal. Os créditos expiram (em geral 30 dias depois de concedidos) e somem depois de resgatados ou expirados.
 
 ## Endpoints
 
-Both live under the ChatGPT backend base URL (`https://chatgpt.com/backend-api`). The CLI
-also has a `PathStyle::CodexApi` variant (`/api/codex/...` instead of `/wham/...`) for
-enterprise/alternative base URLs; Meu Uso uses the ChatGPT style.
+Os dois ficam na URL base do backend do ChatGPT (`https://chatgpt.com/backend-api`). A CLI também tem a variante `PathStyle::CodexApi` (`/api/codex/...` em vez de `/wham/...`) para URLs base enterprise ou alternativas; o Meu Uso usa o estilo do ChatGPT.
 
-Headers on every call (identical to what Meu Uso's Codex usage client already sends):
+Cabeçalhos em toda chamada (os mesmos que o cliente de uso do Codex no Meu Uso já manda):
 
-- `Authorization: Bearer <access_token>` (the ChatGPT OAuth access token from `~/.codex/auth.json`)
-- `ChatGPT-Account-Id: <account_id>` (from the same file)
-- `Content-Type: application/json` on the POST
+- `Authorization: Bearer <access_token>` (o token de acesso OAuth do ChatGPT, de `~/.codex/auth.json`)
+- `ChatGPT-Account-Id: <account_id>` (do mesmo arquivo)
+- `Content-Type: application/json` no POST
 
-### List (already implemented in Meu Uso)
+### Listar (já implementado no Meu Uso)
 
 `GET /wham/rate-limit-reset-credits`
 
@@ -41,7 +32,7 @@ Headers on every call (identical to what Meu Uso's Codex usage client already se
       "reset_type": "codex_rate_limits",
       "status": "available",            // available | redeeming | redeemed
       "granted_at": "2026-06-12T03:57:42.677034Z",
-      "expires_at": "2026-07-12T03:57:42.677034Z",   // may be null (never expires)
+      "expires_at": "2026-07-12T03:57:42.677034Z",   // pode ser null (nunca expira)
       "redeem_started_at": null,
       "redeemed_at": null,
       "profile_image_url": "https://…/codex-icon-200.png",
@@ -54,31 +45,23 @@ Headers on every call (identical to what Meu Uso's Codex usage client already se
 }
 ```
 
-Note: redeemed/expired credits drop out of the list entirely (after the live claim the
-list had 3 entries, not 4 with one `redeemed`).
+Observação: créditos resgatados ou expirados saem da lista de vez. Depois do resgate ao vivo, a lista tinha 3 itens, e não 4 com um deles `redeemed`.
 
-### Consume (the claim)
+### Consumir (o resgate)
 
 `POST /wham/rate-limit-reset-credits/consume`
 
 ```json
 {
-  "redeem_request_id": "<client-generated UUID v4>",
+  "redeem_request_id": "<UUID v4 gerado pelo cliente>",
   "credit_id": "RateLimitResetCredit_…"
 }
 ```
 
-- `redeem_request_id` — **idempotency key**, a plain UUID v4 minted by the client
-  (`Uuid::new_v4().to_string()` in the TUI). The CLI generates one key per credit shown in
-  its picker and **reuses the same key when the user retries after an error**, so a retry
-  can never burn a second credit; the server replies `already_redeemed`, which the CLI
-  treats as success.
-- `credit_id` — optional. When present the server redeems exactly that credit; when
-  omitted the server picks one. The CLI always sends it (it sorts available credits by
-  soonest `expires_at` and lets the user pick; it only omits `credit_id` in a fallback
-  path when the detail list couldn't be fetched).
+- `redeem_request_id`: **chave de idempotência**, um UUID v4 simples criado pelo cliente (`Uuid::new_v4().to_string()` na TUI). A CLI gera uma chave para cada crédito mostrado no seletor e **reaproveita a mesma chave quando o usuário tenta de novo depois de um erro**. Assim, uma nova tentativa nunca gasta um segundo crédito: o servidor responde `already_redeemed`, que a CLI trata como sucesso.
+- `credit_id`: opcional. Quando vem, o servidor resgata exatamente aquele crédito; quando falta, o servidor escolhe um. A CLI sempre manda: ela ordena os créditos disponíveis pelo `expires_at` mais próximo e deixa o usuário escolher. Só deixa o `credit_id` de fora num caminho alternativo, quando não conseguiu buscar a lista detalhada.
 
-Response (HTTP 200 even for the "failure" codes — the outcome is in `code`):
+Resposta (HTTP 200 até para os códigos de "falha"; o resultado vem em `code`):
 
 ```json
 {
@@ -94,49 +77,32 @@ Response (HTTP 200 even for the "failure" codes — the outcome is in `code`):
 }
 ```
 
-`code` values (from `ConsumeRateLimitResetCreditCode` in the CLI):
+Valores de `code` (de `ConsumeRateLimitResetCreditCode` na CLI):
 
-| code | meaning | credit burned? |
+| code | significado | gasta o crédito? |
 |---|---|---|
-| `reset` | success; `windows_reset` = number of windows reset (2 = 5h + weekly) | yes |
-| `already_redeemed` | same `redeem_request_id` was already processed — treat as success | already was |
-| `nothing_to_reset` | usage doesn't need a reset right now (CLI shows "Your usage does not need a reset right now.") | no |
-| `no_credit` | the targeted credit is no longer available (raced away / expired), or none available at all | no |
+| `reset` | sucesso; `windows_reset` = número de janelas renovadas (2 = 5h + semanal) | sim |
+| `already_redeemed` | o mesmo `redeem_request_id` já foi processado; trate como sucesso | já tinha gastado |
+| `nothing_to_reset` | o uso não precisa de renovação agora (a CLI mostra "Your usage does not need a reset right now.") | não |
+| `no_credit` | o crédito pedido não está mais disponível (resgatado em outro lugar ou expirado), ou não há nenhum disponível | não |
 
-The consume response's `credit` object is richer than the CLI's own struct decodes — it
-carries `redeem_started_at` / `redeemed_at` / `profile_*` fields the CLI ignores.
+O objeto `credit` da resposta de consumo traz mais campos do que a struct da própria CLI decodifica: `redeem_started_at`, `redeemed_at` e os `profile_*`, que a CLI ignora.
 
-## Live verification (2026-07-12, Pro plan)
+## Verificação ao vivo (12 de julho de 2026, plano Pro)
 
-Full verbose log (every request/response, token redacted): kept out of the repo; the run
-was a one-shot Python script with hard guards (claim at most one credit, only the
-soonest-expiring one, only if it expired within 4 h, explicit `credit_id`).
+O log completo (cada requisição e resposta, com o token mascarado) ficou fora do repositório. A execução foi um script Python de uso único, com travas rígidas: resgatar no máximo um crédito, só o que expirava primeiro, só se ele expirasse em até 4 h e sempre com `credit_id` explícito.
 
-- Before: 4 credits available; 5h window 96% used (reset in ~25 min), weekly 52% used
-  (reset in ~6 days). Target credit expired 2.18 h later.
-- `POST …/consume` with a fresh UUID + explicit `credit_id` → HTTP 200,
-  `code: "reset"`, `windows_reset: 2`, credit `status: "redeemed"`. Round-trip ~1.1 s
-  (`redeem_started_at` → `redeemed_at` ≈ 0.7 s server-side).
-- After (fetched ~1 s later): both the 5h and weekly windows read **0% used** with full
-  window durations (`reset_after_seconds` = 18000 / 604800), `available_count` = 3, and
-  the redeemed credit no longer appears in the list. The reset also zeroed the windows of
-  the `additional_rate_limits` entry (the model-specific limit was already 0%, so this is
-  suggestive, not proven).
+- Antes: 4 créditos disponíveis; janela de 5h com 96% usado (renovação em ~25 min), semanal com 52% usado (renovação em ~6 dias). O crédito escolhido expiraria 2,18 h depois.
+- `POST …/consume` com um UUID novo e `credit_id` explícito → HTTP 200, `code: "reset"`, `windows_reset: 2`, crédito com `status: "redeemed"`. Ida e volta em ~1,1 s (`redeem_started_at` → `redeemed_at` ≈ 0,7 s no servidor).
+- Depois (lido ~1 s mais tarde): as janelas de 5h e semanal mostravam **0% usado**, com a duração cheia (`reset_after_seconds` = 18000 / 604800), `available_count` = 3, e o crédito resgatado não aparecia mais na lista. A renovação também zerou as janelas do item `additional_rate_limits` (o limite específico do modelo já estava em 0%, então isso é um indício, não uma prova).
 
-## Implementation notes for Meu Uso (when we build it)
+## Notas de implementação para o Meu Uso
 
-- The claim is a single POST on infrastructure Meu Uso already talks to; auth, headers,
-  and account id handling are identical to `CodexUsageClient`'s existing calls.
-- Mint the `redeem_request_id` UUID **when the user is shown the claim affordance** (per
-  credit), persist it for the duration of the interaction, and reuse it on retry — that is
-  the CLI's double-spend protection and we should copy it exactly.
-- Always pass an explicit `credit_id`; default the selection to the soonest-expiring
-  available credit (the CLI's sort order).
-- Treat `already_redeemed` as success; surface `nothing_to_reset` as an informational
-  message (credit is *not* lost); on `no_credit` with a `credit_id`, refresh the list —
-  the credit raced away.
-- This is an irreversible, user-visible spend of a scarce grant — the UI must be an
-  explicit, deliberate user action (the CLI uses a picker + confirmation flow), never
-  automatic.
-- After a successful claim, refresh usage + the credit list immediately: both windows drop
-  to 0% and the count decrements, which the widgets should reflect right away.
+Escritas antes da implementação. O resgate atual (`CodexResetClaimService`) segue estas notas; as diferenças estão entre parênteses.
+
+- O resgate é um único POST, num serviço com que o Meu Uso já conversa: autenticação, cabeçalhos e ID da conta são iguais aos das chamadas que o `CodexUsageClient` já faz.
+- Gere o UUID do `redeem_request_id` **quando o usuário vê a opção de resgate** (um por crédito), guarde durante toda a interação e reaproveite nas novas tentativas. É a proteção da CLI contra gasto em dobro, e devemos copiá-la exatamente. (Na implementação, o UUID nasce quando o crédito entra na confirmação e vale para todas as novas tentativas enquanto a lista do app estiver aberta.)
+- Mande sempre um `credit_id` explícito e deixe selecionado por padrão o crédito disponível que expira primeiro (a ordem da CLI). (Na implementação, a lista do app mostra primeiro a renovação que expira antes, e o app busca de novo a lista da API na hora do resgate para achar o ID pelo horário de expiração.)
+- Trate `already_redeemed` como sucesso. Mostre `nothing_to_reset` como mensagem informativa (o crédito *não* se perde). Com `no_credit` e um `credit_id`, atualize a lista: o crédito foi resgatado em outro lugar.
+- É um gasto irreversível e visível de um benefício escasso: a interface precisa exigir uma ação explícita e deliberada do usuário (a CLI usa seletor e confirmação), nunca automática.
+- Depois de um resgate bem-sucedido, atualize na hora o uso e a lista de créditos: as duas janelas caem para 0% e a contagem diminui, e os widgets devem mostrar isso logo.

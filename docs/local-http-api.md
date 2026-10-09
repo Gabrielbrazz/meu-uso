@@ -1,61 +1,48 @@
-# Local HTTP API
+# API HTTP local
 
-Meu Uso exposes a read-only HTTP API on the loopback interface so other local apps can consume the same usage data shown in the menu bar.
+O Meu Uso expõe uma API HTTP somente leitura na interface de loopback, para outros apps do seu Mac usarem os mesmos dados de uso que aparecem na barra de menus.
 
-**Base URL:** `http://127.0.0.1:6737`
+**URL base:** `http://127.0.0.1:6737`
 
-The server starts automatically with the app. If the port is already in use, the feature is silently disabled for that session.
+O servidor sobe junto com o app. Se a porta já estiver em uso, a API fica desligada naquela sessão, sem aviso.
 
-## Routes
+## Rotas
 
 ### `GET /v1/limits`
 
-Returns a machine-facing envelope for all **enabled** providers. Providers and resources are keyed by
-stable IDs; values are raw scalars with explicit units. This is the preferred route for new integrations
-and the exact format printed by the `meu-uso` CLI.
+Devolve um envelope feito para máquinas, com todos os provedores **ativados**. Provedores e recursos usam IDs estáveis como chave, e os valores são números brutos com unidade explícita. É a rota recomendada para integrações novas e o formato exato que a CLI `meu-uso` imprime.
 
 ### `GET /v1/limits/:id`
 
-Returns the same envelope containing every provider the ID names. It works for disabled providers too.
-Matching is plain string comparison: an exact provider ID names that provider, and a family ID
-(`claude`, `codex`) names every account card of that family — with one account that's exactly the one
-card. There is no aliasing or "pick the right account" logic; the same request always names the same
-providers.
+Devolve o mesmo envelope com todos os provedores que o ID nomeia. Funciona também para provedores desativados. A correspondência é uma comparação simples de texto: um ID exato nomeia aquele provedor, e um ID de família (`claude`, `codex`) nomeia todos os cards de conta da família. Com uma conta só, é exatamente aquele card. Não há apelidos nem lógica para "escolher a conta certa": a mesma requisição sempre nomeia os mesmos provedores.
 
-- **200 OK** — limits envelope with every matched provider that has data (an `errors` entry appears
-  when a refresh failed; a matched provider with no data yet simply has no entry).
-- **404 Not Found** — the ID names no known provider and no family.
+- **200 OK**: envelope de limites com cada provedor encontrado que tenha dados. Uma entrada em `errors` aparece quando uma atualização falhou; um provedor encontrado que ainda não tem dados simplesmente fica sem entrada.
+- **404 Not Found**: o ID não nomeia nenhum provedor nem família conhecidos.
 
 ### `GET /v1/usage`
 
-Returns the legacy UI-oriented snapshots for all **enabled** providers, in your dashboard order. Existing
-consumers remain supported while this route is deprecated; new consumers should use `/v1/limits`.
+Devolve os snapshots legados, pensados para a interface, de todos os provedores **ativados**, na ordem do seu painel. A rota continua funcionando para quem já usa, mas está obsoleta: integrações novas devem usar `/v1/limits`.
 
-Both routes read the same rendered provider snapshots. When iCloud Sync is on, that means they both see
-the same iCloud-combined usage as the dashboard; `/v1/usage` returns the old UI-oriented shape, while
-`/v1/limits` projects the data into stable resource IDs and raw scalar values.
+As duas rotas leem os mesmos snapshots já renderizados. Com a Sincronização com o iCloud ligada, as duas veem o mesmo uso combinado do iCloud que o painel mostra. Muda só o formato: `/v1/usage` devolve o formato antigo, pensado para a interface, e `/v1/limits` projeta os dados em IDs de recurso estáveis e valores numéricos brutos.
 
-- **200 OK** — JSON array (may be empty `[]` if nothing has been fetched yet).
+- **200 OK**: array JSON (pode vir vazio, `[]`, se nada foi buscado ainda).
 
 ### `GET /v1/usage/:id`
 
-Returns the latest snapshots for every provider the ID names (same matching as `/v1/limits/:id`).
-Works for disabled providers too.
+Devolve os snapshots mais recentes de todos os provedores que o ID nomeia (mesma correspondência de `/v1/limits/:id`). Funciona também para provedores desativados.
 
-- **200 OK** — JSON array, one snapshot per matched provider that has one (`[]` when none do yet).
-- **404 Not Found** — the ID names no known provider and no family.
+- **200 OK**: array JSON, com um snapshot para cada provedor encontrado que tenha um (`[]` quando nenhum tem ainda).
+- **404 Not Found**: o ID não nomeia nenhum provedor nem família conhecidos.
 
-> **Breaking change:** this route previously returned a single JSON object and `204` when the
-> provider had no snapshot. It now always returns an array, so the shape stays identical whether an
-> ID names one provider or a whole account family.
+> **Mudança em relação ao app original:** no OpenUsage, esta rota devolvia um único objeto JSON e `204` quando o provedor não tinha snapshot. Aqui ela sempre devolve um array, então o formato é o mesmo quando o ID nomeia um provedor ou uma família inteira de contas.
 
-### Everything else
+### Todo o resto
 
-Methods other than `GET` return **405**; unknown routes return **404**. When the server is already handling its maximum of 16 concurrent connections, requests get **503** — back off and retry.
+Métodos diferentes de `GET` recebem **405**, e rotas desconhecidas recebem **404**. Quando o servidor já está atendendo o máximo de 16 conexões simultâneas, a requisição recebe **503**: espere um pouco e tente de novo.
 
-Pedido que pode ter saído de uma página da web, com `Origin` ou com `Host` diferente de `127.0.0.1:6737` e `localhost:6737`, recebe **403** antes de qualquer rota. Veja [CORS e privacidade](#cors-e-privacidade).
+Requisição que pode ter saído de uma página da web, com `Origin` ou com `Host` diferente de `127.0.0.1:6737` e `localhost:6737`, recebe **403** antes de qualquer rota. Veja [CORS e privacidade](#cors-e-privacidade).
 
-## Limits response shape
+## Formato da resposta de limites
 
 ```jsonc
 {
@@ -91,23 +78,19 @@ Pedido que pode ter saído de uma página da web, com `Origin` ou com `Host` dif
 }
 ```
 
-`kind` is `consumption` (`used`) or `balance` (`available`). Bounded consumption also carries `limit`,
-`remaining`, and a 0–1 `utilization`. Reset, window, expiry-list, and `estimated` fields appear only when
-the provider supplies that meaning. A provider or resource with no current value is omitted rather than
-invented as zero. `expiresAt` is always `fetchedAt` plus the same five-minute freshness interval used by
-the app and CLI; `stale` says whether that instant has passed. Refresh failures appear in `errors` as
-`{"providerId":"…","message":"…"}` while a last-good provider snapshot remains available.
-For bounded progress resources, `unit` follows the provider's live metric format. For example, Cursor
-`totalUsage` is `percent` on percentage-based plans, `requests` on request-based Enterprise plans, and
-`usd` when Cursor reports a dollar pool. Copilot `premiumCredits` is `percent` on paid plans and a
-`credits` count on org-managed seats that only report personal `credits_used`. OpenCode `session`,
-`weekly`, and `monthly` are `percent`. An untouched OpenCode `session` omits `resetsAt`; the field appears
-with the anchored reset instant after the first model call starts the rolling window, even while `used`
-is still 0 because OpenCode reports whole percentages.
+`kind` é `consumption` (`used`) ou `balance` (`available`). Um consumo com teto também traz `limit`, `remaining` e `utilization`, de 0 a 1. Os campos de renovação, de janela, de lista de expirações e `estimated` só aparecem quando o provedor fornece esse dado. Um provedor ou recurso sem valor atual fica de fora, em vez de aparecer como um zero inventado.
 
-### Public resources
+`expiresAt` é sempre `fetchedAt` mais o mesmo intervalo de cinco minutos que o app e a CLI usam para considerar um dado recente; `stale` diz se esse instante já passou. Falhas de atualização aparecem em `errors` como `{"providerId":"…","message":"…"}`, enquanto o último snapshot bom do provedor continua disponível.
 
-| Provider | Resource keys |
+Nos recursos de progresso com teto, `unit` segue o formato que a métrica do provedor tem no momento. Por exemplo:
+
+- `totalUsage` do Cursor é `percent` nos planos por porcentagem, `requests` nos planos Enterprise por requisição e `usd` quando o Cursor informa uma cota em dólar.
+- `premiumCredits` do Copilot é `percent` nos planos pagos e uma contagem `credits` em assentos gerenciados pela organização, que só informam o `credits_used` pessoal.
+- `session`, `weekly` e `monthly` do OpenCode são `percent`. Uma `session` do OpenCode ainda não usada não traz `resetsAt`. O campo aparece, com o instante de renovação já fixado, depois que a primeira chamada de modelo inicia a janela móvel, mesmo com `used` ainda em 0, porque o OpenCode informa porcentagens inteiras.
+
+### Recursos públicos
+
+| Provedor | Chaves de recurso |
 | --- | --- |
 | Claude | `session`, `weekly`, `sonnet`, `fable`, `extraUsage`, `rateLimitResets` |
 | Codex | `session`, `weekly`, `spark`, `sparkWeekly`, `credits`, `creditValue`, `rateLimitResets` |
@@ -121,10 +104,9 @@ is still 0 because OpenCode reports whole percentages.
 | OpenRouter | `credits`, `balance`, `keyLimit` |
 | Z.ai | `session`, `weekly`, `webSearches` |
 
-Charts, colors, subtitles, formatted badges, layout state, and historical spend periods stay out of this
-contract. Codex's combined Credits UI row becomes two scalar resources: `credits` and `creditValue`.
+Gráficos, cores, subtítulos, badges formatados, estado de layout e os períodos do histórico de gasto ficam fora deste contrato. A linha combinada **Créditos** do Codex vira dois recursos numéricos: `credits` e `creditValue`.
 
-## Legacy usage response shape
+## Formato legado da resposta de uso
 
 ```jsonc
 {
@@ -137,22 +119,22 @@ contract. Codex's combined Credits UI row becomes two scalar resources: `credits
       "label": "Session",
       "used": 42.0,
       "limit": 100.0,
-      "format": { "kind": "percent" },          // or "dollars", or "count" (+ "suffix")
-      "resetsAt": "2026-03-26T13:00:00.161Z",   // optional
-      "periodDurationMs": 18000000,             // optional
+      "format": { "kind": "percent" },          // ou "dollars", ou "count" (+ "suffix")
+      "resetsAt": "2026-03-26T13:00:00.161Z",   // opcional
+      "periodDurationMs": 18000000,             // opcional
       "color": null
     },
     {
       "type": "text",
       "label": "Today",
-      "value": "$5.17 · 9.2M tokens",
+      "value": "US$ 5,17 · 9,2 mi tokens",
       "color": null,
       "subtitle": null
     },
     {
       "type": "badge",
       "label": "Pay as you go",
-      "text": "2500 cap",
+      "text": "limite de 2.500",
       "color": "#22c55e",
       "subtitle": null
     },
@@ -160,10 +142,10 @@ contract. Codex's combined Credits UI row becomes two scalar resources: `credits
       "type": "barChart",
       "label": "Usage Trend",
       "points": [
-        { "label": "Mar 25", "value": 1200000.0, "valueLabel": "1.2M tokens" },
-        { "label": "Mar 26", "value": 2400000.0, "valueLabel": "2.4M tokens" }
+        { "label": "25 de mar.", "value": 1200000.0, "valueLabel": "1,2 mi tokens" },
+        { "label": "26 de mar.", "value": 2400000.0, "valueLabel": "2,4 mi tokens" }
       ],
-      "note": "Estimated from local Claude logs at API rates.",
+      "note": "Do seu histórico de uso do Claude (estimativa)",
       "color": null
     }
   ],
@@ -171,17 +153,29 @@ contract. Codex's combined Credits UI row becomes two scalar resources: `credits
 }
 ```
 
-Line types are `progress`, `text`, `badge`, and `barChart`. A `barChart` line carries a `points` array — one `{ label, value, valueLabel? }` per day, oldest first — plus an optional `note`; `value` is the day's token count, `valueLabel` its pre-formatted readout, and `label` a localized month/day (e.g. "Mar 25"). `fetchedAt` is when the snapshot was last fetched successfully (ISO 8601).
+Os tipos de linha são `progress`, `text`, `badge` e `barChart`. Uma linha `barChart` traz um array `points`, com um `{ label, value, valueLabel? }` por dia, do mais antigo para o mais novo, e uma `note` opcional. `value` é a contagem de tokens do dia, `valueLabel` é esse número já formatado para leitura, e `label` é o dia no formato curto do app (por exemplo, "25 de mar."). `fetchedAt` é quando o snapshot foi buscado com sucesso pela última vez (ISO 8601).
 
-The in-app model breakdown shown when hovering spend rows is not included in this API yet. Spend rows continue to serialize as the same `text` lines so existing local integrations keep their current shape.
+O detalhamento por modelo que o app mostra ao passar o mouse nas linhas de gasto ainda não faz parte desta API. As linhas de gasto continuam saindo como as mesmas linhas `text`, para as integrações locais existentes manterem o formato atual.
 
-## Errors
+## Idioma e valores formatados
+
+As chaves JSON, os IDs, os tipos (`type`, `kind`), as unidades e os rótulos de métrica (`label`, como `"Session"` e `"Today"`) ficam em inglês: são identificadores estáveis, não texto de tela. Os números puros (`used`, `limit`, `available`, o `value` dos pontos) continuam números JSON.
+
+Os textos que já chegam prontos para exibir seguem o app: português e o padrão brasileiro de números, moeda e datas (veja [Números, moeda e datas](glossario.md#números-moeda-e-datas) no glossário).
+
+- **No formato legado:** o `value` das linhas `text` ("US$ 5,17 · 9,2 mi tokens"), o `text` dos badges ("limite de 2.500") e o `label`, o `valueLabel` e a `note` do gráfico.
+- **Nos dois formatos:** o `plan` quando o nome vem do app e não do provedor (por exemplo, "Pago por uso" no OpenRouter) e o `displayName` dos cards quando há mais de uma conta (por exemplo, "Claude — Pessoal").
+- **Em `/v1/limits`:** as mensagens de `errors`, que são as mesmas que o app mostra (por exemplo, "Nenhum login encontrado. Rode `codex` para entrar.").
+
+Nesses textos, o espaço depois de `US$` e antes de `mil`, `mi` e `bi` é um espaço não separável (U+00A0). Para fazer contas, use os números de `/v1/limits` em vez de interpretar esses textos.
+
+## Erros
 
 ```json
 { "error": "provider_not_found" }
 ```
 
-Codes: `provider_not_found`, `not_found`, `method_not_allowed`, `host_not_allowed`, `origin_not_allowed`, `server_busy`.
+Códigos: `provider_not_found`, `not_found`, `method_not_allowed`, `host_not_allowed`, `origin_not_allowed`, `server_busy`.
 
 ## CORS e privacidade
 
@@ -190,9 +184,9 @@ A API só escuta na interface de loopback (`127.0.0.1`), então nenhuma outra m�
 Como isso funciona:
 
 - **Sem CORS.** Nenhuma resposta traz cabeçalho `Access-Control-*`, e não existe preflight: `OPTIONS` recebe **405**, como qualquer método diferente de `GET`. Sem esses cabeçalhos, o navegador não entrega a resposta a uma página de outra origem.
-- **Pedido com `Origin` recebe 403** (`origin_not_allowed`), sem dado nenhum. O navegador manda `Origin` em todo `fetch` para outra origem e em todo preflight; `curl` e apps nativos não mandam.
+- **Requisição com `Origin` recebe 403** (`origin_not_allowed`), sem dado nenhum. O navegador manda `Origin` em todo `fetch` para outra origem e em todo preflight; `curl` e apps nativos não mandam.
 - **Só dois `Host` valem: `127.0.0.1:6737` e `localhost:6737`.** Outro valor, `Host` repetido ou a falta dele recebe **403** (`host_not_allowed`). É o que barra o DNS rebinding, em que o site faz o próprio domínio apontar para `127.0.0.1` e, para o navegador, a API vira da mesma origem que ele.
-- **`<script>` e `<img>` de outro site também ficam sem o JSON.** Esses pedidos não levam `Origin`, mas as respostas trazem `Cross-Origin-Resource-Policy: same-origin` e `X-Content-Type-Options: nosniff`, e com isso o navegador não repassa o conteúdo.
+- **`<script>` e `<img>` de outro site também ficam sem o JSON.** Essas requisições não levam `Origin`, mas as respostas trazem `Cross-Origin-Resource-Policy: same-origin` e `X-Content-Type-Options: nosniff`, e com isso o navegador não repassa o conteúdo.
 
 Abrir o endereço na barra do navegador continua funcionando: aí quem lê é você, não uma página.
 
@@ -200,6 +194,6 @@ O motivo: as respostas trazem uso, gasto, nomes de plano e, nos provedores com m
 
 Integração que roda dentro de um navegador ou de uma WebView, como uma extensão ou um widget em HTML, não consegue ler a API. Ela precisa de um intermediário nativo, como o `curl` ou o comando [`meu-uso`](cli.md). O `meu-uso` não passa pelo HTTP (lê o cache do app), então nada muda para ele.
 
-## Caching behavior
+## Comportamento do cache
 
-The API serves whatever the app is showing: only successful fetches replace data, so a failed refresh never blanks the API — you keep getting the last good snapshot. See [Refreshing & caching](refreshing.md).
+A API serve o que o app está mostrando. Só buscas bem-sucedidas substituem os dados, então uma atualização que falha nunca esvazia a API: você continua recebendo o último snapshot bom. Veja [Atualização e cache](refreshing.md).
