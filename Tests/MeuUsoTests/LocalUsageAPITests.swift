@@ -134,8 +134,11 @@ final class LocalUsageAPITests: XCTestCase {
         XCTAssertEqual(post.status, 405)
         XCTAssertEqual((try json(post.body) as? [String: Any])?["error"] as? String, "method_not_allowed")
 
-        let preflight = LocalUsageAPI.respond(method: "OPTIONS", path: "/v1/usage", state: state)
-        XCTAssertEqual(preflight.status, 204)
+        // No CORS preflight any more (it used to be a 204): OPTIONS is just another method the API
+        // doesn't serve. Browser preflights are refused even earlier — see LocalUsageAccessTests.
+        let options = LocalUsageAPI.respond(method: "OPTIONS", path: "/v1/usage", state: state)
+        XCTAssertEqual(options.status, 405)
+        XCTAssertEqual((try json(options.body) as? [String: Any])?["error"] as? String, "method_not_allowed")
 
         let unknownRoute = LocalUsageAPI.respond(method: "GET", path: "/v2/everything", state: state)
         XCTAssertEqual(unknownRoute.status, 404)

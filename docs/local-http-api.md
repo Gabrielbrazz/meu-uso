@@ -51,7 +51,9 @@ Works for disabled providers too.
 
 ### Everything else
 
-Methods other than `GET`/`OPTIONS` return **405**; unknown routes return **404**. When the server is already handling its maximum of 16 concurrent connections, requests get **503** — back off and retry.
+Methods other than `GET` return **405**; unknown routes return **404**. When the server is already handling its maximum of 16 concurrent connections, requests get **503** — back off and retry.
+
+Pedido que pode ter saído de uma página da web, com `Origin` ou com `Host` diferente de `127.0.0.1:6737` e `localhost:6737`, recebe **403** antes de qualquer rota. Veja [CORS e privacidade](#cors-e-privacidade).
 
 ## Limits response shape
 
@@ -179,13 +181,24 @@ The in-app model breakdown shown when hovering spend rows is not included in thi
 { "error": "provider_not_found" }
 ```
 
-Codes: `provider_not_found`, `not_found`, `method_not_allowed`, `server_busy`.
+Codes: `provider_not_found`, `not_found`, `method_not_allowed`, `host_not_allowed`, `origin_not_allowed`, `server_busy`.
 
-## CORS and privacy
+## CORS e privacidade
 
-All responses include permissive CORS headers (`Access-Control-Allow-Origin: *`, methods `GET, OPTIONS`). `OPTIONS` requests return **204** for preflight.
+A API só escuta na interface de loopback (`127.0.0.1`), então nenhuma outra máquina da rede chega até ela. E ela serve programas do seu Mac, não páginas da web: `curl`, scripts e apps nativos leem os dados, mas um site aberto no navegador não lê.
 
-The server only listens on the loopback interface (`127.0.0.1`), so it is not reachable from other machines on your network. Because the CORS header is permissive, though, a web page open in your browser can read your usage snapshots from this API while the app is running. The data exposed is the same usage numbers shown in the menu bar — no credentials or tokens are ever served. This matches the original app's behavior so existing integrations keep working.
+Como isso funciona:
+
+- **Sem CORS.** Nenhuma resposta traz cabeçalho `Access-Control-*`, e não existe preflight: `OPTIONS` recebe **405**, como qualquer método diferente de `GET`. Sem esses cabeçalhos, o navegador não entrega a resposta a uma página de outra origem.
+- **Pedido com `Origin` recebe 403** (`origin_not_allowed`), sem dado nenhum. O navegador manda `Origin` em todo `fetch` para outra origem e em todo preflight; `curl` e apps nativos não mandam.
+- **Só dois `Host` valem: `127.0.0.1:6737` e `localhost:6737`.** Outro valor, `Host` repetido ou a falta dele recebe **403** (`host_not_allowed`). É o que barra o DNS rebinding, em que o site faz o próprio domínio apontar para `127.0.0.1` e, para o navegador, a API vira da mesma origem que ele.
+- **`<script>` e `<img>` de outro site também ficam sem o JSON.** Esses pedidos não levam `Origin`, mas as respostas trazem `Cross-Origin-Resource-Policy: same-origin` e `X-Content-Type-Options: nosniff`, e com isso o navegador não repassa o conteúdo.
+
+Abrir o endereço na barra do navegador continua funcionando: aí quem lê é você, não uma página.
+
+O motivo: as respostas trazem uso, gasto, nomes de plano e, nos provedores com mais de uma conta, nomes de exibição que podem conter o e-mail da conta. O OpenUsage, de onde o Meu Uso veio, responde com `Access-Control-Allow-Origin: *`, e assim qualquer página aberta no navegador lê esses dados enquanto o app está aberto. Credenciais e tokens nunca saem pela API.
+
+Integração que roda dentro de um navegador ou de uma WebView, como uma extensão ou um widget em HTML, não consegue ler a API. Ela precisa de um intermediário nativo, como o `curl` ou o comando [`meu-uso`](cli.md). O `meu-uso` não passa pelo HTTP (lê o cache do app), então nada muda para ele.
 
 ## Caching behavior
 
