@@ -193,7 +193,11 @@ enum UsageHistorySnapshotRenderer {
     ) -> ProviderSnapshot {
         var result = snapshot
         result.lines.removeAll { historyLabels.contains($0.label) }
-        let baseNote = combined ? "Across your Macs · \(descriptor.sourceNote)" : descriptor.sourceNote
+        // The provider's note is an English key; the combined phrase is composed already translated
+        // (`PricingFallbackOption.sourceNote` translates the plain one downstream).
+        let baseNote = combined
+            ? L10n.format("Across your Macs · %@", L10n.tr(descriptor.sourceNote))
+            : descriptor.sourceNote
         SpendTileMapper.appendTokenUsage(
             history.series,
             to: &result.lines,

@@ -88,8 +88,11 @@ extension ProviderAccountAssembly {
 
         func label(for identity: CodexAccountIdentity, preferred: String? = nil) -> String {
             if let preferred = preferred?.nilIfEmpty { return "Codex: \(preferred)" }
-            let workspace = identity.accountID.isEmpty ? "Unknown" : String(identity.accountID.prefix(8))
-            return "Codex: Workspace \(workspace) (\(identity.email ?? identity.accountID))"
+            // The same "Workspace %@" phrase `CodexSwapAccount.displayName` uses, so both cards read alike.
+            let workspace = identity.accountID.isEmpty
+                ? L10n.tr("Workspace Unknown")
+                : L10n.format("Workspace %@", String(identity.accountID.prefix(8)))
+            return "Codex: \(workspace) (\(identity.email ?? identity.accountID))"
         }
 
         /// A name the user chose in xswap or pi beats the generic workspace label; the first such name wins.

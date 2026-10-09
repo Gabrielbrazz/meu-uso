@@ -105,11 +105,12 @@ struct TotalSpendCard: View {
     /// tooltip lie about what the total reflects.
     private var infoTooltip: String {
         let names = providers.map(\.displayName)
-        return "Only includes \(names.formatted(.list(type: .and)))."
+        // The list joins in the app's pt-BR style ("Claude, Codex e Cursor"), like every other formatted value.
+        return L10n.format("Only includes %@.", names.formatted(.list(type: .and).locale(AppLocale.current)))
     }
 
     private var shareButton: some View {
-        CopyFeedbackButton(accessibilityLabel: "Copy \(metric.title) Screenshot") {
+        CopyFeedbackButton(accessibilityLabel: L10n.format("Copy %@ Screenshot", metric.title)) {
             ShareCardRenderer.shareTotalSpend(
                 total: total,
                 metric: metric,
@@ -250,13 +251,14 @@ struct TotalSpendRingContent: View {
 
     private var accessibilityLabel: String {
         let center = formatValue(projection.centerValue, style: .full)
+        let count = projection.slices.count
         switch projection.metric {
         case .cost:
-            return "Total cost \(center) across \(projection.slices.count) providers"
+            return L10n.format("Total cost %@ across %lld providers", center, count)
         case .tokens:
-            return "Total tokens \(center) across \(projection.slices.count) providers"
+            return L10n.format("Total tokens %@ across %lld providers", center, count)
         case .costPerMtok:
-            return "Blended cost per megatoken \(center) across \(projection.slices.count) providers"
+            return L10n.format("Blended cost per megatoken %@ across %lld providers", center, count)
         }
     }
 

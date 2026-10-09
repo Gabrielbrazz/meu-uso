@@ -20,7 +20,8 @@ enum AboutPanel {
 
     /// Centered, secondary-styled credits: the maintainer, the required notice that this is an unofficial
     /// fork of OpenUsage (MIT), and the GitHub repo. The standard panel renders `.link`-attributed runs as
-    /// clickable.
+    /// clickable. The linked names stay as they are; the plain runs between them are translated piece by
+    /// piece (their keys keep the leading/trailing spaces and line breaks), since each link is its own run.
     private static var credits: NSAttributedString {
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = .center
@@ -32,12 +33,12 @@ enum AboutPanel {
         ]
 
         let credits = NSMutableAttributedString()
-        credits.append(NSAttributedString(string: "Created by ", attributes: base))
+        credits.append(NSAttributedString(string: L10n.tr("Created by "), attributes: base))
         credits.append(link("Gabriel Braz", "https://github.com/Gabrielbrazz", base: base))
-        credits.append(NSAttributedString(string: "\nUnofficial fork of ", attributes: base))
+        credits.append(NSAttributedString(string: L10n.tr("\nUnofficial fork of "), attributes: base))
         credits.append(link("OpenUsage", "https://github.com/robinebers/openusage", base: base))
-        credits.append(NSAttributedString(string: ", by Robin Ebers (MIT license)", attributes: base))
-        credits.append(NSAttributedString(string: "\n\nOpen source on ", attributes: base))
+        credits.append(NSAttributedString(string: L10n.tr(", by Robin Ebers (MIT license)"), attributes: base))
+        credits.append(NSAttributedString(string: L10n.tr("\n\nOpen source on "), attributes: base))
         credits.append(link("GitHub", "https://github.com/Gabrielbrazz/meu-uso", base: base))
         return credits
     }

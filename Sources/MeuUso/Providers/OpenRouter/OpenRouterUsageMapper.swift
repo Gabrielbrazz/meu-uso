@@ -53,7 +53,8 @@ enum OpenRouterUsageMapper {
             ))
         }
 
-        let plan = (data["is_free_tier"] as? Bool).map { $0 ? "Free tier" : "Pay as you go" }
+        // OpenRouter sends only a flag, so this label is our wording rather than a provider plan name.
+        let plan = (data["is_free_tier"] as? Bool).map { $0 ? L10n.tr("Free tier") : L10n.tr("Pay as you go") }
         return (plan, lines)
     }
 

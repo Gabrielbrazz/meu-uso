@@ -10,6 +10,8 @@ Ponto de partida: fork do [OpenUsage](https://github.com/robinebers/openusage) v
 - Nome: OpenUsage passa a ser Meu Uso. Bundle ID `io.github.gabrielbrazz.meuuso`, pastas `~/Library/Application Support/MeuUso` e `~/Library/Logs/MeuUso`, configuração em `~/.meu-uso` e `~/.config/meu-uso`, CLI `meu-uso`, API local em `127.0.0.1:6737`. Nada disso colide com uma instalação do OpenUsage no mesmo Mac.
 - Versão reiniciada em 0.1.0.
 - Marca e ícone provisórios: um anel de uso com uma abertura e um ponto, desenhado do zero (`script/brand/mark.py`). O ícone clássico (`.icns`) vai em todo build; o ícone Liquid Glass depende de um `actool` que compile `assets/AppIcon.icon`.
+- Interface em português do Brasil, sempre, qualquer que seja o idioma do Mac. O texto sai de `assets/Localization/pt-BR.lproj`, e o CI acusa texto novo sem tradução.
+- Números, moeda e datas no padrão brasileiro: "US$ 1.234,56", "12,9 mil", "7 de out.", "17:30".
 
 ### Removido
 - Telemetria: o app não envia dados de uso nem relatórios de falha para serviço nenhum.

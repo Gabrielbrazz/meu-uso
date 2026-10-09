@@ -15,23 +15,26 @@ enum ClaudeAuthError: Error, LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .notLoggedIn:
-            return "Not logged in. Run `claude` to authenticate."
+            return L10n.tr("Not logged in. Run `claude` to authenticate.")
         case .desktopPermissionRequired:
-            return "Claude Desktop login found. Refresh once and choose Always Allow to connect it."
+            return L10n.tr("Claude Desktop login found. Refresh once and choose Always Allow to connect it.")
         case .swapTokenExpired:
-            return "Claude Swap login is stale. Launch this account with `cswap run`, then refresh Meu Uso."
+            return L10n.tr("Claude Swap login is stale. Launch this account with `cswap run`, then refresh Meu Uso.")
         case .desktopTokenExpired:
-            return "Claude Desktop login is stale. Open Claude Desktop, then refresh Meu Uso."
+            return L10n.tr("Claude Desktop login is stale. Open Claude Desktop, then refresh Meu Uso.")
         case .desktopCredentialsUnavailable:
-            return "Claude Desktop login couldn't be read. Open Claude Desktop, then try again."
+            return L10n.tr("Claude Desktop login couldn't be read. Open Claude Desktop, then try again.")
         case .sessionExpired:
-            return "Session expired. Run `claude` to log in again."
+            return L10n.tr("Session expired. Run `claude` to log in again.")
         case .tokenExpired:
-            return "Token expired. Run `claude` to log in again."
+            return L10n.tr("Token expired. Run `claude` to log in again.")
         case .credentialsChanged:
-            return "Claude login changed during refresh. Refresh again."
+            return L10n.tr("Claude login changed during refresh. Refresh again.")
         case .invalidOAuthURL(let value):
-            return "Invalid Claude OAuth URL: \(value). Check CLAUDE_CODE_CUSTOM_OAUTH_URL / CLAUDE_LOCAL_OAUTH_API_BASE."
+            return L10n.format(
+                "Invalid Claude OAuth URL: %@. Check CLAUDE_CODE_CUSTOM_OAUTH_URL / CLAUDE_LOCAL_OAUTH_API_BASE.",
+                value
+            )
         }
     }
 

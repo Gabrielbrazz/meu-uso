@@ -9,6 +9,7 @@ import SwiftUI
 /// `handle` wraps the leading drag grip — the live row threads its reorder gesture through it; the
 /// preview leaves it inert. `trailing` is the star button + toggle (live) or placeholders (preview).
 struct CustomizeMetricRow<Handle: View, Trailing: View>: View {
+    /// The metric's descriptor title — an English key in the data, translated at display (`L10n.tr`).
     let title: String
     /// Wraps the leading drag grip. The live row threads its reorder gesture through here; the
     /// preview leaves it untouched.
@@ -20,7 +21,7 @@ struct CustomizeMetricRow<Handle: View, Trailing: View>: View {
     var body: some View {
         HStack(spacing: 10) {
             handle(AnyView(ReorderGrip()))
-            Text(title)
+            Text(L10n.tr(title))
                 .foregroundStyle(.primary)
             Spacer(minLength: 8)
             trailing

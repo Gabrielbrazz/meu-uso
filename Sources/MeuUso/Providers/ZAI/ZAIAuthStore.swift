@@ -21,13 +21,13 @@ enum ZAIAuthError: Error, LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .missingKey:
-            return "No Z.ai API key. Set ZAI_API_KEY or add it to ~/.config/meu-uso/zai.json."
+            return L10n.tr("No Z.ai API key. Set ZAI_API_KEY or add it to ~/.config/meu-uso/zai.json.")
         case .invalidKey:
-            return "Z.ai API key invalid. Check your key at z.ai/manage-apikey/apikey-list."
+            return L10n.tr("Z.ai API key invalid. Check your key at z.ai/manage-apikey/apikey-list.")
         case .saveFailed:
-            return "Couldn't save the Z.ai API key."
+            return L10n.tr("Couldn't save the Z.ai API key.")
         case .deleteFailed:
-            return "Couldn't remove the saved Z.ai API key."
+            return L10n.tr("Couldn't remove the saved Z.ai API key.")
         }
     }
 }

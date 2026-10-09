@@ -11,9 +11,9 @@ struct ScreenCrossLinkRow: View {
 
     /// SF Symbol leading the row, e.g. "gearshape".
     let systemImage: String
-    /// The row's title, e.g. "App Settings".
+    /// The row's title, e.g. "Settings" — an English key, translated at display (`L10n.tr`).
     let title: String
-    /// One-line secondary description of what lives there.
+    /// One-line secondary description of what lives there — also an English key.
     let subtitle: String
     /// Where the row navigates.
     let destination: PopoverScreen
@@ -32,10 +32,10 @@ struct ScreenCrossLinkRow: View {
                     .foregroundStyle(.secondary)
                     .frame(width: 18, height: 18)
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(title)
+                    Text(L10n.tr(title))
                         .font(.system(size: density.headerPointSize, weight: .semibold))
                         .foregroundStyle(.primary)
-                    Text(subtitle)
+                    Text(L10n.tr(subtitle))
                         .font(.system(size: density.planBadgePointSize))
                         .foregroundStyle(.secondary)
                 }

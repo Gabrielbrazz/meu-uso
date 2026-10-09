@@ -133,7 +133,7 @@ struct WidgetRowView: View {
     private func warning(_ state: WidgetData.MeterState) -> some View {
         switch state {
         case .spent:
-            flameWarning(text: "Limit reached", state: state, accessibility: "Limit reached")
+            flameWarning(text: L10n.tr("Limit reached"), state: state, accessibility: L10n.tr("Limit reached"))
         case .runningOut(let eta, _):
             // `eta == nil` is the float-edge case: the flame stands alone (the projection lives in
             // the tooltip), rather than printing a misleading time. A shown time reads "Limit in 3h
@@ -141,7 +141,7 @@ struct WidgetRowView: View {
             // countdown/exact mode, so — exactly like the reset label — clicking it flips that mode
             // (lifted reorder previews pass no toggle and render it inert).
             flameWarning(text: eta, state: state,
-                         accessibility: eta ?? "Will reach limit",
+                         accessibility: eta ?? L10n.tr("Will reach limit"),
                          action: eta == nil ? nil : onToggleResetDisplay)
         case .closeToLimit(let spare, _):
             Spacer(minLength: 8)
@@ -404,9 +404,9 @@ struct WidgetRowView: View {
 
     private func expiryStatusAccessibilityLabel(_ severity: WidgetData.MeterSeverity) -> String {
         switch severity {
-        case .normal: return "Reset credits expire in more than 7 days"
-        case .warning: return "A reset credit expires within 7 days"
-        case .critical: return "A reset credit expires within 48 hours"
+        case .normal: return L10n.tr("Reset credits expire in more than 7 days")
+        case .warning: return L10n.tr("A reset credit expires within 7 days")
+        case .critical: return L10n.tr("A reset credit expires within 48 hours")
         }
     }
 

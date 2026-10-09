@@ -143,7 +143,7 @@ final class WidgetDataStoreTests: XCTestCase {
     }
 
     func testBoundedDollarSubtitlesAppendLimitNoun() {
-        for (title, limit, expected) in [("On-Demand", 100.0, "$100 limit"), ("Credits", 20.0, "$20 limit")] {
+        for (title, limit, expected) in [("On-Demand", 100.0, "US$\u{00A0}100 limit"), ("Credits", 20.0, "US$\u{00A0}20 limit")] {
             let data = WidgetData(
                 title: title, icon: .providerMark("cursor"), kind: .dollars,
                 used: 0, limit: limit, limitNoun: "limit"
@@ -195,8 +195,8 @@ final class WidgetDataStoreTests: XCTestCase {
         store.meterStyle = .remaining
         let remaining = store.data(for: descriptor)
         XCTAssertFalse(remaining.isBounded)
-        XCTAssertEqual(remaining.unboundedDetail, "$40.00 · 1K credits")
-        XCTAssertEqual(remaining.menuBarValue, "$40")   // dollar value → compact tray reading
+        XCTAssertEqual(remaining.unboundedDetail, "US$\u{00A0}40,00 · 1\u{00A0}mil credits")
+        XCTAssertEqual(remaining.menuBarValue, "US$\u{00A0}40")   // dollar value → compact tray reading
         XCTAssertNil(remaining.unboundedSubtitle)
 
         store.meterStyle = .used
@@ -315,11 +315,11 @@ final class WidgetDataStoreTests: XCTestCase {
         await store.refreshAll()
 
         store.meterStyle = .used
-        XCTAssertEqual(store.data(for: budget).menuBarValue, "$12")
+        XCTAssertEqual(store.data(for: budget).menuBarValue, "US$\u{00A0}12")
         XCTAssertEqual(store.data(for: requests).menuBarValue, "412")
 
         store.meterStyle = .remaining
-        XCTAssertEqual(store.data(for: budget).menuBarValue, "$8")
+        XCTAssertEqual(store.data(for: budget).menuBarValue, "US$\u{00A0}8")
         XCTAssertEqual(store.data(for: requests).menuBarValue, "88")
     }
 
@@ -352,8 +352,8 @@ final class WidgetDataStoreTests: XCTestCase {
         store.meterStyle = .remaining
         let remaining = store.data(for: descriptor)
         XCTAssertFalse(remaining.isBounded)
-        XCTAssertEqual(remaining.unboundedDetail, "$7.9K left")
-        XCTAssertEqual(remaining.menuBarValue, "$7.9K")
+        XCTAssertEqual(remaining.unboundedDetail, "US$\u{00A0}7,9\u{00A0}mil left")
+        XCTAssertEqual(remaining.menuBarValue, "US$\u{00A0}7,9\u{00A0}mil")
 
         store.meterStyle = .used
         let used = store.data(for: descriptor)
@@ -393,18 +393,18 @@ final class WidgetDataStoreTests: XCTestCase {
         let data = store.data(for: descriptor)
         XCTAssertTrue(data.hasData)
         XCTAssertFalse(data.isBounded)                          // sample's limit: 100 dropped for a .values row
-        XCTAssertEqual(data.unboundedDetail, "$1.2K spent")     // popover row — compact, not "$1,234.56"
-        XCTAssertEqual(data.menuBarValue, "$1.2K")              // tray — same shorthand
-        XCTAssertEqual(data.unboundedTooltip, "$1,234.56")      // hover still reveals the exact figure
+        XCTAssertEqual(data.unboundedDetail, "US$\u{00A0}1,2\u{00A0}mil spent")     // popover row — compact, not "$1,234.56"
+        XCTAssertEqual(data.menuBarValue, "US$\u{00A0}1,2\u{00A0}mil")              // tray — same shorthand
+        XCTAssertEqual(data.unboundedTooltip, "US$\u{00A0}1.234,56")      // hover still reveals the exact figure
     }
 
     func testCreditValuesFloorAndClampBalance() {
         var data = WidgetData(title: "Extra Usage", icon: .providerMark("codex"), kind: .dollars, used: 0, limit: nil)
         data.values = CodexUsageMapper.creditValues(remaining: 820.9)
-        XCTAssertEqual(data.unboundedDetail, "$32.80 · 820 credits")
+        XCTAssertEqual(data.unboundedDetail, "US$\u{00A0}32,80 · 820 credits")
         // An exhausted/negative balance clamps to a real, measured zero — "$0.00 · 0 credits", not "No data".
         data.values = CodexUsageMapper.creditValues(remaining: -5)
-        XCTAssertEqual(data.unboundedDetail, "$0.00 · 0 credits")
+        XCTAssertEqual(data.unboundedDetail, "US$\u{00A0}0,00 · 0 credits")
     }
 
     func testCreditsRenderUpToOneDecimalPlace() {
@@ -418,8 +418,8 @@ final class WidgetDataStoreTests: XCTestCase {
             unboundedValueWord: "left"
         )
 
-        XCTAssertEqual(credits.valueText, "820.6")
-        XCTAssertEqual(credits.unboundedDetail, "820.6 credits left")
+        XCTAssertEqual(credits.valueText, "820,6")
+        XCTAssertEqual(credits.unboundedDetail, "820,6 credits left")
     }
 
     func testCcusageSpendSplitsIntoCostTokensAndCombined() async {
@@ -463,30 +463,30 @@ final class WidgetDataStoreTests: XCTestCase {
 
         // Cost-only: the dollars, locally estimated.
         let costData = store.data(for: cost)
-        XCTAssertEqual(costData.valueText, "$478.00")
-        XCTAssertEqual(costData.unboundedDetail, "$478.00 spent")
+        XCTAssertEqual(costData.valueText, "US$\u{00A0}478,00")
+        XCTAssertEqual(costData.unboundedDetail, "US$\u{00A0}478,00 spent")
         XCTAssertEqual(costData.infoNote, WidgetData.localEstimateNote)
 
         // Tokens-only: the measured count with its "tokens" unit; the tooltip has every digit.
         let tokenData = store.data(for: tokens)
-        XCTAssertEqual(tokenData.unboundedDetail, "891K tokens")
-        XCTAssertEqual(tokenData.menuBarValue, "891K tokens")
-        XCTAssertEqual(tokenData.unboundedTooltip, "891,000 tokens")
+        XCTAssertEqual(tokenData.unboundedDetail, "891\u{00A0}mil tokens")
+        XCTAssertEqual(tokenData.menuBarValue, "891\u{00A0}mil tokens")
+        XCTAssertEqual(tokenData.unboundedTooltip, "891.000 tokens")
         XCTAssertNil(tokenData.infoNote)
 
         // Combined: both values joined; the tray glances at the leading dollar value, the tooltip is full.
         let combinedData = store.data(for: combined)
-        XCTAssertEqual(combinedData.unboundedDetail, "$478.00 · 891K tokens")
-        XCTAssertEqual(combinedData.menuBarValue, "$478")
-        XCTAssertEqual(combinedData.unboundedTooltip, "$478.00 · 891,000 tokens")
+        XCTAssertEqual(combinedData.unboundedDetail, "US$\u{00A0}478,00 · 891\u{00A0}mil tokens")
+        XCTAssertEqual(combinedData.menuBarValue, "US$\u{00A0}478")
+        XCTAssertEqual(combinedData.unboundedTooltip, "US$\u{00A0}478,00 · 891.000 tokens")
         XCTAssertEqual(combinedData.infoNote, WidgetData.localEstimateNote)
 
         // The value hover carries exact figures plus the source note.
-        XCTAssertEqual(combinedData.unboundedValueTooltip, "$478.00 · 891,000 tokens\n\(WidgetData.localEstimateNote)")
-        XCTAssertEqual(costData.unboundedValueTooltip, "$478.00\n\(WidgetData.localEstimateNote)")
+        XCTAssertEqual(combinedData.unboundedValueTooltip, "US$\u{00A0}478,00 · 891.000 tokens\n\(WidgetData.localEstimateNote)")
+        XCTAssertEqual(costData.unboundedValueTooltip, "US$\u{00A0}478,00\n\(WidgetData.localEstimateNote)")
         // The measured tokens tile has no source note, so it has only the exact-number value hover.
         XCTAssertNil(tokenData.infoNote)
-        XCTAssertEqual(tokenData.unboundedValueTooltip, "891,000 tokens")
+        XCTAssertEqual(tokenData.unboundedValueTooltip, "891.000 tokens")
 
         // An unpriced day (real tokens, no dollar): the cost-only tile finds no dollar value, so it reads
         // "No data" rather than a fabricated $0.00.
@@ -517,9 +517,9 @@ final class WidgetDataStoreTests: XCTestCase {
         await store.refreshAll()
 
         let data = store.data(for: combined)
-        XCTAssertEqual(data.unboundedDetail, "$15.80 · 8.1B tokens")
+        XCTAssertEqual(data.unboundedDetail, "US$\u{00A0}15,80 · 8,1\u{00A0}bi tokens")
         XCTAssertNil(data.infoNote)
-        XCTAssertEqual(data.unboundedValueTooltip, "$15.80 · 8,100,000,000 tokens\n\(WidgetData.cursorUsageHistoryNote)")
+        XCTAssertEqual(data.unboundedValueTooltip, "US$\u{00A0}15,80 · 8.100.000.000 tokens\n\(WidgetData.cursorUsageHistoryNote)")
     }
 
     func testUsesFreshCachedSnapshotInsteadOfRefreshingProvider() async {

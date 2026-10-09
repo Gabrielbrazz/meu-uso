@@ -6,6 +6,7 @@ import SwiftUI
 /// capsule styling lives in one place.
 struct TransientPill: View {
     let systemImage: String
+    /// An English key, translated at display (`L10n.tr`); already-translated notices pass through.
     let text: String
     let tint: AnyShapeStyle
     /// Bumped by the caller each time the pill is (re-)shown, so `.id` re-pops the transition.
@@ -18,7 +19,7 @@ struct TransientPill: View {
         HStack(spacing: 5) {
             Image(systemName: systemImage)
                 .font(.system(size: 11, weight: .semibold))
-            Text(text)
+            Text(L10n.tr(text))
                 .font(.system(size: 12, weight: .semibold))
         }
         .foregroundStyle(tint)

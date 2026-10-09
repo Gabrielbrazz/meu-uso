@@ -90,13 +90,20 @@ enum MenuBarContentBuilder {
     }
 
     /// Tray-only label shortening (the dashboard keeps the full names): the long time-window metrics
-    /// collapse to a single letter so a two-metric stack stays narrow. Unknown labels pass through.
+    /// collapse to a single letter so a two-metric stack stays narrow. Other labels pass through.
+    ///
+    /// Matching stays on the English metric label (a lookup key). The strip draws no labels today, so
+    /// these only reach VoiceOver (`accessibilityText`): every label is translated, and the letters go
+    /// through the "trayLabel" context, where pt-BR spells the period out ("trayLabel:T" = "Hoje").
+    /// Without that entry — and under tests — the English letter stays.
     private static func trayLabel(_ metricLabel: String) -> String {
+        let letter: String
         switch metricLabel.lowercased() {
-        case "today": return "T"
-        case "yesterday": return "Y"
-        case "last 30 days": return "M"
-        default: return metricLabel
+        case "today": letter = "T"
+        case "yesterday": letter = "Y"
+        case "last 30 days": letter = "M"
+        default: return L10n.tr(metricLabel)
         }
+        return L10n.tr(letter, context: "trayLabel")
     }
 }

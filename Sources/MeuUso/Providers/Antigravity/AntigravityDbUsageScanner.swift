@@ -263,8 +263,9 @@ actor AntigravityDbUsageScanner {
         )
     }
 
-    /// Shown in the unknown-model warning for a generation whose blob names no model at all.
-    static let unknownModel = "Unknown Antigravity Model"
+    /// Shown in the unknown-model warning for a generation whose blob names no model at all. Nothing
+    /// compares against it (it is never priced), so it is translated where it enters the data.
+    static var unknownModel: String { L10n.tr("Unknown Antigravity Model") }
 
     /// Names to price by, in order of preference. Antigravity logs `gemini-default` /
     /// `gemini-pro-default` as the ID when the picker is on its default choice and records the model

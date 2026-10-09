@@ -15,10 +15,10 @@ struct CLIArguments: Equatable, Sendable {
             case "-v", "--version": parsed.showVersion = true
             default:
                 if argument.hasPrefix("-") {
-                    throw CLIError.usage("Unknown option: \(argument)")
+                    throw CLIError.usage("Opção desconhecida: \(argument)")
                 }
                 guard parsed.providerID == nil else {
-                    throw CLIError.usage("Only one provider can be requested at a time.")
+                    throw CLIError.usage("Só é possível pedir um provedor por vez.")
                 }
                 parsed.providerID = argument.lowercased()
             }

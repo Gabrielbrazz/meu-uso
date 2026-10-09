@@ -12,9 +12,9 @@ public enum UsageReaderError: LocalizedError, Sendable {
     public var errorDescription: String? {
         switch self {
         case .unknownProvider(let providerID):
-            "Unknown provider: \(providerID)"
+            return L10n.format("Unknown provider: %@", providerID)
         case .refreshFailed(let message):
-            "Refresh failed: \(message)"
+            return L10n.format("Refresh failed: %@", message)
         }
     }
 }
@@ -142,7 +142,7 @@ public struct UsageReader {
         guard let data = response.body else {
             // Unreachable in practice: the token was validated above and the limits routes always
             // produce a body for a known token. Fail loudly rather than print nothing.
-            throw UsageReaderError.refreshFailed(warnings.first ?? "local read produced no data")
+            throw UsageReaderError.refreshFailed(warnings.first ?? L10n.tr("local read produced no data"))
         }
         return UsageReadResult(data: data, warnings: warnings)
     }

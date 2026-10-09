@@ -138,9 +138,14 @@ struct RateLimitResetsDetail: View {
                 .font(.system(size: 20))
                 .foregroundStyle(.secondary)
                 .accessibilityHidden(true)
-            Text("\(count) available")
-                .font(.system(size: density.supportingPointSize))
-                .foregroundStyle(.primary)
+            // Formatted exactly like the row's own "N available" (unit word via `MetricFormatter`), so the
+            // two can't disagree — singular and plural included.
+            Text(MetricFormatter.string(
+                for: MetricValue(number: Double(count), kind: .count, label: "available"),
+                style: .row
+            ))
+            .font(.system(size: density.supportingPointSize))
+            .foregroundStyle(.primary)
             Text("Expiry times unavailable")
                 .font(.system(size: 11))
                 .foregroundStyle(.secondary)
@@ -275,7 +280,7 @@ struct RateLimitResetsDetail: View {
                 Button("Use") { beginConfirm(entry.date) }
                     .controlSize(.small)
                     .disabled(nothingToReset)
-                    .hoverTooltip(nothingToReset ? "Nothing to reset right now" : nil)
+                    .hoverTooltip(nothingToReset ? L10n.tr("Nothing to reset right now") : nil)
                     .transition(.opacity)
             } else if let countdown = entry.countdown {
                 Text(countdown)
@@ -303,7 +308,9 @@ struct RateLimitResetsDetail: View {
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 8) {
                 Button { runClaim(entry.date) } label: {
-                    Text("Reset").frame(maxWidth: .infinity)
+                    // Claiming a reset credit renews the limits ("Renovar"), unlike the Settings/Customize
+                    // "Reset" ("Redefinir"), so this one reads its own context entry.
+                    Text(L10n.tr("Reset", context: "resetClaim")).frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
@@ -403,15 +410,15 @@ struct RateLimitResetsDetail: View {
         case .success:
             claimedExpiries.insert(date)
             nothingToReset = true
-            banner = .init(text: "Reset claimed. Enjoy!", icon: "checkmark.circle.fill", tint: .green)
+            banner = .init(text: L10n.tr("Reset claimed. Enjoy!"), icon: "checkmark.circle.fill", tint: .green)
         case .nothingToReset:
             nothingToReset = true
-            banner = .init(text: "Your usage doesn't need a reset yet", icon: "info.circle.fill", tint: .accentColor)
+            banner = .init(text: L10n.tr("Your usage doesn't need a reset yet"), icon: "info.circle.fill", tint: .accentColor)
         case .noCredit:
             claimedExpiries.insert(date)
-            banner = .init(text: "That reset is no longer available", icon: "exclamationmark.triangle.fill", tint: .orange)
+            banner = .init(text: L10n.tr("That reset is no longer available"), icon: "exclamationmark.triangle.fill", tint: .orange)
         case .failed:
-            banner = .init(text: "Couldn't reset usage. Please try again.", icon: "xmark.circle.fill", tint: .red)
+            banner = .init(text: L10n.tr("Couldn't reset usage. Please try again."), icon: "xmark.circle.fill", tint: .red)
         }
     }
 
@@ -457,7 +464,10 @@ struct RateLimitResetsDetail: View {
         }
 
         var accessibilityLabel: String {
-            "Reset \(number), \(time)" + (countdown.map { ", expires in \($0)" } ?? "")
+            if let countdown {
+                return L10n.format("Reset %lld, %@, expires in %@", number, time, countdown)
+            }
+            return L10n.format("Reset %lld, %@", number, time)
         }
     }
 
@@ -481,7 +491,7 @@ struct RateLimitResetsDetail: View {
                 date: date,
                 key: Entry.Key(date: date, ordinal: ordinal),
                 severity: WidgetData.expirySeverity(secondsRemaining: date.timeIntervalSince(now)),
-                time: (imminent || absolute == nil) ? "Expiring soon" : absolute!,
+                time: (imminent || absolute == nil) ? L10n.tr("Expiring soon") : absolute!,
                 countdown: imminent ? nil : relative
             )
         }

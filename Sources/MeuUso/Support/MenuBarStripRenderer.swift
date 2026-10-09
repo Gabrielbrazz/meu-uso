@@ -41,7 +41,7 @@ enum MenuBarStripRenderer {
     /// extra-large gap next to neighboring items).
     static func textImage(for content: MenuBarContent) -> NSImage? {
         guard !content.isEmpty else { return nil }
-        let renderer = ImageRenderer(content: MenuBarTextStrip(content: content))
+        let renderer = ImageRenderer(content: MenuBarTextStrip(content: content).environment(\.locale, AppLocale.current))
         renderer.scale = 2
         guard let rendered = renderer.cgImage else { return nil }
         let cgImage = trimmedToVisibleContent(rendered) ?? rendered
@@ -106,7 +106,7 @@ enum MenuBarStripRenderer {
     /// counts or spend. Deterministic, so rendered once; `nil` only if `ImageRenderer` fails entirely
     /// (caller falls back to the app icon).
     static let privacyImage: NSImage? = {
-        let renderer = ImageRenderer(content: MenuBarPrivacyLabel())
+        let renderer = ImageRenderer(content: MenuBarPrivacyLabel().environment(\.locale, AppLocale.current))
         renderer.scale = 2
         guard let rendered = renderer.cgImage else { return nil }
         let cgImage = trimmedToVisibleContent(rendered) ?? rendered
@@ -115,7 +115,7 @@ enum MenuBarStripRenderer {
             size: NSSize(width: CGFloat(cgImage.width) / renderer.scale, height: CGFloat(cgImage.height) / renderer.scale)
         )
         image.isTemplate = true
-        image.accessibilityDescription = "Meu Uso, usage hidden while the screen is shared"
+        image.accessibilityDescription = L10n.tr("Meu Uso, usage hidden while the screen is shared")
         return image
     }()
 

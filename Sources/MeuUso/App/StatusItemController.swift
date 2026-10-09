@@ -71,6 +71,8 @@ final class StatusItemController: NSObject {
                     .environment(container.transparency)
                     .environment(updater)
                     .environment(\.codexResetClaims, container.codexResetClaims)
+                    // Dates, numbers and lists formatted by SwiftUI follow the app's pt-BR locale.
+                    .environment(\.locale, AppLocale.current)
             )
         )
         // The host view fills the panel. SwiftUI measures each screen and drives the panel height;
@@ -124,7 +126,12 @@ final class StatusItemController: NSObject {
 
         heightController.installBridge()
 
-        AppLog.info(.statusItem, "Status item ready (button: \(self.statusItem.button != nil), shortcut: \(KeyboardShortcuts.getShortcut(for: .togglePopover)?.description ?? "none"))")
+        // `ShortcutRecorderField.displayText`, not the library's `description`: that one resolves the
+        // Space key's name through a `Bundle.module` the packaged app can't load, which would crash here at
+        // launch for a Space-based shortcut.
+        let shortcutText = KeyboardShortcuts.getShortcut(for: .togglePopover)
+            .map { ShortcutRecorderField.displayText(for: $0) } ?? "none"
+        AppLog.info(.statusItem, "Status item ready (button: \(self.statusItem.button != nil), shortcut: \(shortcutText))")
     }
 
     // MARK: - Panel configuration

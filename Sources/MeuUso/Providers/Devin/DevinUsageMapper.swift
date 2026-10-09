@@ -21,7 +21,8 @@ enum DevinUsageMapper {
     static func mapUserStatus(_ userStatus: [String: Any]) throws -> DevinMappedUsage {
         let planStatus = userStatus["planStatus"] as? [String: Any] ?? [:]
         let planInfo = planStatus["planInfo"] as? [String: Any] ?? [:]
-        let plan = readTrimmedString(planInfo["planName"]) ?? "Unknown"
+        // A real plan name is Devin's own and stays as sent; only the fallback is our wording.
+        let plan = readTrimmedString(planInfo["planName"]) ?? L10n.tr("Unknown")
         let hideDailyQuota = ProviderParse.bool(planInfo["hideDailyQuota"]) == true
 
         let dailyRemaining = ProviderParse.number(planStatus["dailyQuotaRemainingPercent"])
@@ -118,7 +119,7 @@ enum DevinUsageError: Error, LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .invalidResponse, .quotaUnavailable:
-            return "Devin quota data unavailable. Try again later."
+            return L10n.tr("Devin quota data unavailable. Try again later.")
         }
     }
 }

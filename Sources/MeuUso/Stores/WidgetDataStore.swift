@@ -319,7 +319,7 @@ final class WidgetDataStore {
             force: force,
             timeout: providerRefreshTimeout
         ) else {
-            providerErrors[providerID] = "Refresh timed out after \(Int(providerRefreshTimeout))s"
+            providerErrors[providerID] = L10n.format("Refresh timed out after %llds", Int(providerRefreshTimeout))
             failureRetryAfter[providerID] = now().addingTimeInterval(Self.failureRetryBackoff)
             AppLog.warn(.refresh, "\(providerID) timed out after \(Int(providerRefreshTimeout))s")
             return .failed
@@ -533,7 +533,7 @@ final class WidgetDataStore {
     private static func errorMessage(in snapshot: ProviderSnapshot) -> String? {
         guard !snapshot.lines.isEmpty, snapshot.lines.allSatisfy(\.isError) else { return nil }
         if case .badge(_, let text, _, _) = snapshot.lines[0] { return text }
-        return "Refresh failed"
+        return L10n.tr("Refresh failed")
     }
 
     func data(for descriptor: WidgetDescriptor) -> WidgetData {
@@ -551,7 +551,9 @@ final class WidgetDataStore {
 
         // Single global choke point: dashboard/share rows and menu-bar values all funnel through here,
         // so stamping the mode once makes them follow the global setting. Inert for unbounded rows
-        // (limit == nil), whose displayed value ignores displayMode.
+        // (limit == nil), whose displayed value ignores displayMode. The title is translated here for the
+        // same reason; descriptors and snapshot lines keep their English labels, which are lookup keys.
+        result.title = L10n.tr(result.title)
         result.displayMode = meterStyle
         result.resetDisplayMode = resetDisplayMode
         result.alwaysShowPacing = alwaysShowPacing
@@ -584,7 +586,7 @@ final class WidgetDataStore {
         guard age >= Self.stalenessThreshold, let duration = Formatters.compactDuration(age) else {
             return nil
         }
-        return StalenessHint(label: "Outdated", tooltip: "Last updated \(duration) ago")
+        return StalenessHint(label: L10n.tr("Outdated"), tooltip: L10n.format("Last updated %@ ago", duration))
     }
 
     private func resolve(_ line: MetricLine, descriptor: WidgetDescriptor) -> WidgetData? {

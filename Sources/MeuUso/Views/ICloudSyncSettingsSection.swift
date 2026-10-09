@@ -13,10 +13,9 @@ struct ICloudSyncSettingsSection: View {
                 Image(systemName: "info.circle")
                     .imageScale(.small)
                     .foregroundStyle(.secondary)
+                    // One literal, not a concatenation: the whole sentence is the translation key.
                     .hoverTooltip(
-                        "Meu Uso calculates costs and tokens for Claude, Codex, and other providers "
-                            + "from files stored on each Mac. Account limits, credentials, and logs are "
-                            + "never shared."
+                        "Meu Uso calculates costs and tokens for Claude, Codex, and other providers from files stored on each Mac. Account limits, credentials, and logs are never shared."
                     )
             }
             .padding(.horizontal, 8)
@@ -89,7 +88,7 @@ struct ICloudSyncSettingsSection: View {
                     }
                 }
                 TimelineView(.periodic(from: .now, by: 60)) { context in
-                    Text("Updated \(relativeAge(document.updatedAt, now: context.date))")
+                    Text(updatedLabel(document.updatedAt, now: context.date))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
@@ -101,8 +100,9 @@ struct ICloudSyncSettingsSection: View {
         .padding(.vertical, density.controlRowPadding)
     }
 
+    /// Same contract as the Settings screen's `inlineNotice`: an English key or already-translated text.
     private func inlineNotice(_ text: String) -> some View {
-        Text(text)
+        Text(L10n.tr(text))
             .font(.caption)
             .foregroundStyle(Theme.notice)
             .padding(.horizontal, 12)
@@ -111,11 +111,12 @@ struct ICloudSyncSettingsSection: View {
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func relativeAge(_ date: Date, now: Date) -> String {
+    /// "Updated 5m ago" for a device row — whole phrases, so pt-BR can place the age ("Atualizado há 5min").
+    private func updatedLabel(_ date: Date, now: Date) -> String {
         let seconds = max(0, now.timeIntervalSince(date))
-        if seconds < 60 { return "just now" }
-        if seconds < 3_600 { return "\(max(1, Int(seconds / 60)))m ago" }
-        if seconds < 86_400 { return "\(max(1, Int(seconds / 3_600)))h ago" }
-        return "\(max(1, Int(seconds / 86_400)))d ago"
+        if seconds < 60 { return L10n.tr("Updated just now") }
+        if seconds < 3_600 { return L10n.format("Updated %lldm ago", max(1, Int(seconds / 60))) }
+        if seconds < 86_400 { return L10n.format("Updated %lldh ago", max(1, Int(seconds / 3_600))) }
+        return L10n.format("Updated %lldd ago", max(1, Int(seconds / 86_400)))
     }
 }

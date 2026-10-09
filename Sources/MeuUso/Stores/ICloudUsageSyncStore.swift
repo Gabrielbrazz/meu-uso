@@ -42,7 +42,7 @@ enum ICloudUsageSyncError: Error, LocalizedError {
     case unavailable
 
     var errorDescription: String? {
-        "iCloud Drive isn’t available. Check that this Mac is signed into iCloud and iCloud Drive is on."
+        L10n.tr("iCloud Drive isn’t available. Check that this Mac is signed into iCloud and iCloud Drive is on. Development builds of Meu Uso can’t use iCloud.")
     }
 }
 
@@ -277,7 +277,7 @@ final class ICloudUsageSyncStore {
                 dataStore.setPeerHistoryDocuments(result.documents, ownDeviceID: deviceID)
                 operationError = result.invalidFileMessages.isEmpty
                     ? nil
-                    : "Some synced usage data couldn’t be read. Check the log for details."
+                    : L10n.tr("Some synced usage data couldn’t be read. Check the log for details.")
             } catch {
                 report(error, context: "read")
             }
@@ -315,8 +315,9 @@ final class ICloudUsageSyncStore {
         } catch {
             let id = saved ?? UUID().uuidString.lowercased()
             defaults.set(id, forKey: deviceIDKey)
-            let message = "Meu Uso couldn’t save this Mac’s sync identity in Keychain. "
-                + "Sync may create a duplicate device if app preferences are reset."
+            let message = L10n.tr(
+                "Meu Uso couldn’t save this Mac’s sync identity in Keychain. Sync may create a duplicate device if app preferences are reset."
+            )
             AppLog.warn(.keychain, "iCloud device identity failed: \(error.localizedDescription)")
             return (id, message)
         }

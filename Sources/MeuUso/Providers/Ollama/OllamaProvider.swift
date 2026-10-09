@@ -14,7 +14,9 @@ final class OllamaProvider: ProviderRuntime {
 
     /// One notice for every way the plan can go missing, so a failed request and an unreadable response
     /// read the same to the user — the badge is gone for a reason, and the meters are still current.
-    private static let planWarning = "Couldn't read your Ollama plan. Usage below is still up to date."
+    private static var planWarning: String {
+        L10n.tr("Couldn't read your Ollama plan. Usage below is still up to date.")
+    }
 
     let authStore: OllamaAuthStore
     let usageClient: OllamaUsageClient

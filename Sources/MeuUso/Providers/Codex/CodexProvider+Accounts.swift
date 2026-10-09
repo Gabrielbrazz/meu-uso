@@ -42,6 +42,6 @@ extension CodexProvider {
 private struct CodexAccountLoginError: LocalizedError, CategorizedError {
     var errorCategory: ErrorCategory { .authExpired }
     var errorDescription: String? {
-        "No valid login for this Codex account. Sign in with Codex, xswap, or pi, then refresh."
+        L10n.tr("No valid login for this Codex account. Sign in with Codex, xswap, or pi, then refresh.")
     }
 }

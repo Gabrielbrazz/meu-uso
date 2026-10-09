@@ -13,11 +13,12 @@ enum PaceMilestone: String, CaseIterable, Hashable, Sendable {
 
 extension PaceMilestone {
     /// User-facing label for the Settings row and the notification title (they match by design).
+    /// Translated here, where the text is composed; `AppNotifications.post` delivers it as is.
     var settingLabel: String {
         switch self {
-        case .underTenPercent: return "Almost Out"
-        case .healthyToClose: return "Cutting It Close"
-        case .closeToRunningOut: return "Will Run Out"
+        case .underTenPercent: return L10n.tr("Almost Out")
+        case .healthyToClose: return L10n.tr("Cutting It Close")
+        case .closeToRunningOut: return L10n.tr("Will Run Out")
         }
     }
 
@@ -26,20 +27,21 @@ extension PaceMilestone {
 
     /// Notification body — the plain-language verdict. The subtitle carries provider + metric, so the
     /// body stays generic and reads well for any metric (sessions, rate-limit resets, spend tiles).
+    /// Texts with a literal "%" go through `L10n.format` with no arguments, so their keys spell it `%%`.
     var body: String {
         switch self {
-        case .underTenPercent: return "Under 10% usage remaining for this window."
-        case .healthyToClose: return "Projected to finish close to your limit."
-        case .closeToRunningOut: return "Projected to finish before the limit resets."
+        case .underTenPercent: return L10n.format("Under 10%% usage remaining for this window.")
+        case .healthyToClose: return L10n.tr("Projected to finish close to your limit.")
+        case .closeToRunningOut: return L10n.tr("Projected to finish before the limit resets.")
         }
     }
 
     /// One-sentence Settings tooltip (the (i) beside the row) explaining when this fires.
     var tooltip: String {
         switch self {
-        case .underTenPercent: return "Alert when a limit drops below 10% remaining."
-        case .healthyToClose: return "Alert when a limit is projected to finish with little left."
-        case .closeToRunningOut: return "Alert when a limit is projected to finish before it resets."
+        case .underTenPercent: return L10n.format("Alert when a limit drops below 10%% remaining.")
+        case .healthyToClose: return L10n.tr("Alert when a limit is projected to finish with little left.")
+        case .closeToRunningOut: return L10n.tr("Alert when a limit is projected to finish before it resets.")
         }
     }
 }

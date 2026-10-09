@@ -10,9 +10,10 @@ import AppKit
 final class ClosureMenuItem: NSMenuItem {
     private let handler: () -> Void
 
+    /// `title` is an English key, translated here (`L10n.tr`), so call sites pass the literal.
     init(title: String, systemSymbol: String? = nil, keyEquivalent: String = "", handler: @escaping () -> Void) {
         self.handler = handler
-        super.init(title: title, action: #selector(fire), keyEquivalent: keyEquivalent)
+        super.init(title: L10n.tr(title), action: #selector(fire), keyEquivalent: keyEquivalent)
         target = self
         if let systemSymbol {
             image = NSImage(systemSymbolName: systemSymbol, accessibilityDescription: nil)

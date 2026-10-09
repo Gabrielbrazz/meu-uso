@@ -50,7 +50,7 @@ struct PopoverFooter: View {
 
     private var footerIdentity: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Meu Uso \(AppInfo.version)")
+            Text(L10n.format("Meu Uso %@", AppInfo.version))
             if let notice = layout.pinLimitNotice {
                 Text(notice)
                     .foregroundStyle(Theme.notice)
@@ -96,14 +96,14 @@ struct PopoverFooter: View {
     }
 
     private func updateStatusText(now: Date) -> String {
-        if isUpdating { return "Updating…" }
+        if isUpdating { return L10n.tr("Updating…") }
         let base = dataStore.lastRefreshAt ?? now
         let remaining = max(0, base.addingTimeInterval(RefreshSetting.interval).timeIntervalSince(now))
         let totalSeconds = Int(remaining.rounded(.up))
         if totalSeconds >= 60 {
             let minutes = Int((Double(totalSeconds) / 60).rounded(.up))
-            return "Next update in \(minutes)m"
+            return L10n.format("Next update in %lldm", minutes)
         }
-        return "Next update in \(totalSeconds)s"
+        return L10n.format("Next update in %llds", totalSeconds)
     }
 }

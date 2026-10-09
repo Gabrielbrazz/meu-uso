@@ -47,7 +47,8 @@ enum ClaudeUsageMapper {
     /// on (e.g. the first fetch after launch): a status badge plus the staleness note, no live bars.
     static func rateLimitedUsage(credentials: ClaudeOAuth, retryAfterSeconds: Int?) -> ClaudeMappedUsage {
         let retryText = retryAfterSeconds.map(formatRateLimitMinutes)
-        let waitText = retryText.map { "Rate limited, retry in ~\($0)" } ?? "Rate limited, try again later"
+        let waitText = retryText.map { L10n.format("Rate limited, retry in ~%@", $0) }
+            ?? L10n.tr("Rate limited, try again later")
         return ClaudeMappedUsage(
             plan: formatPlan(subscriptionType: credentials.subscriptionType, rateLimitTier: credentials.rateLimitTier),
             lines: [
@@ -63,9 +64,13 @@ enum ClaudeUsageMapper {
     /// dashboard showed bare "No data" rows with no hint of why. Also warns the
     /// user off manual refreshes, which extend Anthropic's rate limiting.
     static func rateLimitedWarning(retryAfterSeconds: Int?) -> String {
-        let base = "Updates blocked by Anthropic. Be patient — manual refreshes will make it worse."
-        guard let retryText = retryAfterSeconds.map(formatRateLimitMinutes) else { return base }
-        return "\(base) Retrying in ~\(retryText)."
+        guard let retryText = retryAfterSeconds.map(formatRateLimitMinutes) else {
+            return L10n.tr("Updates blocked by Anthropic. Be patient — manual refreshes will make it worse.")
+        }
+        return L10n.format(
+            "Updates blocked by Anthropic. Be patient — manual refreshes will make it worse. Retrying in ~%@.",
+            retryText
+        )
     }
 
     /// Provider warning shown on the Claude header (the amber triangle + tooltip, like Z.ai's "no coding
@@ -73,13 +78,16 @@ enum ClaudeUsageMapper {
     /// (an inference-only token, e.g. from `claude setup-token`). Without it the Session / Weekly bars just
     /// read "No data" with no hint that a re-login restores them. The scanned spend tiles are unaffected
     /// and still load.
-    static let missingProfileScopeWarning = "Re-login for live usage. Run `claude` and sign in again to restore session and weekly limits."
+    static var missingProfileScopeWarning: String {
+        L10n.tr("Re-login for live usage. Run `claude` and sign in again to restore session and weekly limits.")
+    }
 
     /// The "live usage is rate limited" note appended to a last-good snapshot so the still-shown bars are
     /// flagged as possibly stale. Shared with `rateLimitedUsage` so the wording stays in one place.
     static func rateLimitedNote(retryAfterSeconds: Int?) -> MetricLine {
         let retryText = retryAfterSeconds.map(formatRateLimitMinutes)
-        let noteText = retryText.map { "Live usage rate limited - retry in ~\($0)" } ?? "Live usage rate limited - data may be stale"
+        let noteText = retryText.map { L10n.format("Live usage rate limited - retry in ~%@", $0) }
+            ?? L10n.tr("Live usage rate limited - data may be stale")
         return .text(label: "Note", value: noteText)
     }
 
@@ -236,9 +244,11 @@ enum ClaudeUsageMapper {
         return Date(timeIntervalSince1970: milliseconds / 1000)
     }
 
+    /// The "~<when>" part of the rate-limit copy: "now", or whole minutes through the shared compact
+    /// duration key ("10m" in English, "10min" in the table).
     private static func formatRateLimitMinutes(_ seconds: Int) -> String {
-        guard seconds > 0 else { return "now" }
-        return "\(Int(ceil(Double(seconds) / 60)))m"
+        guard seconds > 0 else { return L10n.tr("now") }
+        return L10n.format("%lldm", Int(ceil(Double(seconds) / 60)))
     }
 
 }

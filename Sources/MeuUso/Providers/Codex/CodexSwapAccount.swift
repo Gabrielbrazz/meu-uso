@@ -53,7 +53,7 @@ struct CodexSwapAccount: Equatable, Sendable {
     let shareHistory: Bool
 
     var displayName: String {
-        let label = alias ?? "Workspace \(identity.accountID.prefix(8))"
+        let label = alias ?? L10n.format("Workspace %@", String(identity.accountID.prefix(8)))
         return "Codex: \(label) (\(identity.email ?? identity.accountID))"
     }
 

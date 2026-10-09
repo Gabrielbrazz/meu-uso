@@ -104,7 +104,7 @@ final class MenuBarContentTests: XCTestCase {
         let spend = unbounded("a.spend", "Spend")   // unbounded $42
         let content = MenuBarContentBuilder.build(groups: [group("a", usage, credits, requests, spend)], data: { $0.sample })
 
-        XCTAssertEqual(content.groups[0].metrics.map(\.value), ["67%", "$12K", "412", "$42"])
+        XCTAssertEqual(content.groups[0].metrics.map(\.value), ["67%", "US$\u{00A0}12\u{00A0}mil", "412", "US$\u{00A0}42"])
     }
 
     // Compact-notation rules for tray values (abbreviation, decimal rounding) are pinned exactly in

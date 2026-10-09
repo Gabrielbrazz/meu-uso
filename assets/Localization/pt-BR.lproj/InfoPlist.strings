@@ -1,0 +1,4 @@
+/* Nome exibido do app. O pacote se chama MeuUso.app (sem espaço); o Finder, as notificações e os
+   Itens de Início mostram este nome porque o Info.plist declara LSHasLocalizedDisplayName. */
+"CFBundleDisplayName" = "Meu Uso";
+"CFBundleName" = "Meu Uso";
