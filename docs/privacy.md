@@ -33,7 +33,7 @@ O acesso ao Claude Desktop é só de leitura. O Meu Uso pode pedir ao macOS perm
 
 ## API local
 
-A [API HTTP local](local-http-api.md) só escuta em `127.0.0.1:6737`, então outros aparelhos da sua rede não conseguem acessá-la. Ela só permite leitura e entrega os mesmos números de uso da barra de menus, nunca credenciais nem tokens. Como ela aceita pedidos de qualquer origem (CORS liberado), uma página aberta no seu navegador consegue ler esses números enquanto o app está aberto. Veja [CORS e privacidade](local-http-api.md#cors-e-privacidade).
+A [API HTTP local](local-http-api.md) só escuta em `127.0.0.1:6737`, então outros aparelhos da sua rede não conseguem acessá-la. Ela só permite leitura e entrega os mesmos dados de uso da barra de menus, inclusive nomes de conta que podem conter o seu e-mail, mas nunca credenciais nem tokens. E ela não atende páginas da web: as respostas não trazem CORS, e requisições com `Origin` ou com `Host` diferente de `127.0.0.1:6737` e `localhost:6737` recebem 403. Assim, um site aberto no seu navegador não consegue ler esses dados; `curl`, scripts e apps do seu Mac continuam lendo. Veja [CORS e privacidade](local-http-api.md#cors-e-privacidade).
 
 ## Na tela
 

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Routing + JSON for the read-only local usage API, kept pure so it's unit-testable —
+/// Access check, routing + JSON for the read-only local usage API, kept pure so it's unit-testable —
 /// `LocalUsageServer` is just the transport. The wire format follows docs/local-http-api.md
 /// (camelCase `providerId`, `color`, `fetchedAt`, type-tagged `lines`, `{"error": code}` bodies).
 /// One deliberate break from the original app, made before multi-account ships: `/v1/usage/:token`
@@ -35,12 +35,31 @@ enum LocalUsageAPI {
         var body: Data?
     }
 
-    static func respond(method: String, path: String, state: State) -> Response {
-        // Preflight support: OPTIONS anywhere is 204 + the CORS headers the server always sends.
-        if method == "OPTIONS" {
-            return Response(status: 204, body: nil)
-        }
+    /// The only `Host` values a request may carry: the listener's loopback address and name, with
+    /// its port. A page that reaches the listener through DNS rebinding brings its own domain here.
+    static let allowedHosts: Set<String> = [
+        "127.0.0.1:\(LocalUsageServer.port)",
+        "localhost:\(LocalUsageServer.port)"
+    ]
 
+    /// Checked before routing: turns away any request a web page could have made, so no site open in
+    /// the browser can read usage, spend, plans or account names, which can be emails ("CORS e
+    /// privacidade" in docs/local-http-api.md). `curl`, scripts and native apps send one loopback
+    /// `Host` and no `Origin`, so they pass. Returns nil when the request may be routed.
+    /// - `Host` must be exactly one of `allowedHosts`, ignoring case. This stops DNS rebinding, where
+    ///   the page's own domain resolves to 127.0.0.1 and the browser treats the API as same-origin.
+    /// - Any `Origin` is refused: browsers send one on every cross-origin `fetch` and every preflight.
+    static func rejection(hosts: [String], origins: [String]) -> Response? {
+        guard hosts.count == 1, allowedHosts.contains(hosts[0].lowercased()) else {
+            return error(403, "host_not_allowed")
+        }
+        guard origins.isEmpty else {
+            return error(403, "origin_not_allowed")
+        }
+        return nil
+    }
+
+    static func respond(method: String, path: String, state: State) -> Response {
         let segments = path.split(separator: "?", maxSplits: 1)[0]
             .split(separator: "/")
             .map(String.init)

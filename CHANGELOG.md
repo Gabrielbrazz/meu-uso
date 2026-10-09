@@ -17,3 +17,6 @@ Ponto de partida: fork do [OpenUsage](https://github.com/robinebers/openusage) v
 ### Removido
 - Telemetria: o app não envia dados de uso nem relatórios de falha para serviço nenhum.
 - Infraestrutura do projeto original: workflows de política de PR, Pullfrog e stale, publicação no GitHub Pages e a limpeza de agentes da antiga versão Tauri.
+
+### Segurança
+- A API local não atende mais páginas da web. Herdado do OpenUsage, o `Access-Control-Allow-Origin: *` deixava qualquer site aberto no navegador ler uso, gasto, planos e nomes de conta (que podem ser e-mails) enquanto o app rodava. Agora as respostas não trazem CORS, `OPTIONS` não responde mais ao preflight, e requisições com `Origin` ou com `Host` diferente de `127.0.0.1:6737` e `localhost:6737` recebem 403. `curl`, scripts, apps nativos e o comando `meu-uso` seguem funcionando.
