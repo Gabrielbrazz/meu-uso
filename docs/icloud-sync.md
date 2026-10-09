@@ -1,75 +1,39 @@
-# iCloud Sync
+# Sincronização com o iCloud
 
-**Sync Across Macs** is off by default. When it is on, each Mac writes one versioned Meu Uso history
-file to the app's private iCloud container and reads the files written by other Macs signed into the same
-iCloud account. A random device ID is kept in the login Keychain so the same Mac continues updating its
-existing file after app preferences are reset or the app is reinstalled. There is no folder picker,
-pairing code, or separate account.
+> **Disponibilidade.** A sincronização só funciona num build assinado com um perfil de provisionamento que inclua o container do app no iCloud: `iCloud.io.github.gabrielbrazz.meuuso` (ou `iCloud.io.github.gabrielbrazz.meuuso.dev`, no build de desenvolvimento). Hoje nenhum build disponível tem esse perfil: ainda não existe release, e o app de desenvolvimento gerado pelo CI (`MeuUso-dev`) não o inclui. Um build feito no seu Mac com `./script/build_and_run.sh` também fica sem ele, a menos que um perfil de desenvolvimento do container esteja instalado (veja [Configuração para desenvolvimento e release](#configuração-para-desenvolvimento-e-release)). Sem o perfil, a chave **Sincronizar entre Macs** aparece nos Ajustes, mas, ao ativá-la, surge o aviso "O iCloud Drive não está disponível. Confira se este Mac tem sessão iniciada no iCloud e se o iCloud Drive está ativado." e nada é sincronizado, mesmo com o iCloud Drive ativado.
 
-The file contains normalized daily tokens and spend, model totals, and unknown-model names for sources
-that are local to one Mac: Claude, Codex, Grok, and OpenCode. It also includes Claude and Codex account
-and organization or workspace identities when available, but never credentials, account limits,
-raw logs, or provider responses. Cursor's history is already account-wide, so it stays local and is never added across Macs.
-Disabling a provider immediately removes its peer contributions from the combined view and omits it from
-this Mac's next iCloud write, while its local cached snapshot remains.
+**Sincronizar entre Macs** vem desativado. Com ele ativado, cada Mac grava um arquivo versionado com o histórico do Meu Uso no container privado do app no iCloud e lê os arquivos gravados pelos outros Macs com a mesma conta do iCloud. Um ID aleatório do aparelho fica guardado nas chaves do macOS, para o mesmo Mac continuar atualizando o mesmo arquivo depois de redefinir os ajustes ou reinstalar o app. Não há escolha de pasta, código de pareamento nem conta separada.
 
-Claude history that identifies its account and organization is combined only with matching accounts on
-other Macs. Older single-account history without account information remains compatible when only one
-Claude card is visible, and is ignored when multiple cards are visible. If Codex account history
-requires an account-aware sync file, Claude history without a known account is omitted from that
-file. Other providers continue syncing.
+O arquivo traz os tokens e gastos diários normalizados, os totais por modelo e os nomes de modelos desconhecidos das fontes que ficam em cada Mac: Antigravity, Claude, Codex, Grok e OpenCode. Também traz o nome do Mac e, quando existem, identificadores de conta e de organização ou espaço de trabalho do Claude e do Codex (nos cards de conta do Codex, o identificador inclui o e-mail da conta). Nunca traz credenciais, limites de conta, logs brutos ou respostas dos provedores. O histórico do Cursor já vale para a conta inteira, então fica só local e nunca é somado entre Macs. Desativar um provedor tira na hora as contribuições dos outros Macs da visão somada e deixa esse provedor de fora da próxima gravação deste Mac no iCloud, mas o cache local dele continua.
 
-Codex Swap cards combine history only when its account and workspace match. Older Codex history
-without that information is excluded from Swap cards. Codex installations without account cards
-keep their existing sync behavior. Each Mac counts a Codex folder's spending for the account signed
-in to that folder, so the same history never appears on two cards.
+O histórico do Claude que identifica a conta e a organização só é somado com as mesmas contas nos outros Macs. Históricos antigos, de uma conta só e sem informação de conta, continuam compatíveis quando há apenas um card do Claude na tela e são ignorados quando há vários. Se o histórico de contas do Codex exigir um arquivo de sincronização com contas, o histórico do Claude sem conta conhecida fica de fora desse arquivo. Os outros provedores continuam sincronizando.
 
-Meu Uso combines the valid files in memory and rebuilds Today, Yesterday, Last 30 Days, Usage Trend,
-unknown-model warnings, and model breakdowns. The same combined spend rows feed the dashboard, Total
-Spend, menu-bar pins, share cards, and the local HTTP API. Both `/v1/usage` and `/v1/limits` read the
-same rendered snapshots; the former is the deprecated UI-oriented format and the latter is the
-normalized format. Quotas, plans, balances, and provider errors remain this Mac's own values inside
-those snapshots. Rows retained in an older peer file are ignored once they fall outside the same
-calendar window used by the local history scanners.
+Os cards do Codex Swap só somam histórico quando a conta e o espaço de trabalho batem. Histórico antigo do Codex sem essa informação fica fora dos cards do Swap. Instalações do Codex sem cards de conta mantêm o comportamento de sincronização de antes. Cada Mac conta o gasto de uma pasta do Codex para a conta conectada naquela pasta, então o mesmo histórico nunca aparece em dois cards.
 
-This Mac updates its file after a five-minute refresh batch, a manual refresh, or a provider enablement
-change. iCloud delivery is eventually consistent, so another Mac can take longer than five minutes to
-receive it, especially while offline. Downloaded changes reload immediately when macOS reports them.
+O Meu Uso junta os arquivos válidos na memória e refaz Hoje, Ontem, Últimos 30 dias, Tendência de uso, os avisos de modelo desconhecido e os detalhamentos por modelo. As mesmas linhas de gasto somadas alimentam o painel, o Gasto total, as métricas com estrela na barra de menus, os cards de compartilhamento e a API HTTP local. `/v1/usage` e `/v1/limits` leem os mesmos dados exibidos: o primeiro é o formato antigo, pensado para a interface e já obsoleto, e o segundo é o formato normalizado. Dentro desses dados, cotas, planos, saldos e erros dos provedores continuam sendo os valores deste Mac. Linhas guardadas num arquivo antigo de outro Mac são ignoradas quando saem da mesma janela de datas usada pela leitura do histórico local.
 
-Settings lists each valid device file with the time that Mac generated it. To remove a Mac from the
-combined summary, turn sync off on that Mac; this deletes its file from iCloud. Turning sync off also
-stops that Mac from reading peers and immediately returns every surface there to local-only spend.
-Malformed files are ignored and reported in Settings and the app log.
+Este Mac atualiza o arquivo dele depois de cada rodada de atualização de cinco minutos, de uma atualização manual ou de uma mudança nos provedores ativados. A entrega pelo iCloud não é imediata, então outro Mac pode levar mais de cinco minutos para receber o arquivo, principalmente se estiver offline. Mudanças baixadas recarregam na hora, assim que o macOS avisa que chegaram.
 
-## Development and release setup
+Os Ajustes listam cada arquivo de aparelho válido, com o horário em que aquele Mac o gerou (por exemplo, "Atualizado há 5min"). Para tirar um Mac do resumo somado, desative a sincronização naquele Mac; isso apaga o arquivo dele do iCloud. Desativar a sincronização também faz aquele Mac parar de ler os outros e volta na hora todas as telas dele para o gasto só local. Arquivos com defeito são ignorados e aparecem nos Ajustes ("Parte dos dados de uso sincronizados não pôde ser lida. Veja os detalhes no log.") e no log do app.
 
-Apple requires the iCloud container assignment to be present in the provisioning profile embedded in
-the app. Meu Uso uses separate resources so development builds cannot write production history:
+## Configuração para desenvolvimento e release
 
-- `io.github.gabrielbrazz.meuuso.dev` uses `iCloud.io.github.gabrielbrazz.meuuso.dev`.
-- `io.github.gabrielbrazz.meuuso` uses `iCloud.io.github.gabrielbrazz.meuuso`.
+A Apple exige que o container do iCloud esteja no perfil de provisionamento embutido no app. O Meu Uso usa recursos separados para que builds de desenvolvimento não gravem no histórico de produção:
 
-Create a `MAC_APP_DEVELOPMENT` profile that includes every registered development Mac and a
-`MAC_APP_DIRECT` profile for releases. Install the development profile on each included Mac. The
-development build automatically selects the newest non-expired profile matching the development
-bundle and iCloud container from Xcode's current profile directory or the legacy MobileDevice
-directory:
+- `io.github.gabrielbrazz.meuuso.dev` usa `iCloud.io.github.gabrielbrazz.meuuso.dev`.
+- `io.github.gabrielbrazz.meuuso` usa `iCloud.io.github.gabrielbrazz.meuuso`.
+
+Crie um perfil `MAC_APP_DEVELOPMENT` que inclua todos os Macs de desenvolvimento registrados e um perfil `MAC_APP_DIRECT` para as releases. Instale o perfil de desenvolvimento em cada Mac incluído. O build de desenvolvimento escolhe sozinho o perfil mais novo e ainda válido que combine com o bundle de desenvolvimento e com o container do iCloud, procurando na pasta atual de perfis do Xcode ou na pasta antiga do MobileDevice:
 
 ```bash
 ./script/build_and_run.sh
 ```
 
-Set `ICLOUD_PROVISIONING_PROFILE=/path/to/profile.mobileprovision` only when you need to override
-that automatic selection. An explicit missing path fails the build instead of silently producing an
-app without iCloud access.
+Defina `ICLOUD_PROVISIONING_PROFILE=/path/to/profile.mobileprovision` só quando precisar substituir essa escolha automática. Se o caminho informado não existir, o build falha, em vez de gerar em silêncio um app sem acesso ao iCloud. Se nenhum perfil compatível for encontrado, o script avisa (`no matching installed iCloud provisioning profile was found`) e gera o app sem acesso ao iCloud.
 
-The release workflow reads the base64-encoded `MAC_APP_DIRECT` profile from the repository Actions
-secret `APPLE_DEVELOPER_ID_ICLOUD_PROFILE`. Keep the original provisioning profiles and signing `.p12`
-in a password manager, never in the repository. A provisioning profile contains certificates and
-entitlements rather than private keys, but treating it as a signing asset keeps rotation predictable.
+O workflow de release lê o perfil `MAC_APP_DIRECT`, em base64, do segredo de Actions `APPLE_DEVELOPER_ID_ICLOUD_PROFILE` do repositório. Guarde os perfis de provisionamento originais e o `.p12` de assinatura num gerenciador de senhas, nunca no repositório. Um perfil de provisionamento traz certificados e permissões (entitlements), não chaves privadas, mas tratá-lo como material de assinatura deixa a troca previsível.
 
-To inspect the actual history written by a running build, find the file first and only call `jq` when a
-file exists:
+Para conferir o histórico que um build em execução gravou de fato, encontre o arquivo primeiro e só chame o `jq` se ele existir:
 
 ```bash
 file=$(find "$HOME/Library/Mobile Documents" \
@@ -82,6 +46,4 @@ else
 fi
 ```
 
-No file is expected when sync is off, the app is signed without the matching profile, or the first
-write has not completed. The Settings error and app log distinguish those cases; the spinner only
-appears while an iCloud read or write is actually in progress.
+É normal não haver arquivo quando a sincronização está desativada, quando o app foi assinado sem o perfil certo ou quando a primeira gravação ainda não terminou. O aviso nos Ajustes e o log do app diferenciam esses casos; o indicador de carregamento só aparece enquanto uma leitura ou gravação no iCloud está de fato acontecendo.

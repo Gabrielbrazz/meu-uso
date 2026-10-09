@@ -1,58 +1,58 @@
 # Copilot
 
-Tracks your GitHub Copilot quota using a GitHub token that Copilot tooling already left on your machine. No login flow, no browser cookies.
+Acompanha a sua cota do GitHub Copilot usando um token do GitHub que as ferramentas do Copilot já deixaram na sua máquina. Sem fluxo de login e sem cookies do navegador.
 
-## What it tracks
+## O que mostra
 
-| Metric | Meaning |
+| Métrica | O que significa |
 |---|---|
-| Credits | Share of your monthly AI-credit allotment used (the headline meter). On org-managed seats with no allotment, a plain count of your own credits used this cycle |
-| Extra Usage | Premium interactions used beyond your included credits, once extra spend is enabled |
-| Org Credits | AI credits your whole organization used this month (org-managed Business/Enterprise seats) |
-| Org Spend | Dollars your organization was billed for AI credits beyond the included pool |
-| Chat | Chat-message quota used |
-| Completions | Code-completion quota used |
+| Créditos | Parte usada da sua franquia mensal de créditos de IA (o medidor principal). Em licenças gerenciadas por uma organização e sem franquia, uma contagem simples dos créditos que você mesmo usou no ciclo |
+| Uso extra | Interações premium usadas além dos créditos incluídos, depois que o gasto extra é ativado |
+| Créditos da organização | Créditos de IA que a organização inteira usou neste mês (licenças Business/Enterprise gerenciadas por uma organização) |
+| Gasto da organização | Dólares cobrados da organização por créditos de IA além do pacote incluído |
+| Chat | Cota de mensagens de chat usada |
+| Sugestões de código | Cota de sugestões de código usada |
 
-Credits and Extra Usage are Always Visible by default; Org Credits, Org Spend, Chat, and Completions start in On Demand behind the card's caret. Percent meters show percent used and, when the response includes one, a countdown to the next reset. The plan name (Pro, Business, Free, …) shows next to the provider.
+Por padrão, Créditos e Uso extra ficam em Sempre visível. Créditos da organização, Gasto da organização, Chat e Sugestões de código começam em Sob demanda, atrás da seta do card. Os medidores de porcentagem mostram quanto foi usado e, quando a resposta traz essa informação, a contagem até a próxima renovação. O nome do plano (Pro, Business, Free, …) aparece ao lado do provedor.
 
-Since June 2026 GitHub Copilot bills all plans by **AI credits**, so what each account shows differs by plan:
+Desde junho de 2026, o GitHub Copilot cobra todos os planos em **créditos de IA**, então o que cada conta mostra depende do plano:
 
-- **Paid plans** meter the credit pool — so you see Credits (and Extra Usage if you've turned on additional spend). Chat and completions are unlimited on paid plans, so those rows read "No data".
-- **Free plans** have no credits, so Credits reads "No data"; instead you see your fixed Chat and Completions counts under the caret.
-- **Org-managed seats (Copilot Business / Enterprise assigned by an organization)** return no per-seat percent quota. If the response's `premium_interactions` bucket carries a real `credits_used` count, Meu Uso shows it as **Credits** — a plain count, not a percentage, since this bucket's `entitlement` is 0 (no allotment to divide by). This is your *own* consumption and needs no special access. Meu Uso also looks the usage up in the organization's billing: it lists your organizations, finds the one whose billing reports Copilot AI-credit usage, and shows **Org Credits** (credits the whole org used this month) and **Org Spend** (dollars billed beyond the included pool). Two caveats there:
-  - The Org Credits/Org Spend numbers are **organization-wide**, not your personal share — GitHub doesn't expose per-seat usage through that API.
-  - Reading an org's billing requires you to be an **org owner or billing manager**. Regular members don't get Org Credits/Org Spend, but still see their own Credits count when the response carries one; if it doesn't, the meters read "No data".
-- Org Credits is shown as a plain count, not a percentage: the billing API reports usage only, never the org's credit allotment, and Meu Uso doesn't fabricate a denominator.
+- **Planos pagos** medem o pacote de créditos: você vê Créditos (e Uso extra, se ativou o gasto adicional). Chat e sugestões de código são ilimitados nos planos pagos, então essas linhas mostram "Sem dados".
+- **Planos gratuitos** não têm créditos, então Créditos mostra "Sem dados". No lugar, você vê as cotas fixas de Chat e de Sugestões de código, atrás da seta.
+- **Licenças gerenciadas por uma organização (Copilot Business / Enterprise atribuídos por uma organização)** não trazem cota percentual por licença. Se o bucket `premium_interactions` da resposta trouxer uma contagem real em `credits_used`, o Meu Uso mostra esse número como **Créditos**. É uma contagem simples, não uma porcentagem, porque o `entitlement` desse bucket é 0 (não há franquia para dividir). Esse é o *seu* consumo e não exige acesso especial. O Meu Uso também procura o uso no faturamento da organização: ele lista as suas organizações, acha aquela cujo faturamento mostra uso de créditos de IA do Copilot e mostra **Créditos da organização** (créditos que a organização inteira usou neste mês) e **Gasto da organização** (dólares cobrados além do pacote incluído). Dois cuidados:
+  - Os números de Créditos da organização e Gasto da organização valem para a **organização inteira**, e não são a sua parte. O GitHub não expõe o uso por licença nessa API.
+  - Ler o faturamento de uma organização exige que você seja **proprietário da organização ou gerente de cobrança**. Membros comuns não veem Créditos da organização nem Gasto da organização, mas ainda veem a própria contagem de Créditos quando a resposta traz esse dado. Se não trouxer, os medidores mostram "Sem dados".
+- Créditos da organização aparece como contagem simples, não como porcentagem: a API de faturamento só informa o uso, nunca a franquia de créditos da organização, e o Meu Uso não inventa um denominador.
 
-A dollar credit figure (e.g. "$12 of $15 used") isn't shown: GitHub only exposes that through its logged-in web billing page, which would require reading browser cookies — Meu Uso does not do that. Editors like VS Code show the same credit *percentage* from this endpoint, not a dollar amount.
+O valor dos créditos em dólar (como "US$ 12 de US$ 15 usados") não aparece. O GitHub só mostra esse valor na página de faturamento da web, com login, e lê-lo exigiria os cookies do navegador, o que o Meu Uso não faz. Editores como o VS Code mostram a mesma *porcentagem* de créditos desse endpoint, e não um valor em dólar.
 
-## Where credentials come from
+## De onde vêm as credenciais
 
-Checked in this order (prompt-free files first, Keychain last):
+Conferidas nesta ordem (primeiro os arquivos, que não pedem permissão; as chaves do macOS por último):
 
-1. Copilot editor token: `~/.config/github-copilot/apps.json` (older `hosts.json`) — written by the VS Code / JetBrains / Neovim Copilot plugins.
-2. GitHub CLI config: `~/.config/gh/hosts.yml` (`oauth_token`), when `gh` stores its token in a file.
-3. GitHub CLI Keychain item (service `gh:github.com`), when `gh` stores its token in the system keyring.
+1. Token do Copilot no editor: `~/.config/github-copilot/apps.json` (ou o antigo `hosts.json`), gravado pelos plugins do Copilot para VS Code, JetBrains e Neovim.
+2. Configuração da CLI do GitHub: `~/.config/gh/hosts.yml` (`oauth_token`), quando o `gh` guarda o token em arquivo.
+3. Item da CLI do GitHub nas chaves do macOS (Keychain), no serviço `gh:github.com`, quando o `gh` guarda o token nas chaves do sistema.
 
-### Setup
+### Configuração
 
-If usage doesn't appear, authenticate with the GitHub CLI:
+Se o uso não aparecer, entre pela CLI do GitHub:
 
 ```bash
-brew install gh   # if needed
-gh auth login     # choose GitHub.com and follow the prompts
+brew install gh   # se precisar
+gh auth login     # escolha GitHub.com e siga as instruções
 ```
 
-Using Copilot in a supported editor is enough on its own — the editor writes the token to `apps.json`.
+Usar o Copilot num editor compatível já basta: o editor grava o token no `apps.json`.
 
-## Troubleshooting
+## Solução de problemas
 
-- **"Sign in to GitHub Copilot…"** — no token was found. Sign in to Copilot in your editor, or run `gh auth login`.
-- **"GitHub token invalid or expired"** — the token was rejected (401/403). Re-authenticate with `gh auth login`.
-- **Meters show "No data" but the plan is shown** — expected on an org-managed Copilot Business/Enterprise seat whose response carries no personal `credits_used` and, if you aren't an org owner or billing manager, no org billing access either (GitHub doesn't expose per-seat quota otherwise, and org billing is admin-only). If you *are* an org admin and still see no Org Credits, make sure your token can list your orgs — the GitHub CLI token from `gh auth login` can; some editor-plugin tokens can't.
+- **"Entre no GitHub Copilot…"**: nenhum token foi encontrado. Entre no Copilot pelo seu editor ou rode `gh auth login`.
+- **"Token do GitHub inválido ou expirado"**: o token foi recusado (401/403). Entre de novo com `gh auth login`.
+- **Os medidores mostram "Sem dados", mas o plano aparece**: é o esperado numa licença Copilot Business/Enterprise gerenciada por uma organização quando a resposta não traz um `credits_used` pessoal e você não tem acesso ao faturamento da organização, por não ser proprietário nem gerente de cobrança. O GitHub não expõe a cota por licença de outro jeito, e o faturamento da organização é só para administradores. Se você *é* administrador da organização e ainda não vê Créditos da organização, confira se o seu token consegue listar as suas organizações. O token da CLI do GitHub, do `gh auth login`, consegue; alguns tokens de plugin de editor não.
 
-## Under the hood
+## Por dentro
 
-`GET https://api.github.com/copilot_internal/user` with the standard Copilot client headers (API version `2025-04-01`). The response reports each bucket as percent *remaining*; the meters show percent *used*.
+`GET https://api.github.com/copilot_internal/user` com os headers padrão do cliente do Copilot (versão da API `2025-04-01`). A resposta informa cada bucket como porcentagem *restante*; os medidores mostram a porcentagem *usada*.
 
-For org-managed seats (identified by the token-based-billing placeholder in that response), the provider additionally calls the public REST billing API: `GET /user/orgs` to list your organizations, then `GET /orgs/{org}/settings/billing/usage/summary` per org until one reports Copilot AI-credit usage. The matching org is remembered, so steady-state refreshes make a single extra call; it's re-discovered automatically if it stops answering.
+Em licenças gerenciadas por uma organização (identificadas pelo marcador `token_based_billing` nessa resposta), o provedor também chama a API REST pública de faturamento: `GET /user/orgs` para listar as suas organizações e, depois, `GET /orgs/{org}/settings/billing/usage/summary` em cada uma, até achar uma que mostre uso de créditos de IA do Copilot. A organização encontrada fica guardada, então as atualizações seguintes fazem só uma chamada a mais. Se essa organização deixar de mostrar uso do Copilot ou de liberar o acesso, o app procura de novo automaticamente. Falhas passageiras (erro de rede, 429, 5xx) mantêm a organização guardada para a próxima atualização.

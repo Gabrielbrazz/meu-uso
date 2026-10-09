@@ -57,7 +57,7 @@ Use feature-specific categories like `Windowing`, `Commands`, `MenuBar`, `Sideba
 
 3. Build and run the app.
    - Use `build-run-debug` for the build/run loop.
-   - If `script/build_and_run.sh` exists, prefer `./script/build_and_run.sh --telemetry` for live telemetry checks or `./script/build_and_run.sh --logs` for broader process logs.
+   - If `script/build_and_run.sh` exists, prefer `./script/build_and_run.sh logs` to build, launch, and stream the app's logs.
    - Exercise the UI or command path that should emit telemetry.
 
 4. Read runtime logs and verify the event fired.

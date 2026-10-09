@@ -1,33 +1,33 @@
 # Devin
 
-Tracks your Devin quota using the login from the Devin CLI or the Devin app.
+Acompanha a sua cota do Devin usando o login da CLI do Devin ou do app Devin.
 
-## What it tracks
+## O que mostra
 
-| Metric | Meaning |
+| Métrica | O que significa |
 |---|---|
-| Weekly | Weekly quota used (falls back to the daily figure when Devin reports neither a weekly percentage nor a weekly reset) |
-| Daily | Daily quota used (hidden when Devin hides the daily quota) |
-| Extra Balance | Overage/extra-usage balance in dollars |
+| Semanal | Cota semanal usada (quando o Devin oculta a cota diária e não informa nem a porcentagem nem a renovação semanal, mostra o número diário) |
+| Diário | Cota diária usada (fica oculta quando o Devin oculta a cota diária) |
+| Saldo extra | Saldo de uso extra (excedente), em dólares |
 
-If Devin supplies a weekly reset but omits the weekly percentage, the weekly quota is exhausted (100% used).
+Se o Devin informa a renovação semanal, mas omite a porcentagem semanal, a cota semanal está esgotada (100% usada).
 
-When Devin reports your plan name, Meu Uso shows it beside the provider name.
+Quando o Devin informa o nome do seu plano, o Meu Uso mostra o plano ao lado do nome do provedor.
 
-## Where credentials come from
+## De onde vêm as credenciais
 
-Checked in this order — whichever works first wins:
+Conferidas nesta ordem; vale a primeira que funcionar:
 
-1. Devin CLI credentials: `~/.local/share/devin/credentials.toml` (uses `windsurf_api_key`, and `api_server_url` when present)
-2. The Devin app's local state database
+1. Credenciais da CLI do Devin: `~/.local/share/devin/credentials.toml` (usa `windsurf_api_key` e, quando existe, `api_server_url`)
+2. O banco de dados de estado local do app Devin
 
-If the CLI credentials fail but the app is signed in with a different account, the app's auth is used instead.
+Se as credenciais da CLI falharem e o app estiver conectado com outra conta, o login do app é usado no lugar.
 
-## Troubleshooting
+## Solução de problemas
 
-- **"Not logged in"** — run `devin auth login`, or sign into the Devin app, then refresh.
-- **Weekly shows the daily figure** — when Devin reports neither a weekly percentage nor a weekly reset, the daily quota is shown in the Weekly row so it stays meaningful.
+- **"Rode devin auth login ou entre no Devin…"**: rode `devin auth login` ou entre no app Devin e atualize.
+- **Semanal mostra o número diário**: quando o Devin oculta a cota diária e não informa nem a porcentagem nem a renovação semanal, a cota diária aparece na linha Semanal, para ela continuar fazendo sentido.
 
-## Under the hood
+## Por dentro
 
-Connect RPC `GetUserStatus` on the configured API server (default `server.codeium.com`). Quota percentages arrive as "remaining" and are flipped to "used". No token refresh — a 401/403 switches to the next auth source instead.
+Connect RPC `GetUserStatus` no servidor de API configurado (padrão `server.codeium.com`). As porcentagens de cota chegam como "restante" e são invertidas para "usado". Não há renovação de token: um 401/403 passa para a próxima fonte de login.

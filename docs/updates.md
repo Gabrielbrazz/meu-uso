@@ -1,35 +1,38 @@
-# Updates
+# Atualizações
 
-Meu Uso keeps itself up to date using [Sparkle](https://sparkle-project.org), the standard update
-framework for Mac apps. Updates are downloaded from Meu Uso's own release feed and verified before
-they install, so you always get a genuine, unmodified build.
+O Meu Uso usa o [Sparkle](https://sparkle-project.org), o framework de atualização padrão dos apps de Mac, para se manter atualizado. Mas isso só funciona em builds de release, e **ainda não existe nenhuma**: o projeto não tem versão assinada nem notarizada.
 
-## How it works
+## Como instalar e atualizar hoje
 
-- **Automatic checks.** The app quietly checks for a new version in the background (about once an hour).
-  When one is found, an **Update Available** banner appears at the top of the popover instead of a
-  window popping up behind your other apps. Click **Install Update** to open the update window (release
-  notes, download, install) front and center. The banner's close button snoozes it; it comes back the
-  next time the app finds the update.
-- **Manual check.** Open **Settings → Updates** and click **Check for Updates…** at any time.
-  For both manual checks and banner installs, Meu Uso brings itself to the foreground before opening
-  Sparkle so the update window doesn't get buried behind another app. Because Meu Uso normally lives
-  only in the menu bar, it briefly shows a Dock icon for the update session, then hides again.
-- **Turn it off.** The **Check Automatically** switch in **Settings → Updates** stops the
-  background checks. You can still check manually.
+Por enquanto, há dois jeitos de ter o app (ele roda no macOS 15 ou mais novo):
 
-## Beta updates
+- **Compilar do código.** Na raiz do repositório, rode `./script/build_and_run.sh` (exige o Xcode 26). O script monta o app em `dist/MeuUso.app` e o abre dali, sem instalar nada em `/Applications`.
+- **Baixar o app de desenvolvimento do CI.** Cada execução do CI gera o artefato `MeuUso-dev`, um `.zip` com o app, que fica disponível por 7 dias. Baixe com o GitHub CLI (comando abaixo). Assim o arquivo não ganha a marca de quarentena, e o macOS deixa abrir o app mesmo sem notarização. Baixado pelo navegador, ele vem com essa marca, e o macOS bloqueia a abertura.
 
-**Settings → Updates → Beta Updates** opts you into pre-release builds before they ship to
-everyone. Turn it off to go back to stable-only; you'll stay on your current version until the next
-stable release catches up.
+```sh
+gh run download <run-id> -n MeuUso-dev && ditto -x -k MeuUso-dev.zip .
+```
 
-Everyone always receives stable releases — the beta option only *adds* pre-release builds on top.
+O passo a passo completo está em [Depuração e captura de logs](debugging.md#testar-sem-xcode-local).
 
-## Where updates come from
+Esses builds de desenvolvimento não têm feed de atualização, então nunca buscam atualizações: a seção **Atualizações** não aparece nos Ajustes, e o item **Buscar atualizações…** do menu **Opções** fica desativado. Para atualizar, compile de novo a partir do código mais recente ou baixe um artefato mais novo do CI. Você reconhece um build de desenvolvimento pela versão no rodapé, que termina em `-dev`.
 
-Update builds are published on Meu Uso's GitHub releases, and the list of available versions (the
-"appcast") is served from `https://gabrielbrazz.github.io/meu-uso/appcast.xml`. Each download is
-signed two ways — Apple notarization plus Meu Uso's own signature — and the app refuses anything that
-doesn't match. This is only available in the official signed release build, not in local developer
-builds.
+## Como funciona nos builds de release
+
+Quando houver uma release assinada, o app instalado por ela vai se atualizar assim:
+
+- **Busca automática.** O app procura uma versão nova em segundo plano, a cada hora. Quando encontra, aparece o aviso **Atualização disponível** no topo da janela, em vez de uma janela do Sparkle que abriria escondida atrás dos outros apps. Clique em **Instalar atualização** para abrir na frente a janela da atualização (notas da versão, download e instalação). O botão de fechar (✕) adia o aviso; ele volta na próxima vez que o app encontrar a atualização.
+- **Busca manual.** Em **Ajustes → Atualizações**, clique em **Buscar atualizações…** quando quiser (o mesmo item fica no menu **Opções** do rodapé). Tanto na busca manual quanto no aviso, o Meu Uso vem para a frente antes de abrir o Sparkle, para a janela da atualização não ficar escondida atrás de outro app. Como o Meu Uso normalmente fica só na barra de menus, ele mostra um ícone no Dock enquanto a atualização acontece e depois some de lá de novo.
+- **Para desligar.** A chave **Buscar automaticamente**, em **Ajustes → Atualizações**, desliga as buscas em segundo plano. A busca manual continua funcionando.
+
+## Acesso antecipado
+
+**Ajustes → Atualizações → Acesso antecipado** inclui as versões prévias (beta) antes de elas chegarem a todo mundo. Desative para voltar a receber só versões estáveis; você fica na versão atual até a próxima versão estável alcançá-la.
+
+Todo mundo recebe as versões estáveis. O acesso antecipado só *acrescenta* as versões prévias.
+
+## De onde vêm as atualizações
+
+Cada release publica um DMG nas releases do GitHub do Meu Uso, e a lista de versões disponíveis (o "appcast") fica em `https://gabrielbrazz.github.io/meu-uso/appcast.xml`. Esse endereço só passa a existir com a primeira release assinada. Uma tag simples (como `v0.1.0`) publica para todo mundo; uma tag com sufixo de versão prévia (como `v0.1.0-beta.1`) publica só no acesso antecipado.
+
+Cada download é assinado de dois jeitos (a notarização da Apple e a assinatura própria do Meu Uso), e o app recusa qualquer arquivo que não confira. Só o build de release assinado traz o feed; os builds de desenvolvimento não têm (veja `script/build_and_run.sh` e `script/release.sh`).

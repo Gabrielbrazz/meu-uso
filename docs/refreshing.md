@@ -1,51 +1,34 @@
-# Refreshing & Caching
+# Atualização e cache
 
-## When data updates
+## Quando os dados atualizam
 
-- All enabled providers refresh together: once at launch, then every 5 minutes (a fixed cadence — there's no setting for it). Opening the popover does not start a second automatic pass. Providers fetch in parallel, so fast cards update without waiting for a slow one. The batch itself still finishes only after every provider returns; notifications, history sync, and the next five-minute wait begin after that point.
-- Turning a provider on (yourself in Customize, or automatically by first-launch/new-provider detection) fetches it promptly instead of waiting out the interval — even when the change lands in the middle of a refresh that's already running.
-- The Dashboard and Settings footer shows `Next update in Nm`. **Clicking it (or pressing ⌘R while that footer is present)** refreshes immediately, skipping the cache.
-- The one-shot `meu-uso` command reuses this same persisted cache for five minutes, refreshes missing or stale entries without starting the app, and exits. `meu-uso --force` runs the same forced provider refresh as ⌘R regardless of cache age.
-- While a provider is fetching, a small spinner appears next to its name (and one shows in the footer beside the countdown), so you can tell a refresh is in flight rather than wondering if the numbers are stale.
-- With [iCloud Sync](icloud-sync.md) on, a refresh batch writes one machine-history file after the whole
-  batch finishes. Manual provider refreshes write after that provider finishes, and adjacent changes are
-  debounced into one write.
+- Todos os provedores ativados atualizam juntos: uma vez quando o app abre e depois a cada 5 minutos (intervalo fixo, sem ajuste para mudar). Abrir a janela não dispara uma segunda rodada automática. Os provedores buscam os dados em paralelo, então os cards rápidos atualizam sem esperar um lento. A rodada em si só termina quando todos os provedores respondem; as notificações, a sincronização do histórico e a próxima espera de cinco minutos começam a partir daí.
+- Ativar um provedor (você mesmo, em Personalizar, ou a detecção automática na primeira abertura ou de um provedor novo) busca os dados dele logo, sem esperar o intervalo, mesmo que a mudança aconteça no meio de uma atualização em andamento.
+- O rodapé do painel e dos Ajustes mostra `Próxima atualização em Nmin`. **Clicar nele (ou apertar ⌘R com esse rodapé na tela)** atualiza na hora, sem usar o cache.
+- O comando `meu-uso`, que roda uma vez e termina, reaproveita esse mesmo cache quando ele tem menos de cinco minutos, atualiza o que estiver faltando ou velho sem abrir o app e encerra. `meu-uso --force` faz a mesma atualização forçada do ⌘R, seja qual for a idade do cache.
+- Enquanto um provedor busca dados, aparece um pequeno indicador de carregamento ao lado do nome dele (e o rodapé mostra "Atualizando…"). Assim você sabe que há uma atualização em andamento e não fica na dúvida se os números estão velhos.
+- Com a [Sincronização com o iCloud](icloud-sync.md) ativada, cada rodada de atualização grava um arquivo de histórico deste Mac depois que a rodada inteira termina. Atualizações manuais de um provedor gravam depois que aquele provedor termina, e mudanças muito próximas viram uma gravação só.
 
-## Caching
+## Cache
 
-Snapshots are cached on disk and load instantly at launch, so you see your last-known values immediately instead of placeholders — even before the first fetch finishes.
+Os últimos dados de cada provedor ficam guardados em disco e carregam na hora quando o app abre. Assim você vê os últimos valores conhecidos logo de cara, em vez de espaços vazios, antes mesmo de a primeira busca terminar.
 
-Claude and Codex cache entries also remember which account produced them. If you swap the account
-signed in at the provider's default home between launches, the previous account's cached values are
-discarded at the next launch (the card starts empty and fills on its first fetch) instead of briefly
-showing the old account's limits and plan under the new login.
+O cache do Claude e do Codex também lembra qual conta gerou cada valor. Se você trocar a conta conectada na pasta padrão do provedor entre uma abertura e outra, os valores da conta anterior são descartados na abertura seguinte (o card começa vazio e é preenchido na primeira busca). Assim o app não mostra, nem por um instante, os limites e o plano da conta antiga com o login novo.
 
-A cached value only counts as *fresh* (skip-a-refresh fresh) when it was fetched **during the current running session**. So a value cached in an earlier session always re-fetches on the first pass after launch — you still see it instantly, but the app never waits out the old interval before getting live numbers. This matters after an update: a new app version refreshes right away instead of showing the previous version's data until its interval lapses. Within a session, a freshly fetched value then counts as fresh for one refresh interval before the next pass re-fetches it.
+Um valor em cache só conta como *recente* (a ponto de pular uma atualização) quando foi buscado **durante a sessão atual do app**. Então um valor guardado numa sessão anterior sempre é buscado de novo na primeira rodada depois de abrir o app: você ainda o vê na hora, mas o app nunca espera o intervalo antigo acabar para buscar os números atuais. Isso importa depois de uma atualização do app: a versão nova atualiza os dados na hora, em vez de mostrar os da versão anterior até o intervalo vencer. Dentro de uma sessão, um valor recém-buscado vale como recente por um intervalo de atualização, até a próxima rodada buscá-lo de novo.
 
-Claude, Codex, and pi spend history has a separate local-log parse cache under
-`~/Library/Application Support/MeuUso/log-scan-cache/`. It stores parsed usage events before Meu Uso
-applies model-rate estimates, so pricing updates take effect without re-reading unchanged JSONL. On
-relaunch, an entry is reused only when its path, size, modification time, and parser version still match.
-Same-home cards share parsed data, and changing one source file rewrites only that file's record. Old files
-leave the cache as the history window advances, and identities unused for 35 days are removed. App writes
-are debounced until after refresh; the one-shot CLI drains pending writes before it exits.
+O histórico de gasto do Claude, do Codex, do Grok e do pi tem um cache separado, com a leitura dos logs locais, em `~/Library/Application Support/MeuUso/log-scan-cache/`. Ele guarda os eventos de uso já lidos antes de o Meu Uso aplicar as estimativas de preço por modelo, então mudanças de preço passam a valer sem reler arquivos JSONL que não mudaram. Quando o app abre de novo, uma entrada só é reaproveitada se o caminho, o tamanho, a data de modificação e a versão do leitor ainda baterem. Cards que leem a mesma pasta compartilham os dados lidos, e mudar um arquivo de origem regrava só o registro daquele arquivo. Arquivos antigos saem do cache à medida que a janela do histórico avança, e identidades sem uso há 35 dias são removidas. O app deixa as gravações para depois da atualização; o comando `meu-uso` grava o que estiver pendente antes de terminar.
 
-## When a fetch fails
+## Quando uma atualização falha
 
-A failed refresh **never wipes your data**: the last good values stay on screen, and a small warning triangle appears next to the provider's name — hover it for the error message (e.g. "Not logged in"). The error clears on the next successful refresh.
+Uma atualização que falha **nunca apaga seus dados**: os últimos valores bons continuam na tela, e um pequeno triângulo de aviso aparece ao lado do nome do provedor. Passe o mouse nele para ver a mensagem de erro (por exemplo, "Nenhum login encontrado. Rode `claude` para entrar."). O erro some na próxima atualização que der certo.
 
-A provider that stops responding altogether is given up on after two minutes. Its spinner stops, the
-warning triangle reads "Refresh timed out after 120s", and it is tried again on a later pass — so one
-stuck provider can't leave a spinner turning for the rest of the session. The wait is deliberately long:
-a healthy provider on a slow network can legitimately take over a minute, and it should be reported as
-slow, not as broken.
+Um provedor que para de responder de vez é deixado de lado depois de dois minutos. O indicador de carregamento para, o triângulo de aviso mostra "Tempo esgotado ao atualizar (120s)" e o provedor é tentado de novo numa rodada seguinte. Assim, um provedor travado não deixa um indicador girando pelo resto da sessão. A espera é longa de propósito: um provedor que funciona bem, numa rede lenta, pode mesmo levar mais de um minuto, e isso deve aparecer como lentidão, não como defeito.
 
-The last good normalized history is preserved too, so a temporary provider failure—or a successful
-limit refresh whose local log scan is temporarily unavailable—does not remove this Mac's previous
-contribution from an iCloud-combined spend total.
+O último histórico normalizado bom também fica guardado. Então uma falha temporária de um provedor (ou uma atualização de limites que dá certo, mas cuja leitura dos logs locais está indisponível no momento) não tira a contribuição anterior deste Mac de um gasto total somado pelo iCloud.
 
-Rows that have never had data show "No data" rather than made-up numbers.
+Linhas que nunca tiveram dados mostram "Sem dados", em vez de números inventados.
 
-## Stale data
+## Dados desatualizados
 
-Because a failed refresh keeps the last good values on screen, those values can persist if refreshes keep failing — so a plan or limit that changed on the provider's side could otherwise keep showing the old figures indefinitely. To make that obvious, a small **"Outdated"** tag appears next to the provider's name once its data is more than a couple of refresh cycles old (about ten minutes); hover it for the precise age ("Last updated 3h ago"). The tag stays short so it never crowds a long plan name. When you see it, the numbers below are from that earlier time, not live — usually because the provider is failing to refresh (check the warning triangle) or the Mac was asleep. A successful refresh clears it.
+Como uma atualização que falha mantém os últimos valores bons na tela, esses valores podem ficar lá se as falhas continuarem. Sem aviso, um plano ou limite que mudou no provedor poderia mostrar os números antigos por tempo indeterminado. Para deixar isso claro, uma pequena etiqueta **Desatualizado** aparece ao lado do nome do provedor quando os dados chegam a uns dez minutos de idade, o equivalente a duas rodadas de atualização. Passe o mouse nela para ver a idade exata ("Atualizado há 3h"). A etiqueta é curta para nunca espremer um nome de plano comprido. Quando ela aparece, os números abaixo são daquele momento, não atuais. Em geral, é porque o provedor está falhando ao atualizar (confira o triângulo de aviso) ou porque o Mac estava em repouso. Uma atualização que dá certo tira a etiqueta.

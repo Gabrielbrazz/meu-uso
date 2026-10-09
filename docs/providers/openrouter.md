@@ -1,60 +1,50 @@
 # OpenRouter
 
-Tracks your [OpenRouter](https://openrouter.ai) credit balance and spend from your account API key.
+Acompanha o saldo de créditos e o gasto do seu [OpenRouter](https://openrouter.ai) a partir da chave de API da sua conta.
 
-## What it tracks
+## O que mostra
 
-| Metric | Meaning |
+| Métrica | O que significa |
 |---|---|
-| Credits | Lifetime spend against the credits you've purchased (a dollar meter) |
-| Balance | Prepaid credits remaining |
-| Today | Spend so far today |
-| This Week | Spend so far this week |
-| This Month | Spend so far this month |
-| Key Limit | Spend in the current limit window against this key's cap — shown only when the key has one configured |
+| Créditos | Gasto total em relação aos créditos que você já comprou (um medidor em dólares) |
+| Saldo | Créditos pré-pagos restantes |
+| Hoje | Gasto de hoje até agora |
+| Esta semana | Gasto desta semana até agora |
+| Este mês | Gasto deste mês até agora |
+| Limite da chave | Gasto na janela de limite atual em relação ao teto desta chave. Só aparece quando a chave tem um teto configurado |
 
-Meu Uso shows the reported tier (such as "Pay as you go" or "Free tier") beside the provider name.
+O Meu Uso mostra o tipo de conta informado (como "Pago por uso" ou "Gratuito") ao lado do nome do provedor.
 
-## Where credentials come from
+## De onde vêm as credenciais
 
-Unlike the other providers, OpenRouter has no companion app or CLI that leaves a credential on your
-machine, so you supply an API key. Create one at [openrouter.ai/keys](https://openrouter.ai/keys),
-then add it in **Settings → API Keys** (recommended): expand OpenRouter, paste the key, and Save.
-The key is stored at `~/.config/meu-uso/openrouter.json` and picked up on the next refresh.
+Ao contrário dos outros provedores, o OpenRouter não tem um app ou CLI que deixe uma credencial na sua máquina, então você fornece uma chave de API. Crie uma em [openrouter.ai/keys](https://openrouter.ai/keys) e adicione no app (recomendado): abra **Personalizar**, escolha o OpenRouter e, na seção **Chave de API**, clique em **Adicionar**, cole a chave e clique em **Salvar**. A chave fica em `~/.config/meu-uso/openrouter.json`. Se o OpenRouter estiver ativado, o app já atualiza os dados dele na hora; se estiver desligado, ative-o na lista de **Personalizar**.
 
-You can also provide the key directly (checked in this order, first match wins):
+Você também pode fornecer a chave diretamente. O app confere nesta ordem e usa a primeira chave que encontrar:
 
-1. **Config file:** `~/.config/meu-uso/openrouter.json` — the file the Settings card writes:
+1. **Arquivo de configuração:** `~/.config/meu-uso/openrouter.json`, o arquivo que a seção Chave de API grava:
 
    ```json
    { "apiKey": "sk-or-v1-..." }
    ```
 
-   A plain-text file containing just the key, or `~/.config/openrouter/key.json`, also work.
+   O arquivo também pode ter só a chave, em texto puro. E `~/.config/openrouter/key.json` também funciona.
 
-2. **Environment variable:** set `OPENROUTER_API_KEY` in your shell profile (e.g. `~/.zshrc` or
-   `~/.zprofile`). On launch the app reads your login shell's environment, so a key exported there is
-   picked up even when the app is started from Finder or the Dock — not just when run from a terminal.
-   When a key is found here, the API Keys card shows it as read-only ("From environment") with a
-   checkbox to override it with a saved key.
+2. **Variável de ambiente:** defina `OPENROUTER_API_KEY` (ou `OPENROUTER_KEY`) no perfil do seu shell (por exemplo, `~/.zshrc` ou `~/.zprofile`). Ao abrir, o app lê o ambiente do seu shell de login, então uma chave exportada ali é encontrada mesmo quando o app é aberto pelo Finder ou pelo Dock, e não só quando roda a partir de um terminal. Quando a chave vem daqui, a seção Chave de API mostra a chave como somente leitura ("Da variável de ambiente"), com a opção "Substituir por uma chave personalizada" para trocá-la por uma chave salva.
 
-A key saved through the app overrides an environment key (the config file is checked first); removing
-the saved key falls back to the environment key, or to none.
+Uma chave salva pelo app tem prioridade sobre a do ambiente (o arquivo de configuração é conferido primeiro). Apagar a chave salva remove também o `~/.config/openrouter/key.json`, se ele existir, e volta para a chave do ambiente, ou para nenhuma.
 
-## Troubleshooting
+## Solução de problemas
 
-- **"No OpenRouter API key"** — add the key in Settings → API Keys (or the config file / env var), then refresh.
-- **"API key invalid"** — the key was rejected (401/403). Check or recreate it at openrouter.ai/keys.
+- **"Nenhuma chave de API do OpenRouter"**: adicione a chave em Personalizar → OpenRouter → Chave de API (ou no arquivo de configuração ou na variável de ambiente) e atualize.
+- **"Chave de API do OpenRouter inválida"**: as duas chamadas recusaram a chave (401/403). Confira a chave ou crie outra em openrouter.ai/keys.
 
-## Under the hood
+## Por dentro
 
-Two REST calls with a `Bearer` token against `https://openrouter.ai/api/v1`:
+Duas chamadas REST com um token `Bearer` em `https://openrouter.ai/api/v1`, feitas de forma independente:
 
-- `GET /credits` — account-wide `total_credits` and `total_usage`; the Credits meter and Balance come
-  from these. Required for a usable snapshot.
-- `GET /key` — best-effort: the tier, daily/weekly/monthly spend, and an optional per-key cap
-  (`limit` minus `limit_remaining` for the current window). If this call fails, the balance still
-  renders from `/credits`.
+- `GET /credits`: `total_credits` e `total_usage` da conta inteira. O medidor de Créditos e o Saldo vêm daqui.
+- `GET /key`: o tipo de conta, o gasto diário, semanal e mensal e um teto opcional por chave (`limit` menos `limit_remaining` na janela atual).
 
-A period spend of `$0.00` is shown as a real, measured zero (the API reports it directly) rather than
-"No data". Credit values may be up to ~60 seconds stale on OpenRouter's side.
+O app mostra o que cada chamada trouxe. Se uma falhar, as linhas da outra continuam aparecendo. A chave só é dada como inválida quando as duas chamadas a recusam (401/403), porque o OpenRouter libera alguns endpoints só para certos tipos de chave.
+
+Um gasto de período de `US$ 0,00` aparece como um zero real e medido (a API informa esse valor diretamente), e não como "Sem dados". Os valores de crédito podem ter até ~60 segundos de atraso do lado do OpenRouter.

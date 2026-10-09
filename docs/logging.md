@@ -1,72 +1,58 @@
-# Logging
+# Logs
 
-Meu Uso keeps a file log so you can capture what the app was doing and share it with support when
-something misbehaves. Lines at or above your chosen level also go to the macOS unified log, so raising
-the level to Debug surfaces the extra detail in both places (see [Debugging](debugging.md) for
-`log stream`).
+O Meu Uso mantém um arquivo de log para você registrar o que o app estava fazendo e mandar ao suporte quando algo der errado. As linhas no nível escolhido ou acima também vão para o log unificado do macOS, então subir o nível para **Depuração** mostra o detalhe extra nos dois lugares (veja [Depuração](debugging.md) para o `log stream`).
 
-## Where the log file lives
+O texto do log fica em inglês, como no projeto original, para facilitar a busca e a comparação. A exceção são as mensagens de erro que entram numa linha, como a que aparece no card de um provedor: elas ficam como o app mostra, em português.
+
+## Onde fica o arquivo de log
 
 ```
 ~/Library/Logs/MeuUso/MeuUso.log
 ```
 
-The easiest way to grab it: open Settings -> Advanced and use **Copy Log Path** (puts the path on the
-clipboard) or **Reveal in Finder** (selects the file in a Finder window). No Terminal needed.
+O jeito mais fácil de pegar o arquivo: abra **Ajustes → Avançado** e use **Copiar caminho do log** (copia o caminho para a área de transferência) ou **Mostrar no Finder** (seleciona o arquivo numa janela do Finder). Não precisa do Terminal.
 
-## Changing the log level (Settings -> Advanced)
+## Como mudar o nível de log (Ajustes → Avançado)
 
-The **Log Level** picker controls how much detail is written. Your choice persists across launches and
-takes effect immediately — no restart.
+O seletor **Nível de log** controla quanto detalhe é gravado. A escolha continua valendo nas próximas aberturas e tem efeito na hora, sem reiniciar.
 
-| Level | What it captures |
+| Nível | O que registra |
 |---|---|
-| Error | Only failures. |
-| Warning | Failures plus things that look wrong but recovered. |
-| Info | The normal story: refresh start/end, per-provider results, cache and auth milestones. |
-| Debug | Everything, including per-request and per-cache-check detail. |
+| Erro | Só falhas. |
+| Aviso | Falhas e coisas que parecem erradas, mas se recuperaram. |
+| Informação | O dia a dia: início e fim de cada atualização, resultado por provedor, marcos de cache e de autenticação. |
+| Depuração | Tudo, inclusive o detalhe de cada requisição e de cada consulta ao cache. |
 
-The release default is **Info** — quiet but useful. **Debug** is opt-in; turn it on only while
-reproducing a problem, since it is much noisier.
+O padrão é **Informação**: discreto, mas útil. **Depuração** é opcional. Ligue só enquanto reproduz um problema, porque ele gera muito mais linhas.
 
-If a local usage log exists but cannot be read, Meu Uso writes one warning and skips it for that
-refresh. It does not repeat the warning every five minutes; it warns again only if the file recovers
-and later becomes unreadable again.
+Se um log de uso local existe mas não pode ser lido, o Meu Uso grava um aviso e pula o arquivo naquela atualização. O aviso não se repete a cada cinco minutos: só volta se o arquivo voltar a ser lido e, depois, ficar ilegível de novo.
 
-Any provider refresh that takes 10 seconds or longer writes a Warning-level `[refresh]` line with the
-provider ID, elapsed milliseconds, and threshold. This is visible at the default Info setting, so a
-slow local-log scan or network call can be identified from a normal support log without reproducing it
-with Debug enabled. The warning is diagnostic only: other provider cards still update independently,
-and the slow provider is allowed to finish.
+Toda atualização de provedor que leva 10 segundos ou mais grava uma linha `[WARN] [refresh]` com o ID do provedor, o tempo gasto em milissegundos e o limite, por exemplo `cursor slow refresh (12034ms, threshold=10000ms)`. Ela aparece no nível padrão (Informação), então dá para achar uma leitura lenta de log local ou uma chamada de rede lenta num log comum de suporte, sem reproduzir o problema com Depuração ligada. O aviso serve só para diagnóstico: os cards dos outros provedores continuam atualizando por conta própria, e o provedor lento pode terminar.
 
-## Subsystem tags
+## Tags de subsistema
 
-Every line is prefixed with a bracketed tag so the log is easy to grep:
+Cada linha traz a data (ISO 8601), o nível e uma tag entre colchetes, para facilitar o `grep`:
 
-`[refresh]` `[cache]` `[http]` `[auth]` `[keychain]` `[menubar]` `[updates]` `[config]`
-`[subprocess]` `[localapi]`, plus per-provider tags like `[plugin:claude]` and `[auth:claude]`.
+```
+2026-10-08T14:03:12.481Z [INFO] [refresh] codex ok (842ms)
+```
 
-For example, to follow just the refresh cycle:
+As tags são `[refresh]` `[cache]` `[http]` `[auth]` `[keychain]` `[menubar]` `[statusitem]` `[updates]` `[config]` `[pricing]` `[notifications]` `[lifecycle]` `[subprocess]` `[localapi]`, além das tags por provedor, como `[plugin:claude]` e `[auth:claude]`.
+
+Por exemplo, para acompanhar só o ciclo de atualização:
 
 ```sh
 grep '\[refresh\]' ~/Library/Logs/MeuUso/MeuUso.log
 ```
 
-## What is never logged
+## O que nunca vai para o log
 
-Secrets never reach the log. Access/refresh tokens, cookies, session tokens, and API keys are redacted
-before any line is written (a sensitive value becomes `first4...last4`, or `[REDACTED]` when too short
-to mask safely), and filesystem paths under your home directory are replaced with `[PATH]`. Response
-bodies are never logged in full; on an HTTP error the app may record a redacted, truncated (≤500 byte)
-preview at Debug to aid diagnosis — run through the same redaction first. The redaction rules match the
-original app's, and a test suite guards them.
+Segredos nunca chegam ao log. Tokens de acesso e de renovação, cookies, tokens de sessão e chaves de API são mascarados antes de qualquer linha ser gravada: um valor sensível vira `first4...last4`, ou `[REDACTED]` quando é curto demais para mascarar com segurança. Caminhos de arquivo, como os da sua pasta pessoal, viram `[PATH]`.
 
-## File size cap
+Corpos de resposta nunca vão inteiros para o log. Num erro HTTP, o app pode gravar no nível Depuração uma prévia cortada (até 500 bytes) para ajudar no diagnóstico, que passa antes pelo mesmo mascaramento. As regras de mascaramento são as mesmas do app original, e uma bateria de testes garante que continuem assim.
 
-The log is capped at ~10 MB. When it fills up, the current file is rotated to `MeuUso.1.log` and a
-fresh `MeuUso.log` starts, so a long-running session can never fill your disk (at most ~20 MB across
-the live file and one archive). An oversize file left over from a previous session is rotated once at
-launch.
+## Limite de tamanho
 
-> Note: the dev build and a released build both write to the same `MeuUso.log`. Running them at the
-> same time interleaves their lines — fine for normal use, worth knowing if you debug both at once.
+O log tem um limite de cerca de 10 MB. Quando enche, o arquivo atual vira `MeuUso.1.log` e um `MeuUso.log` novo começa. Assim, uma sessão longa nunca enche o disco (são no máximo uns 20 MB, somando o arquivo atual e o anterior). Um arquivo grande demais que sobrou de uma sessão anterior é rotacionado uma vez na abertura.
+
+> Observação: o build de desenvolvimento e o build de release gravam no mesmo `MeuUso.log`. Rodar os dois ao mesmo tempo mistura as linhas. Não atrapalha o uso normal, mas vale saber se você depura os dois juntos.

@@ -5,9 +5,9 @@ description: Sync Meu Uso's pricing supplement with Cursor's published model pri
 
 # Pricing Update
 
-`Sources/MeuUso/Resources/pricing_supplement.json` prices the models no public catalog carries (Cursor-native models like `auto`, `composer-*`, `github_bugbot`), supplies fast-variant multipliers, and maps provider log/CSV slugs to canonical pricing keys. On merge to `main`, `.github/workflows/pricing-supplement.yml` validates it and publishes it to GitHub Pages; installed apps pick it up within about an hour — no release needed. Full background: `docs/pricing.md`.
+`Sources/MeuUso/Resources/pricing_supplement.json` prices the models no public catalog carries (Cursor-native models like `auto`, `composer-*`, `github_bugbot`), supplies fast-variant multipliers, and maps provider log/CSV slugs to canonical pricing keys. CI's `Pricing supplement` job (`.github/workflows/ci.yml`) validates it on every PR; installed apps fetch it straight from `main` on raw.githubusercontent.com and pick up a merged change within about an hour — no release needed. Full background: `docs/pricing.md`.
 
-Only the supplement needs manual care. Normal API models (new Claude/GPT/Gemini/Grok releases) are priced automatically by the daily LiteLLM and models.dev fetches — do not add them to the supplement unless they need an alias rule or the catalogs are wrong.
+Only the supplement needs manual care. Normal API models (new Claude/GPT/Gemini/Grok releases) are priced automatically by the hourly LiteLLM and models.dev fetches — do not add them to the supplement unless they need an alias rule or the catalogs are wrong.
 
 ## Steps
 
@@ -69,7 +69,7 @@ If a new alias rule maps a slug that appears in real usage, add a resolution tes
 
 ### 5. Open a PR
 
-Branch from `main`, commit (`fix(pricing): ...` or `feat(pricing): ...`), and open a PR following the repo's PR description structure (TL;DR / What was happening / What this changes). Cite the Cursor doc as the source and list each price or alias change explicitly so the owner can verify numbers at a glance. Never push pricing changes directly to `main`.
+Branch from `main`, commit (`fix(pricing): ...` or `feat(pricing): ...`), and open a PR following `.github/PULL_REQUEST_TEMPLATE.md` (Resumo / Contexto / O que muda), in Brazilian Portuguese. Cite the Cursor doc as the source and list each price or alias change explicitly so the owner can verify numbers at a glance. Never push pricing changes directly to `main`.
 
 ### 6. Verify publication after merge
 
