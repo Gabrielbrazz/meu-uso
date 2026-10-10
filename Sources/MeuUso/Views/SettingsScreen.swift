@@ -191,8 +191,8 @@ struct SettingsScreen: View {
             row("Reset Times") {
                 picker($store.resetDisplayMode, options: ResetDisplayMode.allCases, label: \.label)
             }
-            // Off (default) leaves pacing on yellow and red only. On also surfaces projection
-            // and the even-pace tick on blue rows.
+            // Off (default) leaves pacing on amber and red only. On also surfaces projection
+            // and the even-pace tick on green rows.
             row("Always Show Pacing") {
                 Toggle("", isOn: $store.alwaysShowPacing)
                     .settingsSwitchStyle()
@@ -209,7 +209,7 @@ struct SettingsScreen: View {
                     .settingsSwitchStyle()
             }
             Text("While your screen is shared or recorded, the menu bar shows “Meu Uso” instead of your usage.")
-                .font(.caption)
+                .font(.braz(.caption))
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 12)
                 .padding(.bottom, 8)
@@ -261,12 +261,11 @@ struct SettingsScreen: View {
         return VStack(alignment: .leading, spacing: density.headerToCardSpacing) {
             HStack(spacing: 6) {
                 Text("Notifications")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .brazOverline()
                 if needsAttention {
                     Image(systemName: "exclamationmark.triangle")
                         .font(.caption)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Theme.notice)
                         .hoverTooltip(notificationsAuth == .denied
                             ? L10n.tr("Notifications are turned off for Meu Uso. Enable them in System Settings.")
                             : L10n.tr("Meu Uso needs permission to send alerts."))
@@ -370,7 +369,7 @@ struct SettingsScreen: View {
                 }
             }
             Text("Adds a global `meu-uso` command agents can use to monitor limits.")
-                .font(.caption)
+                .font(.braz(.caption))
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 12)
                 .padding(.bottom, 8)
@@ -423,7 +422,7 @@ struct SettingsScreen: View {
                 isPresentingResetConfirm = true
             } label: {
                 Text("Reset All Settings…")
-                    .foregroundStyle(.red)
+                    .foregroundStyle(Braz.danger)
                     .frame(maxWidth: .infinity)
             }
             .glassButtonStyle()
@@ -471,8 +470,7 @@ struct SettingsScreen: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: density.headerToCardSpacing) {
             Text(L10n.tr(title))
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .brazOverline()
                 .padding(.horizontal, 8)
             VStack(spacing: 0) {
                 rows()
@@ -498,7 +496,7 @@ struct SettingsScreen: View {
     /// paused by a system accessibility setting, or by Party mode taking over the look).
     private func inlineNotice(_ text: String) -> some View {
         Text(L10n.tr(text))
-            .font(.caption)
+            .font(.braz(.caption))
             .foregroundStyle(Theme.notice)
             .padding(.horizontal, 12)
             .padding(.bottom, 8)

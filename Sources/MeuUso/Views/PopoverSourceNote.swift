@@ -7,7 +7,7 @@ struct PopoverSourceNote: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 10))
+            .font(.braz(size: 10))
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
             .multilineTextAlignment(.center)

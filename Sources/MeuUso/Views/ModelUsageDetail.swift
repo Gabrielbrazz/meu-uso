@@ -41,7 +41,7 @@ struct ModelUsageDetail: View {
 
     private var header: some View {
         Text(L10n.tr(title))
-            .font(.system(size: density.headerPointSize, weight: .semibold))
+            .font(.braz(size: density.headerPointSize, weight: .semibold))
             .foregroundStyle(.primary)
     }
 
@@ -52,7 +52,7 @@ struct ModelUsageDetail: View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(Self.displayName(model.model))
-                    .font(.system(size: density.supportingPointSize, weight: .semibold))
+                    .font(.braz(size: density.supportingPointSize, weight: .semibold))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
                 Spacer(minLength: 8)
@@ -65,7 +65,7 @@ struct ModelUsageDetail: View {
                         .foregroundStyle(.tertiary)
                 }
             }
-            .font(.system(size: density.supportingPointSize))
+            .font(.braz(size: density.supportingPointSize))
 
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text("\(percent)%")
@@ -77,12 +77,12 @@ struct ModelUsageDetail: View {
                 ))
                 .monospacedDigit()
             }
-            .font(.system(size: density.supportingPointSize))
+            .font(.braz(size: density.supportingPointSize))
             .foregroundStyle(.secondary)
 
             GeometryReader { proxy in
                 Capsule()
-                    .fill(.quaternary)
+                    .fill(Theme.meterTrack)
                     .overlay(alignment: .leading) {
                         Capsule()
                             .fill(Theme.meterFill(.normal))

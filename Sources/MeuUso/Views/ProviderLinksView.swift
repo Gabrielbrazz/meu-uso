@@ -44,7 +44,7 @@ struct ProviderLinksView: View {
         } label: {
             HStack(spacing: 4) {
                 Text(label)
-                    .font(.system(size: density.supportingPointSize, weight: .medium))
+                    .font(.braz(size: density.supportingPointSize, weight: .medium))
                     .lineLimit(1)
                 Image(systemName: "arrow.up.right")
                     .font(.system(size: density.supportingPointSize - 2))

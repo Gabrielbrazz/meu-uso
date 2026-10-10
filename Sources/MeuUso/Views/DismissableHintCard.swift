@@ -23,9 +23,9 @@ struct DismissableHintCard: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(L10n.tr(title))
-                    .font(.subheadline.weight(.semibold))
+                    .font(.braz(.subheadline, weight: .semibold))
                 Text(L10n.tr(message))
-                    .font(.caption)
+                    .font(.braz(.caption))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 Button(L10n.tr(buttonTitle), action: action)

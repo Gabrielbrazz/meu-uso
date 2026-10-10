@@ -61,6 +61,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
         // preferredColorScheme, so the override is applied at the AppKit level once at launch;
         // the Theme picker on the Settings screen re-applies it on change.
         AppearanceSetting.applyCurrent()
+        // Braz design system type (Hanken Grotesk + Geist Mono) ships in the resource bundle and is
+        // registered for this process before any view renders.
+        BrazFont.registerBundledFonts()
 
         if ShellEnvironmentSnapshotStore.launchSnapshot == nil,
            !LoginShellEnvironment.shared.capturedSuccessfully {

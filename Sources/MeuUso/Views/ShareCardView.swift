@@ -43,12 +43,12 @@ struct ShareCardView: View {
                 .frame(width: 22, height: 22)
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Text(provider.displayName)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.braz(size: 15, weight: .semibold))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
                 if let plan, !plan.isEmpty {
                     Text(plan)
-                        .font(.system(size: 12))
+                        .font(.braz(size: 12))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                         .layoutPriority(1)
@@ -68,7 +68,7 @@ struct ShareCardView: View {
         if rows.isEmpty {
             DashboardMetricCard {
                 Text("No metrics to show")
-                    .font(.system(size: 14))
+                    .font(.braz(size: 14))
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 14)

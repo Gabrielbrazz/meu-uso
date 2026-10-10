@@ -28,7 +28,7 @@ struct UsageSparkline: View {
     var body: some View {
         HStack(spacing: 8) {
             Text(data.title)
-                .font(.system(size: density.supportingPointSize, weight: .semibold))
+                .font(.braz(size: density.supportingPointSize, weight: .semibold))
                 .foregroundStyle(.primary)
                 .lineLimit(1)
             Spacer(minLength: 8)
@@ -40,12 +40,12 @@ struct UsageSparkline: View {
                 // reads as the popover's source. `hover.dismiss()` clears both flags on panel close.
                 .background {
                     RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .fill(.quaternary)
+                        .fill(Theme.meterTrack)
                         .padding(.horizontal, -7)
                         .padding(.vertical, -4)
                         .opacity(showChartHighlight ? 1 : 0)
                 }
-                .animation(.easeOut(duration: 0.12), value: showChartHighlight)
+                .animation(Braz.Motion.hover, value: showChartHighlight)
                 // Only the bar strip is hoverable — hovering the title must not reveal the detail.
                 .contentShape(Rectangle())
                 .onContinuousHover { phase in
@@ -75,9 +75,9 @@ struct UsageSparkline: View {
 
     private var bars: some View {
         let maxValue = max(1, points.map(\.value).max() ?? 1)
-        // The bars use the same blue as a healthy meter (`Theme.meterFill(.normal)`, system blue softened
-        // for glass), so the trend reads as part of the card's visual language and tracks light/dark and
-        // the accessibility contrast settings like every other bar.
+        // The bars use the same Braz Green as a healthy meter (`Theme.meterFill(.normal)`, the primary
+        // chart series), so the trend reads as part of the card's visual language and tracks light/dark
+        // like every other bar.
         return HStack(alignment: .bottom, spacing: 1) {
             // Keyed by the day label (unique — the producer collapses duplicate days) so a refresh that
             // adds or drops a day re-lays-out cleanly instead of remapping bars by position.

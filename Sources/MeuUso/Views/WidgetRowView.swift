@@ -39,11 +39,11 @@ struct WidgetRowView: View {
     /// `.headline.weight(.regular)` does not match `.headline` on macOS, and `minimumScaleFactor`
     /// was shrinking only the trailing value.
     private var labelFont: Font {
-        .system(size: density.labelPointSize, weight: .semibold)
+        .braz(size: density.labelPointSize, weight: .semibold)
     }
 
     private var supportingFont: Font {
-        .system(size: density.supportingPointSize, weight: .regular)
+        .braz(size: density.supportingPointSize, weight: .regular)
     }
 
     var body: some View {
@@ -112,7 +112,7 @@ struct WidgetRowView: View {
     /// run-out time, read as "Limit in 3h 45m" ⟷ "Limit today at 11:49 PM" (following the global
     /// countdown/exact mode) — clicking the time flips the global mode like the reset label. Close
     /// to limit: a quiet "~3% spare" — the cushion projected at reset. Healthy / level / no-data:
-    /// nothing unless "always show pacing" surfaces projection on blue. Only the flame carries
+    /// nothing unless "always show pacing" surfaces projection on green. Only the flame carries
     /// flame carries the severity color — tint on glass is reserved for the symbol while copy
     /// stays secondary like the row's other supporting text; the bar below carries the color.
     /// Hovering shows the pace projection at reset. The warning gets the space; the title truncates.
@@ -128,7 +128,7 @@ struct WidgetRowView: View {
 
     /// The single escalating warning slot, switching exhaustively over the state so the copy can
     /// never contradict the bar. The flame cases share one builder; the amber and (always-show-pacing)
-    /// blue cases are plain text.
+    /// green cases are plain text.
     @ViewBuilder
     private func warning(_ state: WidgetData.MeterState) -> some View {
         switch state {
@@ -154,7 +154,7 @@ struct WidgetRowView: View {
         case .healthy where data.alwaysShowPacing:
             // "Always show pacing" surfaces the projection on the otherwise-silent on-track row: the
             // same quiet secondary note as the amber case, but the cushion ("~33% left at reset")
-            // rather than the spare. No flame (blue isn't a warning) and no hover tooltip — the copy
+            // rather than the spare. No flame (green isn't a warning) and no hover tooltip — the copy
             // already *is* the projection the amber case hides in its tooltip.
             if let projection = state.tooltip {
                 Spacer(minLength: 8)
@@ -321,25 +321,25 @@ struct WidgetRowView: View {
                     // Secondary, not tertiary: the subtitle is informational ("on-device estimate"),
                     // and tertiary is reserved for inactive content on glass.
                     Text(subtitle)
-                        .font(.caption)
+                        .font(.braz(.caption))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
             }
             .multilineTextAlignment(.trailing)
-            // A quaternary chip behind the value — the app's subtle-fill token, in the shared 6pt
+            // A quiet chip behind the value — Braz `--bg-active` (`Theme.meterTrack`), in the shared 6pt
             // continuous corner — signals the value is interactive before the breakdown even opens.
             // Negative-inset so it hugs the figure without changing the row's height (the text-row
             // rhythm that clusters Today / Yesterday / Last 30 Days must not shift), and a quick
             // opacity fade in/out matches macOS hover states.
             .background {
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(.quaternary)
+                    .fill(Theme.meterTrack)
                     .padding(.horizontal, -7)
                     .padding(.vertical, -4)
                     .opacity(showValueHighlight ? 1 : 0)
             }
-            .animation(.easeOut(duration: 0.12), value: showValueHighlight)
+            .animation(Braz.Motion.hover, value: showValueHighlight)
             // Both the hover trigger and the popover anchor live on the value column, not the whole
             // row: hovering the label (or empty gap) shouldn't reveal the breakdown — only the figure
             // it explains should — and the arrow then centers on that figure, matching the trend
@@ -388,7 +388,7 @@ struct WidgetRowView: View {
         }
     }
 
-    /// Small blue/yellow/red status dot shown just before the value when the row carries reset-credit
+    /// Small green/amber/red status dot shown just before the value when the row carries reset-credit
     /// expiries — colored by the soonest expiry. The per-credit detail (which credits, expiring when)
     /// lives in the resets popover the value column now reveals on hover, so the dot carries no tooltip
     /// of its own. Renders nothing when no credit is available (an empty `expiriesAt`).
@@ -415,7 +415,7 @@ struct WidgetRowView: View {
             Text(data.title)
                 // Same point size as the trailing value so the single-line row reads tight;
                 // semibold alone keeps the name/value hierarchy.
-                .font(.system(size: density.supportingPointSize, weight: .semibold))
+                .font(.braz(size: density.supportingPointSize, weight: .semibold))
                 .foregroundStyle(.primary)
                 .lineLimit(1)
                 .fixedSize(horizontal: true, vertical: false)
@@ -440,12 +440,12 @@ struct WidgetRowView: View {
     /// Full-width capsule meter — the Tahoe-era level-indicator form (capsule, full-height
     /// leading-anchored fill, like the redesigned Slider / Control Center). Deliberately NOT the
     /// native linear `Gauge`/`ProgressView`, which Tahoe left as the thin legacy bar. The fill is
-    /// a flat **system color** carrying the pace verdict (blue = well within limits, yellow =
+    /// a flat **Braz status color** carrying the pace verdict (green = well within limits, amber =
     /// projected to land inside the last 10%, red = projected to run out; `Theme.meterFill` /
     /// `MeterState.severity`) at full strength on the opaque popover surface; the earlier
     /// provider-brand gradient was removed deliberately so the bar's color always reads as state.
     /// Empty + colorless without data. A thin tick marks the even-pace line — where usage would sit
-    /// if it burned evenly across the reset window — on yellow and red bars always, and on blue when
+    /// if it burned evenly across the reset window — on amber and red bars always, and on green when
     /// "always show pacing" is on. The tick rides in an overlay so it pokes out top and bottom without
     /// changing the bar's height. Hovering shows the pace projection (`MeterState.tooltip`).
     private func meter(_ state: WidgetData.MeterState) -> some View {
@@ -455,9 +455,9 @@ struct WidgetRowView: View {
             // pokes out top and bottom without stretching the capsules. (As a ZStack sibling it grew the
             // stack and the flexible capsules stretched with it, so a tick'd bar read as a thicker bar.)
             ZStack(alignment: .leading) {
-                // Semantic quaternary fill (not an opacity-faded color) so the track stays vibrant
-                // on glass and adapts to Increase Contrast / Reduce Transparency.
-                Capsule().fill(.quaternary)
+                // Braz `--bg-active`: a translucent neutral one step above the card, so the track
+                // reads in both themes and on the translucent surface.
+                Capsule().fill(Theme.meterTrack)
                 Capsule()
                     .fill(partyMode ? PartyMode.meterFill : severityColor(state.severity))
                     .frame(width: fillWidth(track: proxy.size.width))
@@ -465,7 +465,7 @@ struct WidgetRowView: View {
             .overlay(alignment: .leading) {
                 if let tick {
                     RoundedRectangle(cornerRadius: 1)
-                        .fill(Color.primary.opacity(0.55))
+                        .fill(Braz.fg1.opacity(0.55))
                         .frame(width: Self.paceTickWidth, height: density.meterHeight + Self.paceTickOverhang)
                         .offset(x: paceTickOffset(track: proxy.size.width, fraction: tick))
                 }

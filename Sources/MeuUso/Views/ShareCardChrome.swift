@@ -17,6 +17,7 @@ struct ShareCardChrome<Content: View>: View {
         .padding(16)
         .frame(width: ShareCardView.width, alignment: .topLeading)
         .background(Theme.traySurface)
+        .brazContentStyle()
         .environment(\.colorScheme, appearance)
         .environment(\.hoverTooltipsDisabled, true)
     }
@@ -27,7 +28,7 @@ struct ShareCardChrome<Content: View>: View {
             ProviderIcon(source: .providerMark("meuuso"), inset: 0)
                 .frame(width: 14, height: 14)
             Text("Monitor Your AI Subscriptions with Meu Uso")
-                .font(.system(size: 12))
+                .font(.braz(size: 12))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)

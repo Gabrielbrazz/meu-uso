@@ -354,6 +354,7 @@ private final class TooltipPresenter {
         func fit(maxTextWidth: CGFloat?) -> CGSize {
             host.rootView = AnyView(
                 TooltipBubble(text: target.text, maxTextWidth: maxTextWidth)
+                    .brazContentStyle()
                     .environment(\.locale, AppLocale.current)
             )
             host.layoutSubtreeIfNeeded()
@@ -417,8 +418,9 @@ private final class NonKeyPanel: NSPanel {
     override var canBecomeMain: Bool { false }
 }
 
-/// The bubble drawn inside the panel: a solid fill with a hairline border (the popover is opaque, so
-/// the tooltip matches it rather than sampling glass). Sizes to its content (`fittingSize` drives the
+/// The bubble drawn inside the panel: Braz's floating surface — a solid `--bg-overlay` fill with a 1px
+/// `--border-default` hairline (the popover is opaque, so the tooltip matches it rather than sampling
+/// glass). Sizes to its content (`fittingSize` drives the
 /// panel size); the panel's window shadow supplies the drop shadow.
 private struct TooltipBubble: View {
     let text: String
@@ -430,18 +432,18 @@ private struct TooltipBubble: View {
     static let horizontalPadding: CGFloat = 8
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: 6, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: Braz.Radius.sm, style: .continuous)
         label
             .padding(.horizontal, Self.horizontalPadding)
             .padding(.vertical, 5)
-            .background { shape.fill(Color(nsColor: .windowBackgroundColor)) }
-            .overlay { shape.strokeBorder(.separator, lineWidth: 0.5) }
+            .background { shape.fill(Braz.bgOverlay) }
+            .overlay { shape.strokeBorder(Braz.borderDefault, lineWidth: 1) }
     }
 
     @ViewBuilder
     private var label: some View {
         let content = Text(text)
-            .font(.system(size: 12))
+            .font(.braz(size: 12))
             .foregroundStyle(.primary)
             .multilineTextAlignment(.center)
         if let maxTextWidth {

@@ -16,8 +16,7 @@ struct CodexPricingSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: density.headerToCardSpacing) {
             Text("Cost Estimates")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .brazOverline()
                 .padding(.horizontal, 8)
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: 10) {
@@ -44,21 +43,21 @@ struct CodexPricingSection: View {
                             .accessibilityHidden(true)
                         Text(activityLabel)
                     }
-                    .font(.caption)
+                    .font(.braz(.caption))
                     .foregroundStyle(.secondary)
                     .accessibilityElement(children: .combine)
                     .padding(.horizontal, 12)
                     .padding(.bottom, 8)
                 }
                 Text("Estimate costs for models that don't have known pricing.")
-                    .font(.caption)
+                    .font(.braz(.caption))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 12)
                     .padding(.bottom, 10)
                 if selectionUnavailable && !isLoading {
                     Text("This model's pricing is unavailable. Choose another model or None.")
-                        .font(.caption)
+                        .font(.braz(.caption))
                         .foregroundStyle(Theme.notice)
                         .padding(.horizontal, 12)
                         .padding(.bottom, 10)

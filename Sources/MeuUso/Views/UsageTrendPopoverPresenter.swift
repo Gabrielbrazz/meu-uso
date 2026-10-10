@@ -33,7 +33,9 @@ private struct MotionAwareHoverPopoverModifier<PopoverContent: View>: ViewModifi
                 )
             }
         } else {
-            content.popover(isPresented: $isPresented, arrowEdge: .top, content: popoverContent)
+            content.popover(isPresented: $isPresented, arrowEdge: .top) {
+                popoverContent().brazContentStyle()
+            }
         }
     }
 }
@@ -110,7 +112,11 @@ final class ReducedMotionPopoverController: NSObject, NSPopoverDelegate {
     }
 
     func update(content: AnyView, reduceAnimations: Bool, anchor: NSView) {
-        host.rootView = AnyView(content.animationReduction(reduceAnimations).environment(\.locale, AppLocale.current))
+        host.rootView = AnyView(
+            content.animationReduction(reduceAnimations)
+                .brazContentStyle()
+                .environment(\.locale, AppLocale.current)
+        )
         guard isPresented.wrappedValue else {
             synchronize(with: anchor)
             return

@@ -100,5 +100,10 @@ Falhe de forma visível: registre o erro no log e mostre uma mensagem amigável 
 ## Interface
 
 - Em português, maiúscula só no começo de título, botão e item de menu; os termos seguem o glossário (`docs/glossario.md`).
-- Siga a linguagem visual existente; o app tem uma aparência própria.
+- **O visual é o design system Braz:** escuro por padrão, monocromático, um único verde de destaque (Braz Green), Hanken Grotesk no texto e Geist Mono em títulos de seção, atalhos e IDs.
+  - Os tokens ficam em `Sources/MeuUso/Support/BrazTokens.swift` (cores, raios, movimento) e `BrazTypography.swift` (fontes, `brazContentStyle()`, `brazOverline()`). Superfícies e barras passam pelo `Theme`.
+  - Nunca use hex, cor do sistema (`.systemBlue`, `.orange`, `Color.accentColor`) nem fonte do sistema (`.system(size:)`, `.caption`) em texto. Use `Braz.<token>`, `Theme.<estilo>`, `.font(.braz(...))` ou `.font(.brazMono(...))`. Ícones SF Symbols mantêm a fonte do sistema.
+  - O verde aparece no máximo uma ou duas vezes por tela: barra saudável, interruptor ligado, confirmação. Âmbar e vermelho só para status.
+  - Cartão é `--bg-surface` com borda de 1px (`cardSurface()`), sem sombra. Só camadas flutuantes (tooltip, aviso, prévia de arrastar) têm sombra.
+  - Título de seção usa `brazOverline()`.
 - Só adicione tooltips (`hoverTooltip`) quando pedirem explicitamente. Não coloque por iniciativa própria em controles novos.

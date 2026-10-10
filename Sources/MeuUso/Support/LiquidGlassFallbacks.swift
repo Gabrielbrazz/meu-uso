@@ -133,12 +133,12 @@ private struct MotionAwareInteractiveGlassModifier<Shape: InsettableShape>: View
                 if reduceAnimations {
                     content
                         .background(.regularMaterial, in: shape)
-                        .overlay { shape.strokeBorder(.separator, lineWidth: 0.5) }
+                        .overlay { shape.strokeBorder(Braz.borderDefault, lineWidth: 1) }
                         .glassEffect(.regular, in: shape)
                 } else {
                     content
                         .background(.regularMaterial, in: shape)
-                        .overlay { shape.strokeBorder(.separator, lineWidth: 0.5) }
+                        .overlay { shape.strokeBorder(Braz.borderDefault, lineWidth: 1) }
                         .glassEffect(.regular.interactive(), in: shape)
                 }
             } else if reduceAnimations {
@@ -149,7 +149,7 @@ private struct MotionAwareInteractiveGlassModifier<Shape: InsettableShape>: View
         } else {
             content
                 .background(.regularMaterial, in: shape)
-                .overlay { shape.strokeBorder(.separator, lineWidth: 0.5) }
+                .overlay { shape.strokeBorder(Braz.borderDefault, lineWidth: 1) }
         }
     }
 }

@@ -39,12 +39,12 @@ extension CustomizeMetricRow where Handle == AnyView {
 }
 
 /// The static switch placeholder the lifted previews render where the live row shows a real
-/// `Toggle` — a quaternary capsule the size of a small switch, so the floating chip reads like the
+/// `Toggle` — a quiet `--bg-active` capsule the size of a small switch, so the floating chip reads like the
 /// row without carrying a live control.
 struct CustomizeSwitchPlaceholder: View {
     var body: some View {
         Capsule()
-            .fill(.quaternary)
+            .fill(Theme.meterTrack)
             .frame(width: 28, height: 16)
     }
 }
@@ -54,7 +54,7 @@ struct CustomizeStarPlaceholder: View {
     var body: some View {
         Image(systemName: "star")
             .font(.system(size: 11, weight: .semibold))
-            .foregroundStyle(.quaternary)
+            .foregroundStyle(Braz.fg4)
             .frame(width: 18, height: 18)
     }
 }
