@@ -27,6 +27,8 @@ let package = Package(
             path: "Sources/MeuUso",
             resources: [
                 .copy("Resources/ProviderIcons"),
+                // Braz design system type: Hanken Grotesk + Geist Mono (SIL OFL), registered at launch.
+                .copy("Resources/Fonts"),
                 .copy("Resources/pricing_supplement.json"),
                 .copy("Resources/pricing_litellm_snapshot.json"),
                 .copy("Resources/pricing_models_dev_snapshot.json")
