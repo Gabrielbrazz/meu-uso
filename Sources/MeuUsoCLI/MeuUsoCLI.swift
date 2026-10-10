@@ -18,6 +18,11 @@ struct MeuUsoCLI {
                 return
             }
 
+            if arguments.command == .update {
+                let executableURL = Bundle.main.executableURL ?? URL(fileURLWithPath: CommandLine.arguments[0])
+                exit(try SelfUpdate.run(force: arguments.force, executableURL: executableURL))
+            }
+
             guard let defaults = UserDefaults(suiteName: app.bundleIdentifier) else {
                 throw CLIError.appDefaultsUnavailable
             }
@@ -33,6 +38,8 @@ struct MeuUsoCLI {
             }
         } catch CLIError.usage(let message) {
             fail("\(message)\nRode 'meu-uso --help' para ver como usar.", code: 2)
+        } catch CLIError.updateUnavailable(let message) {
+            fail(message, code: 3)
         } catch CLIError.appDefaultsUnavailable {
             fail("Não foi possível abrir o domínio de ajustes do Meu Uso.", code: 4)
         } catch UsageReaderError.unknownProvider(let providerID) {
@@ -55,8 +62,12 @@ struct MeuUsoCLI {
     /// Flags, the command name, exit codes and the JSON output stay as they are.
     private static let help = """
     Uso: meu-uso [provedor] [--force]
+         meu-uso update [--force]
 
     Lê os limites pelo cache compartilhado de cinco minutos do Meu Uso e sai. A saída é sempre JSON.
+
+    Comandos:
+      update       Baixa e instala a versão mais nova do Meu Uso (com --force, reinstala a atual)
 
     Opções:
       --force      Atualiza mesmo quando o cache compartilhado ainda está válido

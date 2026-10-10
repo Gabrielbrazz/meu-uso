@@ -234,6 +234,8 @@
 "Update Available" = "Atualização disponível";
 "Meu Uso %@ is ready to download." = "O Meu Uso %@ está pronto para baixar.";
 "Install Update" = "Instalar atualização";
+"Meu Uso %@ is available. Run the update command in Terminal." = "O Meu Uso %@ está disponível. Rode o comando de atualização no Terminal.";
+"Copy Update Command" = "Copiar comando de atualização";
 "Dismiss" = "Fechar";
 "%lld metrics" = "%lld métricas";
 "%lld metrics#one" = "%lld métrica";

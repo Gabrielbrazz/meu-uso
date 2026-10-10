@@ -10,13 +10,15 @@ Este arquivo documenta as convenções de engenharia do projeto. Leia antes de c
 - **Fork independente.** O Meu Uso é um fork independente do [OpenUsage](https://github.com/robinebers/openusage) e não sincroniza com ele.
   - Nada no código, nos scripts ou nos workflows pode apontar para a infraestrutura do projeto original: appcast, Pages, analytics, contatos.
   - Referências a issues de lá ficam qualificadas como `robinebers/openusage#123`.
-- **Sem telemetria.** O app não coleta dados. Não adicione analytics, crash reporting nem chamadas de rede que não sejam aos provedores ou às tabelas de preço (veja `docs/privacy.md`).
+- **Sem telemetria.** O app não coleta dados. Não adicione analytics, crash reporting nem chamadas de rede que não sejam aos provedores, às tabelas de preço ou à checagem de atualização (veja `docs/privacy.md`).
 
 ## Releases
 
-- `main` é a linha ativa. O `.github/workflows/release.yml` publica uma versão a partir de uma tag `v*`, com appcast do Sparkle em `gh-pages`. Ele só funciona depois de configurar os segredos da Apple (Developer ID, notarização) e as chaves EdDSA do Sparkle; até lá não há release assinada. O passo a passo está na skill release-swift.
+- `main` é a linha ativa. Uma tag `v*` publica a versão por um de dois workflows, escolhido pela variável de repositório `SIGNED_RELEASES`:
+  - **Sem a variável (hoje):** `.github/workflows/release-terminal.yml` gera o app universal com assinatura ad-hoc, sem feed do Sparkle, e publica `MeuUso.zip` e `MeuUso.zip.sha256` na release do GitHub. Quem usa instala e atualiza pelo `script/install.sh` (`meu-uso update` roda a cópia que vem no app). Mudou o instalador? Ele roda direto da `main` pelo `curl | bash`, e o CI passa o shellcheck nele.
+  - **Com `SIGNED_RELEASES=true`:** `.github/workflows/release.yml` publica a versão assinada e notarizada, com appcast do Sparkle em `gh-pages`. Exige os segredos da Apple (Developer ID, notarização) e as chaves EdDSA do Sparkle. O passo a passo está na skill release-swift.
 - **Nunca aumente o número da versão por conta própria.** Proponha o número e espere a aprovação explícita do mantenedor antes de criar tag ou release. As versões começam em `0.1.0`.
-- Beta usa tag `-beta.N` e fica como pre-release no canal beta do Sparkle; versão estável usa tag simples e vira a "Latest" do GitHub.
+- Beta usa tag `-beta.N` e fica como pre-release (no canal beta do Sparkle, na versão assinada; o `install.sh` só instala com `--version`); versão estável usa tag simples e vira a "Latest" do GitHub.
 - Nunca deixe uma release em rascunho nem publique notas em branco.
 
 ## Arquitetura

@@ -9,7 +9,12 @@ import Sparkle
 /// The updater starts whenever the app runs from a packaged bundle that declares a `SUFeedURL`. Only the
 /// signed release build bakes one in, so the Settings "Updates" section appears there alone. A bare
 /// `swift run` and the in-place dev build ship no feed, leaving the updater dormant and the section
-/// hidden. See `docs/updates.md` for the user-facing behavior.
+/// hidden.
+///
+/// The terminal release (`MeuUsoDistribution` = `terminal`, installed by `script/install.sh`) has no feed
+/// either: there a `TerminalUpdateChecker` looks for a newer GitHub release at launch and once a day, and
+/// the same dashboard banner offers the `meu-uso update` command instead of a Sparkle install. See
+/// `docs/updates.md` for the user-facing behavior.
 @MainActor
 @Observable
 final class UpdaterController {
@@ -37,6 +42,10 @@ final class UpdaterController {
     /// dockless apps); the dashboard renders it as an "Update Available" banner whose install button
     /// routes through `checkForUpdates()` — a user-initiated check, which Sparkle brings to the front.
     private(set) var availableUpdateVersion: String?
+    /// True in the terminal release: updates install with `meu-uso update`, so the banner offers that
+    /// command instead of Sparkle's install flow.
+    private(set) var updatesFromTerminal = false
+    private var terminalCheckTask: Task<Void, Never>?
 
     /// Backs the "Beta Updates" toggle. Persisted to `UserDefaults`; flipping it resets Sparkle's update
     /// cycle so the new channel set takes effect on the next scheduled check instead of a day later.
@@ -64,7 +73,11 @@ final class UpdaterController {
     func start() {
         guard controller == nil else { return }
         guard Bundle.main.object(forInfoDictionaryKey: "SUFeedURL") != nil else {
-            AppLog.info(.updates, "disabled: no SUFeedURL (unbundled or dev build)")
+            if Bundle.main.object(forInfoDictionaryKey: "MeuUsoDistribution") as? String == "terminal" {
+                startTerminalChecks()
+            } else {
+                AppLog.info(.updates, "disabled: no SUFeedURL (unbundled or dev build)")
+            }
             return
         }
         // The driver delegate's callbacks run on the main thread but the delegate itself is
@@ -126,6 +139,53 @@ final class UpdaterController {
     /// Sparkle re-presents it in frontmost focus (its window, release notes, and install button).
     func installAvailableUpdate() {
         checkForUpdates()
+    }
+
+    /// The terminal release's update command, as the banner copies it: `meu-uso update` when the
+    /// terminal helper is linked to this app, else the bundled helper's full path, which always works.
+    var terminalUpdateCommand: String {
+        let helper = Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/meu-uso").path
+        let linked = try? FileManager.default.destinationOfSymbolicLink(atPath: "/usr/local/bin/meu-uso")
+        return linked == helper ? "meu-uso update" : "\"\(helper)\" update"
+    }
+
+    /// The terminal release's banner action: puts `terminalUpdateCommand` on the clipboard.
+    func copyTerminalUpdateCommand() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(terminalUpdateCommand, forType: .string)
+        AppLog.info(.updates, "copied the terminal update command")
+    }
+
+    /// Checks GitHub at launch and then once a day. A dismissed banner comes back at the next check
+    /// that still finds the newer version, matching the Sparkle banner's snooze.
+    private func startTerminalChecks(checker: TerminalUpdateChecker = TerminalUpdateChecker()) {
+        guard terminalCheckTask == nil else { return }
+        let current = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
+        updatesFromTerminal = true
+        AppLog.info(.updates, "terminal release \(current): checking GitHub releases daily")
+        terminalCheckTask = Task { [weak self] in
+            while !Task.isCancelled {
+                await self?.runTerminalCheck(checker, current: current)
+                try? await Task.sleep(for: .seconds(24 * 60 * 60))
+            }
+        }
+    }
+
+    private func runTerminalCheck(_ checker: TerminalUpdateChecker, current: String) async {
+        do {
+            guard let latest = try await checker.latestVersion(userAgentVersion: current) else {
+                AppLog.info(.updates, "terminal check: no published release yet")
+                return
+            }
+            if TerminalUpdateChecker.isNewer(latest, than: current) {
+                availableUpdateVersion = latest
+                AppLog.info(.updates, "terminal check found \(latest) (running \(current)); showing in-app banner")
+            } else {
+                AppLog.info(.updates, "terminal check: \(current) is current (latest \(latest))")
+            }
+        } catch {
+            AppLog.warn(.updates, "terminal check failed: \(error.localizedDescription)")
+        }
     }
 
     /// The banner's dismiss action for this found update. Sparkle's next scheduled check re-surfaces
