@@ -26,6 +26,21 @@ jobs:
       - name: Check pt-BR translations
         run: python3 script/check_localization.py
 
+  installer:
+    name: Install script
+    # Users pipe script/install.sh from `main` straight into bash (`curl … | bash`), so like the pricing
+    # supplement, a broken edit must never merge. shellcheck ships on GitHub's Ubuntu runners.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Lint the installer
+        run: |
+          bash -n script/install.sh
+          shellcheck script/install.sh
+
   pricing:
     name: Pricing supplement
     # Installed apps fetch Sources/MeuUso/Resources/pricing_supplement.json straight from `main`

@@ -14,6 +14,11 @@ set -euo pipefail
 # Usage: script/build_and_run.sh [run|build|logs|verify]
 # Env:   CODESIGN_IDENTITY  override signing identity (exact name or hash)
 #        CONFIG             "release" (default) or "debug"
+#        APP_VERSION / APP_BUILD / APP_VERSION_SUFFIX  version stamped into Info.plist (dev: 0.1.0-dev)
+#        DISTRIBUTION       "dev" (default) or "terminal" — the GitHub release installed by
+#                         script/install.sh, which tells the app to point updates at that script
+#        UNIVERSAL=1        build arm64 + x86_64 slices (the terminal release ships universal)
+#        SIGN_ENTITLEMENTS  entitlements for the ad-hoc / development signature
 #        ICLOUD_PROVISIONING_PROFILE  optional override for the development provisioning profile;
 #                         otherwise the newest matching installed profile is selected automatically
 
@@ -23,10 +28,13 @@ CONFIG="${CONFIG:-release}"
 TARGET_NAME="MeuUso"                 # SwiftPM target / binary name
 APP_DISPLAY="MeuUso"                 # user-facing app name
 BUNDLE_ID="${BUNDLE_ID:-io.github.gabrielbrazz.meuuso.dev}"
-ICLOUD_CONTAINER_ID="iCloud.io.github.gabrielbrazz.meuuso.dev"
+ICLOUD_CONTAINER_ID="iCloud.$BUNDLE_ID"
 MIN_SYSTEM_VERSION="15.0"
-APP_VERSION="0.1.0"
-APP_BUILD="0.1.0"
+APP_VERSION="${APP_VERSION:-0.1.0}"
+APP_BUILD="${APP_BUILD:-0.1.0}"
+APP_VERSION_SUFFIX="${APP_VERSION_SUFFIX--dev}"
+DISTRIBUTION="${DISTRIBUTION:-dev}"
+UNIVERSAL="${UNIVERSAL:-0}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="$ROOT_DIR/dist"
@@ -40,15 +48,28 @@ CLI_BINARY="$APP_HELPERS/meu-uso"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
 RESOURCE_BUNDLE_NAME="${TARGET_NAME}_${TARGET_NAME}.bundle"
 ENTITLEMENTS="$ROOT_DIR/script/MeuUso.dev.entitlements.plist"
-SIGN_ENTITLEMENTS="$ROOT_DIR/script/MeuUso.local.entitlements.plist"
+SIGN_ENTITLEMENTS="${SIGN_ENTITLEMENTS:-$ROOT_DIR/script/MeuUso.local.entitlements.plist}"
 
 # Match the staged binary path, not the bare process name, so an installed app with the same
 # executable name is never touched.
 pkill -f "$APP_BINARY" >/dev/null 2>&1 || true
 
-echo "==> swift build ($CONFIG)"
-swift build -c "$CONFIG"
-BUILD_DIR="$(swift build -c "$CONFIG" --show-bin-path)"
+# ARCH_FLAGS is word-split on purpose (empty for a host-arch build). With several --arch, SwiftPM
+# lipo-merges the slices and --show-bin-path resolves to the merged products dir (same as release.sh).
+ARCH_FLAGS=""
+if [ "$UNIVERSAL" = "1" ]; then
+  ARCH_FLAGS="--arch arm64 --arch x86_64"
+  echo "==> swift build ($CONFIG, universal arm64 + x86_64)"
+  # shellcheck disable=SC2086
+  swift build -c "$CONFIG" $ARCH_FLAGS --product "$TARGET_NAME"
+  # shellcheck disable=SC2086
+  swift build -c "$CONFIG" $ARCH_FLAGS --product meu-uso-cli
+else
+  echo "==> swift build ($CONFIG)"
+  swift build -c "$CONFIG"
+fi
+# shellcheck disable=SC2086
+BUILD_DIR="$(swift build -c "$CONFIG" $ARCH_FLAGS --show-bin-path)"
 BUILD_BINARY="$BUILD_DIR/$TARGET_NAME"
 BUILD_CLI_BINARY="$BUILD_DIR/meu-uso-cli"
 
@@ -71,6 +92,12 @@ chmod +x "$CLI_BINARY"
 # The shared module links Sparkle even though the one-shot CLI never initializes the updater. Helpers
 # sit one directory below Contents, so give dyld the same embedded-framework location as the app binary.
 install_name_tool -add_rpath "@executable_path/../Frameworks" "$CLI_BINARY"
+if [ "$UNIVERSAL" = "1" ]; then
+  for binary in "$APP_BINARY" "$CLI_BINARY"; do
+    lipo -archs "$binary" | grep -q "x86_64" && lipo -archs "$binary" | grep -q "arm64" \
+      || { echo "Expected a universal (arm64 + x86_64) binary, got: $(lipo -archs "$binary")" >&2; exit 1; }
+  done
+fi
 
 # SwiftPM stamps LC_BUILD_VERSION's `sdk` field with the deployment target (macOS 15), not the real
 # SDK it compiled against. macOS gates the modern Liquid Glass control appearance (pop-up buttons,
@@ -94,6 +121,8 @@ shopt -u nullglob
 # The pt-BR strings (assets/Localization): the app's only localization, so the UI — including AppKit's
 # own menus and panels — is always Portuguese. See Support/L10n.swift.
 ditto "$ROOT_DIR/assets/Localization/pt-BR.lproj" "$APP_RESOURCES/pt-BR.lproj"
+# The terminal installer/updater: `meu-uso update` runs this bundled copy (see Sources/MeuUsoCLI).
+cp "$ROOT_DIR/script/install.sh" "$APP_RESOURCES/install.sh"
 
 # App icon. The classic AppIcon.icns (rendered by script/brand/mark.py --icns) always ships. When actool
 # can compile the Icon Composer source (assets/AppIcon.icon), the Liquid Glass Assets.car is added and
@@ -149,11 +178,13 @@ cat >"$INFO_PLIST" <<PLIST
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
-  <string>$APP_VERSION-dev</string>
+  <string>$APP_VERSION$APP_VERSION_SUFFIX</string>
   <key>CFBundleVersion</key>
   <string>$APP_BUILD</string>
   <key>LSMinimumSystemVersion</key>
   <string>$MIN_SYSTEM_VERSION</string>
+  <key>MeuUsoDistribution</key>
+  <string>$DISTRIBUTION</string>
   $ICON_NAME_ENTRY
   <key>CFBundleIconFile</key>
   <string>AppIcon</string>
@@ -165,7 +196,7 @@ cat >"$INFO_PLIST" <<PLIST
   <true/>
   <key>NSUbiquitousContainers</key>
   <dict>
-    <key>iCloud.io.github.gabrielbrazz.meuuso.dev</key>
+    <key>$ICLOUD_CONTAINER_ID</key>
     <dict>
       <key>NSUbiquitousContainerIsDocumentScopePublic</key>
       <false/>

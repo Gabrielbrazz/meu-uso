@@ -24,17 +24,25 @@ A maioria dos provedores usa as credenciais que já estão no seu Mac (nas chave
 
 ## Instalação
 
-Ainda não há versão assinada para baixar. Por enquanto o Meu Uso roda a partir do código:
+No Terminal:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Gabrielbrazz/meu-uso/main/script/install.sh | bash
+```
+
+O script baixa a versão mais recente das [releases do GitHub](https://github.com/Gabrielbrazz/meu-uso/releases), confere o checksum, instala o app em Aplicativos e abre. Precisa do macOS 15 (Sequoia) ou mais novo.
+
+Para atualizar, rode `meu-uso update`. Quando sai uma versão nova, o app avisa no topo da janela e copia o comando para você.
+
+O Meu Uso ainda não tem assinatura da Apple. O macOS bloqueia apps assim quando eles vêm do navegador, mas não quando vêm do Terminal, por isso a instalação é por comando. Nessa versão a sincronização pelo iCloud fica indisponível, e o macOS pode pedir de novo o acesso às chaves depois de uma atualização. Veja [Atualizações](docs/updates.md).
+
+### Compilar do código
 
 ```bash
 git clone https://github.com/Gabrielbrazz/meu-uso.git && cd meu-uso && ./script/build_and_run.sh
 ```
 
-O script compila e abre o app de desenvolvimento a partir de `dist/`, sem instalar nada em Aplicativos.
-
-Você vai precisar de:
-- macOS 15 (Sequoia) ou mais novo;
-- Xcode 26 para compilar.
+O script compila e abre o app de desenvolvimento a partir de `dist/`, sem instalar nada em Aplicativos. Precisa do Xcode 26.
 
 Cada PR também gera no CI um build de desenvolvimento, o artefato `MeuUso-dev`. Veja como usar em [Testar sem Xcode local](docs/debugging.md#testar-sem-xcode-local).
 

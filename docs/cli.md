@@ -19,8 +19,12 @@ A CLI fala português. As opções, os códigos de saída e as chaves do JSON fi
 ```text
 $ meu-uso --help
 Uso: meu-uso [provedor] [--force]
+     meu-uso update [--force]
 
 Lê os limites pelo cache compartilhado de cinco minutos do Meu Uso e sai. A saída é sempre JSON.
+
+Comandos:
+  update       Baixa e instala a versão mais nova do Meu Uso (com --force, reinstala a atual)
 
 Opções:
   --force      Atualiza mesmo quando o cache compartilhado ainda está válido
@@ -52,6 +56,19 @@ meu-uso: aviso: codex: Nenhum login encontrado. Rode `codex` para entrar.
 ```
 
 Os códigos de saída são `0` para sucesso, `2` para argumento inválido ou provedor desconhecido e `4` quando uma atualização ou leitura local falha.
+
+## Atualizar o Meu Uso
+
+`meu-uso update` instala a versão mais nova do Meu Uso por cima do app que contém o comando. Ele roda o mesmo script da instalação (`script/install.sh`, que vem dentro do app): descobre a versão mais recente no GitHub, baixa, confere o checksum, fecha o app, troca e abre de novo. Se a versão instalada já for a mais nova, só avisa e sai. `meu-uso update --force` reinstala a versão atual.
+
+```text
+$ meu-uso update
+Baixando o Meu Uso 0.2.0…
+Fechando o Meu Uso…
+Meu Uso 0.2.0 instalado em /Applications/MeuUso.app.
+```
+
+O comando só atualiza a versão instalada pelo Terminal. Num build de desenvolvimento ele explica como atualizar e termina com o código `3`; o mesmo vale para uma futura versão assinada, que se atualiza pelo próprio app. Quando o script falha (sem internet, checksum que não confere, pasta sem permissão), a versão anterior continua instalada e o comando termina com o código `1`. Veja [Atualizações](updates.md).
 
 ## Instalar no `PATH`
 

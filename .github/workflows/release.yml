@@ -26,6 +26,10 @@ concurrency:
 
 jobs:
   release:
+    # Off until the Apple Developer ID, notarization and Sparkle secrets exist: set the repository
+    # variable SIGNED_RELEASES to "true" to turn it on. Until then tags ship through
+    # release-terminal.yml (the terminal installer, no Apple credentials).
+    if: vars.SIGNED_RELEASES == 'true'
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v7

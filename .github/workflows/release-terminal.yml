@@ -1,0 +1,101 @@
+name: Terminal release
+
+# Publishes a version for the terminal installer (script/install.sh), without Apple credentials:
+#   git tag v0.1.0 && git push origin v0.1.0
+#
+# The build is universal (arm64 + x86_64), ad-hoc signed and ships no Sparkle feed; the app points
+# updates at `meu-uso update` instead (MeuUsoDistribution = terminal in its Info.plist). A tag with a
+# pre-release suffix (v0.1.0-beta.1) becomes a GitHub pre-release, which install.sh only installs when
+# asked by name (--version).
+#
+# This runs while the signed Sparkle pipeline (release.yml) is off. Setting the repository variable
+# SIGNED_RELEASES to "true" hands tags over to release.yml and turns this workflow off.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build (e.g. v0.1.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: vars.SIGNED_RELEASES != 'true'
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      # Inputs reach shell steps through env, never interpolated into the script text.
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # On a tag push `inputs.tag` is empty and checkout uses the triggering tag.
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0          # full history so CFBundleVersion (commit count) is right
+          persist-credentials: false
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Check the tag
+        run: |
+          case "$TAG" in
+            v[0-9]*.[0-9]*.[0-9]*) ;;
+            *) echo "Tag must look like v0.1.0 (got '$TAG')" >&2; exit 1 ;;
+          esac
+
+      - name: Build the app (universal, ad-hoc signed)
+        env:
+          BUNDLE_ID: io.github.gabrielbrazz.meuuso
+          DISTRIBUTION: terminal
+          UNIVERSAL: "1"
+          APP_VERSION_SUFFIX: ""
+          SIGN_ENTITLEMENTS: ${{ github.workspace }}/script/MeuUso.terminal.entitlements.plist
+        run: |
+          APP_VERSION="${TAG#v}" APP_BUILD="$(git rev-list --count HEAD)" ./script/build_and_run.sh build
+
+      # The same checks install.sh makes on the user's Mac, run here first so a broken bundle never ships.
+      - name: Verify the bundle
+        run: |
+          plist=dist/MeuUso.app/Contents/Info.plist
+          codesign --verify --deep --strict dist/MeuUso.app
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$plist")" = io.github.gabrielbrazz.meuuso
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$plist")" = "${TAG#v}"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :MeuUsoDistribution' "$plist")" = terminal
+          test -f dist/MeuUso.app/Contents/Resources/install.sh
+          if /usr/libexec/PlistBuddy -c 'Print :SUFeedURL' "$plist" >/dev/null 2>&1; then
+            echo "The terminal build must not ship a Sparkle feed" >&2; exit 1
+          fi
+
+      - name: Package
+        working-directory: dist
+        run: |
+          ditto -c -k --keepParent MeuUso.app MeuUso.zip
+          shasum -a 256 MeuUso.zip > MeuUso.zip.sha256
+          cat MeuUso.zip.sha256
+
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          generated=$(gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" -f tag_name="$TAG" --jq .body)
+          {
+            echo "## Instalar ou atualizar"
+            echo
+            echo '```bash'
+            echo "curl -fsSL https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/script/install.sh | bash"
+            echo '```'
+            echo
+            echo 'Já tem o Meu Uso? Rode `meu-uso update`. Precisa do macOS 15 ou mais novo.'
+            echo
+            echo "$generated"
+          } > release-notes.md
+          prerelease=()
+          case "$TAG" in *-*) prerelease=(--prerelease) ;; esac
+          gh release create "$TAG" dist/MeuUso.zip dist/MeuUso.zip.sha256 \
+            --verify-tag --title "Meu Uso ${TAG#v}" --notes-file release-notes.md "${prerelease[@]}"

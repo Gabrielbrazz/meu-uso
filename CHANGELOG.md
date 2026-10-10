@@ -6,7 +6,12 @@ Todas as mudanças relevantes do Meu Uso ficam registradas aqui. O formato segue
 
 Ponto de partida: fork do [OpenUsage](https://github.com/robinebers/openusage) v0.7.14 (commit `cb21465`), de Robin Ebers, sob licença MIT. O histórico anterior a este ponto está no repositório original.
 
+### Adicionado
+- Instalação e atualização pelo Terminal, sem assinatura da Apple: `curl -fsSL https://raw.githubusercontent.com/Gabrielbrazz/meu-uso/main/script/install.sh | bash` instala a versão mais recente das releases do GitHub, conferindo o checksum, e `meu-uso update` atualiza. Cada tag `v*` publica o app universal (Apple Silicon e Intel) pelo workflow `release-terminal.yml`.
+- Aviso de versão nova na versão do Terminal: o app consulta o GitHub ao abrir e uma vez por dia e oferece o comando de atualização no topo da janela.
+
 ### Alterado
+- Visual no design system Braz: escuro, monocromático, um verde de destaque, Hanken Grotesk e Geist Mono (embutidas no app, licença SIL OFL). Barras no ritmo ficam verdes, em vez de azuis.
 - Nome: OpenUsage passa a ser Meu Uso. Bundle ID `io.github.gabrielbrazz.meuuso`, pastas `~/Library/Application Support/MeuUso` e `~/Library/Logs/MeuUso`, configuração em `~/.meu-uso` e `~/.config/meu-uso`, CLI `meu-uso`, API local em `127.0.0.1:6737`. Nada disso colide com uma instalação do OpenUsage no mesmo Mac.
 - Versão reiniciada em 0.1.0.
 - Marca e ícone provisórios: um anel de uso com uma abertura e um ponto, desenhado do zero (`script/brand/mark.py`). O ícone clássico (`.icns`) vai em todo build; o ícone Liquid Glass depende de um `actool` que compile `assets/AppIcon.icon`.
