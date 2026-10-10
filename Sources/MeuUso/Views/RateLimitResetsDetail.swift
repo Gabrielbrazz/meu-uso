@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Hover detail for a rate-limit-resets row (Codex reset credits, Claude reset grants): a vertical
 /// timeline of each still-available reset, one node per credit, ordered soonest-expiry first. Each
-/// node is a single line — a numbered, severity-colored dot (the number IS the reset number; blue > 7 days, yellow within a week, red
+/// node is a single line — a numbered, severity-colored dot (the number IS the reset number; green > 7 days, amber within a week, red
 /// within 48 hours — the same `expirySeverity` bands as the row's status dot), the exact expiry time,
 /// and the countdown to it on the trailing edge. Replaces the old `HoverTooltip` list. When no credits
 /// are available it shows a centered empty state. Mirrors `ModelUsageDetail` / `UsageTrendDetail`'s
@@ -121,7 +121,7 @@ struct RateLimitResetsDetail: View {
                 .foregroundStyle(.secondary)
                 .accessibilityHidden(true)
             Text("You have no rate limit resets")
-                .font(.system(size: density.supportingPointSize))
+                .font(.braz(size: density.supportingPointSize))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
@@ -144,10 +144,10 @@ struct RateLimitResetsDetail: View {
                 for: MetricValue(number: Double(count), kind: .count, label: "available"),
                 style: .row
             ))
-            .font(.system(size: density.supportingPointSize))
+            .font(.braz(size: density.supportingPointSize))
             .foregroundStyle(.primary)
             Text("Expiry times unavailable")
-                .font(.system(size: 11))
+                .font(.braz(size: 11))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
@@ -193,9 +193,9 @@ struct RateLimitResetsDetail: View {
     private func rail(for entry: Entry, isFirst: Bool, isLast: Bool, dotCenterY: CGFloat) -> some View {
         ZStack(alignment: .top) {
             VStack(spacing: 0) {
-                Rectangle().fill(.quaternary).frame(width: 1.5).frame(height: dotCenterY)
+                Rectangle().fill(Theme.meterTrack).frame(width: 1.5).frame(height: dotCenterY)
                     .opacity(isFirst ? 0 : 1)
-                Rectangle().fill(.quaternary).frame(width: 1.5).frame(maxHeight: .infinity)
+                Rectangle().fill(Theme.meterTrack).frame(width: 1.5).frame(maxHeight: .infinity)
                     .opacity(isLast ? 0 : 1)
             }
             numberedDot(entry).padding(.top, dotCenterY - 9)
@@ -208,15 +208,15 @@ struct RateLimitResetsDetail: View {
         ZStack {
             Circle().fill(Theme.meterFill(entry.severity)).frame(width: 18, height: 18)
             Text("\(entry.number)")
-                .font(.system(size: 11, weight: .medium))
+                .font(.braz(size: 11, weight: .medium))
                 .foregroundStyle(Self.numberColor(entry.severity))
         }
     }
 
-    /// The number sits on a saturated system fill, so it takes the fill's paired foreground: dark on the
-    /// bright yellow, white on the blue and red.
+    /// The number sits on a saturated Braz status fill, so it takes the fill's paired foreground: dark on
+    /// amber, and `--accent-fg` on green and red (dark on the bright dark-theme fills, white on light).
     private static func numberColor(_ severity: WidgetData.MeterSeverity) -> Color {
-        severity == .warning ? .black : .white
+        severity == .warning ? Braz.onWarning : Braz.onStatus
     }
 
     /// One timeline node's content (no dot — that lives on the rail): the read-only/claimable line, or,
@@ -252,7 +252,7 @@ struct RateLimitResetsDetail: View {
     private func row(_ entry: Entry) -> some View {
         HStack(spacing: 8) {
             Text(entry.time)
-                .font(.system(size: density.supportingPointSize))
+                .font(.braz(size: density.supportingPointSize))
                 .foregroundStyle(.primary)
                 .lineLimit(1)
             Spacer(minLength: 8)
@@ -284,7 +284,7 @@ struct RateLimitResetsDetail: View {
                     .transition(.opacity)
             } else if let countdown = entry.countdown {
                 Text(countdown)
-                    .font(.system(size: density.supportingPointSize))
+                    .font(.braz(size: density.supportingPointSize))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
                     .fixedSize(horizontal: true, vertical: false)
@@ -300,10 +300,10 @@ struct RateLimitResetsDetail: View {
     private func confirmRow(_ entry: Entry) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Use this reset?")
-                .font(.system(size: density.supportingPointSize, weight: .medium))
+                .font(.braz(size: density.supportingPointSize, weight: .medium))
                 .foregroundStyle(.primary)
             Text("Immediately reset your usage limits. This can't be undone.")
-                .font(.system(size: 11))
+                .font(.braz(size: 11))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 8) {
@@ -323,7 +323,7 @@ struct RateLimitResetsDetail: View {
         }
         .padding(confirmCardPadding)
         .background {
-            RoundedRectangle(cornerRadius: 8, style: .continuous).fill(.quaternary.opacity(0.5))
+            RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Braz.bgHover)
         }
         .padding(.vertical, 4)
     }
@@ -333,7 +333,7 @@ struct RateLimitResetsDetail: View {
     private func claimingRow() -> some View {
         HStack(spacing: 8) {
             Text("Resetting your usage…")
-                .font(.system(size: density.supportingPointSize))
+                .font(.braz(size: density.supportingPointSize))
                 .foregroundStyle(.secondary)
             Spacer(minLength: 8)
             MotionAwareProgressView(controlSize: .small)
@@ -350,14 +350,14 @@ struct RateLimitResetsDetail: View {
                 .foregroundStyle(banner.tint)
                 .accessibilityHidden(true)
             Text(banner.text)
-                .font(.system(size: density.supportingPointSize, weight: .medium))
+                .font(.braz(size: density.supportingPointSize, weight: .medium))
                 .foregroundStyle(banner.tint)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(9)
         .background {
-            RoundedRectangle(cornerRadius: 8, style: .continuous).fill(banner.tint.opacity(0.12))
+            RoundedRectangle(cornerRadius: Braz.Radius.md, style: .continuous).fill(banner.tint.opacity(0.12))
         }
     }
 
@@ -410,15 +410,15 @@ struct RateLimitResetsDetail: View {
         case .success:
             claimedExpiries.insert(date)
             nothingToReset = true
-            banner = .init(text: L10n.tr("Reset claimed. Enjoy!"), icon: "checkmark.circle.fill", tint: .green)
+            banner = .init(text: L10n.tr("Reset claimed. Enjoy!"), icon: "checkmark.circle.fill", tint: Braz.success)
         case .nothingToReset:
             nothingToReset = true
-            banner = .init(text: L10n.tr("Your usage doesn't need a reset yet"), icon: "info.circle.fill", tint: .accentColor)
+            banner = .init(text: L10n.tr("Your usage doesn't need a reset yet"), icon: "info.circle.fill", tint: Braz.info)
         case .noCredit:
             claimedExpiries.insert(date)
-            banner = .init(text: L10n.tr("That reset is no longer available"), icon: "exclamationmark.triangle.fill", tint: .orange)
+            banner = .init(text: L10n.tr("That reset is no longer available"), icon: "exclamationmark.triangle.fill", tint: Braz.warning)
         case .failed:
-            banner = .init(text: L10n.tr("Couldn't reset usage. Please try again."), icon: "xmark.circle.fill", tint: .red)
+            banner = .init(text: L10n.tr("Couldn't reset usage. Please try again."), icon: "xmark.circle.fill", tint: Braz.danger)
         }
     }
 

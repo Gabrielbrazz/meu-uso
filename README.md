@@ -88,6 +88,8 @@ O Meu Uso é um fork não oficial do [OpenUsage](https://github.com/robinebers/o
 
 O código herdado mantém o aviso de copyright original no [LICENSE](LICENSE). A marca e o ícone do Meu Uso são próprios, gerados por [`script/brand/mark.py`](script/brand/mark.py).
 
+O visual segue o design system Braz. As fontes [Hanken Grotesk](https://github.com/marcologous/hanken-grotesk) e [Geist Mono](https://github.com/vercel/geist-font) vão dentro do app sob a SIL Open Font License 1.1, com as licenças em [`Sources/MeuUso/Resources/Fonts`](Sources/MeuUso/Resources/Fonts).
+
 ## Licença
 
 [MIT](LICENSE).

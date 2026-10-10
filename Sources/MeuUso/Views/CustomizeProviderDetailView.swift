@@ -59,8 +59,7 @@ struct CustomizeProviderDetailView: View {
     private func metricSection(_ title: String, metrics: [WidgetDescriptor], providerID: String) -> some View {
         VStack(alignment: .leading, spacing: density.headerToCardSpacing) {
             Text(title)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .brazOverline()
                 .padding(.horizontal, 8)
             VStack(spacing: 0) {
                 if metrics.isEmpty {
@@ -87,7 +86,7 @@ struct CustomizeProviderDetailView: View {
             .padding(8)
             .overlay(
                 Text("Drag metrics here")
-                    .font(.caption)
+                    .font(.braz(.caption))
                     .foregroundStyle(.tertiary)
             )
             .reorderFrame(id: expandedDividerID(for: providerID), in: .named(reorderSpaceName), yOutset: yOutset)
@@ -220,7 +219,7 @@ private struct StarButton: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .foregroundStyle(pinned ? Color.accentColor : Color.secondary)
+            .foregroundStyle(pinned ? Braz.accent : Braz.fg3)
             .denyShake(trigger: shakeTrigger)
             .animation(Motion.spring, value: pinned)
         }

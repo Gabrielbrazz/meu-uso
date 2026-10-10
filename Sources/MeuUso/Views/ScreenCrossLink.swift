@@ -33,10 +33,10 @@ struct ScreenCrossLinkRow: View {
                     .frame(width: 18, height: 18)
                 VStack(alignment: .leading, spacing: 0) {
                     Text(L10n.tr(title))
-                        .font(.system(size: density.headerPointSize, weight: .semibold))
+                        .font(.braz(size: density.headerPointSize, weight: .semibold))
                         .foregroundStyle(.primary)
                     Text(L10n.tr(subtitle))
-                        .font(.system(size: density.planBadgePointSize))
+                        .font(.braz(size: density.planBadgePointSize))
                         .foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 8)

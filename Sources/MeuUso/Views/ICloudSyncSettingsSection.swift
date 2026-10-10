@@ -8,8 +8,7 @@ struct ICloudSyncSettingsSection: View {
         VStack(alignment: .leading, spacing: density.headerToCardSpacing) {
             HStack(spacing: 5) {
                 Text("iCloud Sync")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .brazOverline()
                 Image(systemName: "info.circle")
                     .imageScale(.small)
                     .foregroundStyle(.secondary)
@@ -36,7 +35,7 @@ struct ICloudSyncSettingsSection: View {
                 .padding(.vertical, density.controlRowPadding)
                 .animation(Motion.spring, value: sync.isSyncing)
                 Text("Shares usage history through iCloud, so you can see one combined summary for all your Macs.")
-                .font(.caption)
+                .font(.braz(.caption))
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 12)
                 .padding(.bottom, 10)
@@ -55,7 +54,7 @@ struct ICloudSyncSettingsSection: View {
 
         if sync.displayedDocuments.isEmpty, !sync.isSyncing, sync.serviceError == nil {
             Text("Waiting for this Mac’s first iCloud update…")
-                .font(.caption)
+                .font(.braz(.caption))
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 12)
                 .padding(.bottom, 10)
@@ -79,7 +78,7 @@ struct ICloudSyncSettingsSection: View {
                         .truncationMode(.tail)
                     if isThisMac {
                         Text("This Mac")
-                            .font(.caption2.weight(.medium))
+                            .font(.braz(.caption2, weight: .medium))
                             .foregroundStyle(.secondary)
                             .padding(.horizontal, 5)
                             .padding(.vertical, 1)
@@ -89,7 +88,7 @@ struct ICloudSyncSettingsSection: View {
                 }
                 TimelineView(.periodic(from: .now, by: 60)) { context in
                     Text(updatedLabel(document.updatedAt, now: context.date))
-                        .font(.caption)
+                        .font(.braz(.caption))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
@@ -103,7 +102,7 @@ struct ICloudSyncSettingsSection: View {
     /// Same contract as the Settings screen's `inlineNotice`: an English key or already-translated text.
     private func inlineNotice(_ text: String) -> some View {
         Text(L10n.tr(text))
-            .font(.caption)
+            .font(.braz(.caption))
             .foregroundStyle(Theme.notice)
             .padding(.horizontal, 12)
             .padding(.top, 8)

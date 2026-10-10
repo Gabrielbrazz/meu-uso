@@ -20,14 +20,16 @@ struct TransientPill: View {
             Image(systemName: systemImage)
                 .font(.system(size: 11, weight: .semibold))
             Text(L10n.tr(text))
-                .font(.system(size: 12, weight: .semibold))
+                .font(.braz(size: 12, weight: .semibold))
         }
         .foregroundStyle(tint)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(.regularMaterial, in: Capsule())
-        .overlay(Capsule().strokeBorder(.separator, lineWidth: 0.5))
-        .shadow(color: .black.opacity(showsShadow ? 0.12 : 0), radius: 6, y: 2)
+        // Braz floating surface: solid `--bg-overlay` with a `--border-default` hairline. The shadow is
+        // the one floating layers are allowed (`--shadow-popover`), and only on the floating variant.
+        .background(Braz.bgOverlay, in: Capsule())
+        .overlay(Capsule().strokeBorder(Braz.borderDefault, lineWidth: 1))
+        .shadow(color: .black.opacity(showsShadow ? 0.28 : 0), radius: 12, y: 6)
         .id(trigger)
         .transition(.scale(scale: 0.85).combined(with: .opacity))
     }

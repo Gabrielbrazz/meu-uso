@@ -61,7 +61,7 @@ struct ProviderSectionHeader: View {
                 // Give the plan first choice of the available width, while still allowing an oversized
                 // plan to truncate. Account names and the lower-priority stale tag yield space first.
                 Text(provider.displayName)
-                    .font(.system(size: density.headerPointSize, weight: .semibold))
+                    .font(.braz(size: density.headerPointSize, weight: .semibold))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
                     .layoutPriority(1)
@@ -75,7 +75,7 @@ struct ProviderSectionHeader: View {
                 // already says "working on it".
                 if let staleness, !refreshing {
                     Text(staleness.label)
-                        .font(.system(size: density.planBadgePointSize))
+                        .font(.braz(size: density.planBadgePointSize))
                         .foregroundStyle(.tertiary)
                         .lineLimit(1)
                         .hoverTooltip(staleness.tooltip)
@@ -120,7 +120,7 @@ struct ProviderPlanBadge: View {
         // name is information the user reads, and tertiary on glass is reserved for inactive
         // content. The smaller point size alone keeps it subordinate to metric values.
         Text(plan)
-            .font(.system(size: density.planBadgePointSize))
+            .font(.braz(size: density.planBadgePointSize))
             .foregroundStyle(.secondary)
             .lineLimit(1)
     }

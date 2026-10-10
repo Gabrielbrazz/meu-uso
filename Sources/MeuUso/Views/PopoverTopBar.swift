@@ -65,7 +65,7 @@ struct PopoverTopBar: View {
     ) -> some View {
         ZStack {
             Text(title)
-                .font(.headline)
+                .font(.braz(.headline))
                 .lineLimit(1)
                 .frame(maxWidth: .infinity)
 

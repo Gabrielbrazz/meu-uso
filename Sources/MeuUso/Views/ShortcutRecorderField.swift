@@ -37,13 +37,13 @@ struct ShortcutRecorderField: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
                     .background(
-                        RoundedRectangle(cornerRadius: 6, style: .continuous)
-                            .fill(.quinary)
+                        RoundedRectangle(cornerRadius: Braz.Radius.sm, style: .continuous)
+                            .fill(Braz.bgHover)
                     )
                     .overlay(
-                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        RoundedRectangle(cornerRadius: Braz.Radius.sm, style: .continuous)
                             .strokeBorder(
-                                isRecording ? AnyShapeStyle(.tint) : AnyShapeStyle(.separator),
+                                isRecording ? AnyShapeStyle(.tint) : AnyShapeStyle(Braz.borderDefault),
                                 lineWidth: isRecording ? 1.5 : 1
                             )
                     )
@@ -80,14 +80,14 @@ struct ShortcutRecorderField: View {
     private var chipContent: some View {
         if isRecording {
             Text("Type Shortcut…")
-                .font(.callout)
+                .font(.braz(.callout))
                 .foregroundStyle(.secondary)
         } else if let currentShortcut {
             Text(Self.displayText(for: currentShortcut))
-                .font(.system(.callout, design: .monospaced))
+                .font(.brazMono(size: 12))
         } else {
             Text("Record Shortcut")
-                .font(.callout)
+                .font(.braz(.callout))
                 .foregroundStyle(.secondary)
         }
     }

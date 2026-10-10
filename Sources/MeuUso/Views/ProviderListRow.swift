@@ -30,11 +30,11 @@ struct ProviderListRow<Handle: View>: View {
                     .frame(width: 18, height: 18)
                 VStack(alignment: .leading, spacing: 0) {
                     Text(provider.displayName)
-                        .font(.system(size: density.headerPointSize, weight: .semibold))
+                        .font(.braz(size: density.headerPointSize, weight: .semibold))
                         .foregroundStyle(.primary)
                         .lineLimit(1)
                     Text(metricCountText)
-                        .font(.system(size: density.planBadgePointSize))
+                        .font(.braz(size: density.planBadgePointSize))
                         .foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 8)

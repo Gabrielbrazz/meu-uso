@@ -42,11 +42,11 @@ struct UsageTrendDetail: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             Text(L10n.tr(title))
-                .font(.system(size: 13, weight: .semibold))
+                .font(.braz(size: 13, weight: .semibold))
                 .foregroundStyle(.primary)
             Spacer(minLength: 8)
             Text(readout)
-                .font(.system(size: 11))
+                .font(.braz(size: 11))
                 .monospacedDigit()
                 .foregroundStyle(.secondary)
         }
@@ -87,7 +87,7 @@ struct UsageTrendDetail: View {
             Spacer()
             Text(points.last?.label ?? "")
         }
-        .font(.system(size: 10))
+        .font(.braz(size: 10))
         .monospacedDigit()
         .foregroundStyle(.secondary)
     }

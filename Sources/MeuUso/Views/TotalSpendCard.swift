@@ -86,7 +86,7 @@ struct TotalSpendCard: View {
         } label: {
             HStack(spacing: 4) {
                 Text(metric.title)
-                    .font(.system(size: density.headerPointSize, weight: .semibold))
+                    .font(.braz(size: density.headerPointSize, weight: .semibold))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
                 Image(systemName: "chevron.down")
@@ -160,7 +160,15 @@ struct TotalSpendCard: View {
             }
         }
         .padding(3)
-        .background(.quinary, in: Capsule())
+        // Braz segmented control: a `--bg-hover` track fenced by a `--border-subtle` hairline.
+        .background {
+            RoundedRectangle(cornerRadius: Braz.Radius.sm, style: .continuous)
+                .fill(Braz.bgHover)
+                .overlay {
+                    RoundedRectangle(cornerRadius: Braz.Radius.sm, style: .continuous)
+                        .strokeBorder(Braz.borderSubtle, lineWidth: 1)
+                }
+        }
         .frame(maxWidth: .infinity)
     }
 
@@ -170,19 +178,25 @@ struct TotalSpendCard: View {
             periodRawValue = candidate.rawValue
         } label: {
             Text(candidate.shortLabel)
-                .font(.system(size: 11, weight: isSelected ? .semibold : .medium))
+                .font(.braz(size: 11, weight: isSelected ? .semibold : .medium))
                 .foregroundStyle(isSelected ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
                 .padding(.horizontal, 12)
                 .padding(.vertical, 4)
                 .frame(maxWidth: .infinity)
-                .contentShape(Capsule())
+                .contentShape(RoundedRectangle(cornerRadius: Braz.Radius.xs, style: .continuous))
         }
         .buttonStyle(.plain)
         .background {
             if isSelected {
-                Capsule()
-                    .fill(.background)
-                    .shadow(color: .black.opacity(0.12), radius: 2, y: 1)
+                // The selected segment lifts onto the floating surface: `--bg-overlay`, a
+                // `--border-default` hairline and `--shadow-xs`.
+                RoundedRectangle(cornerRadius: Braz.Radius.xs, style: .continuous)
+                    .fill(Braz.bgOverlay)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: Braz.Radius.xs, style: .continuous)
+                            .strokeBorder(Braz.borderDefault, lineWidth: 1)
+                    }
+                    .shadow(color: .black.opacity(0.2), radius: 1, y: 1)
                     .matchedGeometryEffect(id: "totalSpendPeriod", in: pickerNamespace)
             }
         }
@@ -193,7 +207,7 @@ struct TotalSpendCard: View {
     /// never a fabricated zero ring.
     private var emptyState: some View {
         Text(metric.emptyMessage)
-            .font(.system(size: density.supportingPointSize))
+            .font(.braz(size: density.supportingPointSize))
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 18)
@@ -294,13 +308,13 @@ struct TotalSpendRingContent: View {
         let center = MetricFormatter.totalSpendRingCenter(projection.centerValue, metric: projection.metric)
         return VStack(spacing: 1) {
             Text(center.primary)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .font(.braz(size: 13, weight: .semibold))
                 .foregroundStyle(.primary)
                 .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             Text(center.unit)
-                .font(.system(size: 9, weight: .medium))
+                .font(.braz(size: 9, weight: .medium))
                 .foregroundStyle(.tertiary)
                 .lineLimit(1)
         }
@@ -335,14 +349,14 @@ struct TotalSpendRingContent: View {
                 .fill(TotalSpendPalette.color(for: slice.provider.id))
                 .frame(width: 8, height: 8)
             Text(slice.provider.displayName)
-                .font(.system(size: density.supportingPointSize))
+                .font(.braz(size: density.supportingPointSize))
                 .foregroundStyle(.primary)
                 .lineLimit(1)
             Spacer(minLength: 8)
             // Tokens always abbreviate in the legend (12.4M), matching spend rows elsewhere —
             // `.full` would spill every digit. Cost modes keep cents via `.row` / `.full`.
             Text(formatValue(slice.displayAmount, style: legendValueStyle))
-                .font(.system(size: density.supportingPointSize, weight: .medium))
+                .font(.braz(size: density.supportingPointSize, weight: .medium))
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
                 .lineLimit(1)

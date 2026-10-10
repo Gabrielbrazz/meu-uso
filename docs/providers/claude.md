@@ -23,7 +23,7 @@ Por padrão, o Fable vem ativado e sempre visível, logo abaixo de Semanal. O So
 
 De vez em quando, a Anthropic concede renovações gratuitas do limite de uso. Por exemplo, uma renovação para assinantes Pro e Max quando sai um modelo novo. Usar uma renovação zera na hora o uso dos seus limites de sessão e semanal.
 
-A linha Renovações de limite conta quantas renovações você ainda tem, com um ponto colorido para o prazo mais próximo: azul se o prazo passa de 7 dias, amarelo se é de até 7 dias e vermelho se é de até 48 horas. Ao passar o mouse sobre o valor, abre a mesma linha do tempo que o Codex usa. Uma renovação concedida sem prazo também conta, mas não tem data para mostrar. Contas fora do programa mostram `0 disponíveis`. Se a Anthropic nem informar o programa para o seu plano, a linha mostra **Sem dados**.
+A linha Renovações de limite conta quantas renovações você ainda tem, com um ponto colorido para o prazo mais próximo: verde se o prazo passa de 7 dias, amarelo se é de até 7 dias e vermelho se é de até 48 horas. Ao passar o mouse sobre o valor, abre a mesma linha do tempo que o Codex usa. Uma renovação concedida sem prazo também conta, mas não tem data para mostrar. Contas fora do programa mostram `0 disponíveis`. Se a Anthropic nem informar o programa para o seu plano, a linha mostra **Sem dados**.
 
 Por enquanto, o Meu Uso só mostra as suas renovações. Para usar uma, rode `/rate-limit-options` no Claude Code ou aceite quando o Claude Code oferecer, ao chegar num limite de uso.
 

@@ -33,8 +33,7 @@ struct APIKeysSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: density.headerToCardSpacing) {
             Text("API Key")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .brazOverline()
                 .padding(.horizontal, 8)
             VStack(spacing: 0) {
                 providerRow
@@ -73,7 +72,7 @@ struct APIKeysSection: View {
     /// The dot is binary, never a palette: red when no key is set, green when a key is usable (from
     /// the environment, saved, or overriding the env). It's the row's only status signal.
     private var statusDot: some View {
-        let color = status == .notSet ? Color(nsColor: .systemRed) : Color(nsColor: .systemGreen)
+        let color = status == .notSet ? Braz.danger : Braz.success
         return Circle().fill(color).frame(width: 6, height: 6)
     }
 
@@ -97,7 +96,7 @@ struct APIKeysSection: View {
                 } else {
                     Toggle("Override With a Custom Key", isOn: $overrideChecked)
                         .toggleStyle(.checkbox)
-                        .font(.caption)
+                        .font(.braz(.caption))
                 }
             } else {
                 // saved / overrideActive: a custom key is already set, so the override checkbox is
@@ -107,13 +106,13 @@ struct APIKeysSection: View {
             }
             if let actionError {
                 Text(actionError)
-                    .font(.caption)
+                    .font(.braz(.caption))
                     .foregroundStyle(Theme.notice)
             }
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Rectangle().fill(.fill.quinary))
+        .background(Rectangle().fill(Braz.bgHover))
         .onChange(of: overrideChecked) { _, isOn in
             // Flipping into override mode starts a fresh entry; flipping back drops the draft.
             if isOn { input = ""; revealInput = false }
